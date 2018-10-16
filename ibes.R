@@ -36,13 +36,14 @@ events <- events_raw %>%
             terminated_stocks = as.numeric(X5))
 
 # filter only closures and make a [-1,0]-year and a [0,1]-year interval for event_date
+# ask whether should be [-1-3months,0]-year and [0,1+3months]-year
 
 closures <- events %>% 
   filter(event_type == "Closure") %>% 
-  mutate(event_date_temp1 = event_date - years(1),
-         event_date_temp2 = event_date + years(1),
-         event_date_yearbefore_interval = interval(event_date  - years(1), event_date),
-         event_date_yearafter_interval = interval(event_date, event_date + years(1)))
+  mutate(event_date_temp1 = event_date - years(1) - months(3),
+         event_date_temp2 = event_date + years(1) + months(3),
+         event_date_yearbefore_interval = interval(event_date  - years(1) - months(3), event_date),
+         event_date_yearafter_interval = interval(event_date, event_date + years(1) + months(3)))
 
 # generate all the dates that are in the before_interval (i.e. [-1,0]-year)
 
@@ -78,6 +79,9 @@ detail_temp4 <- detail_temp3 %>%
 detail_temp5 <- detail_temp4 %>% 
   filter(in_after_interval == F, !is.na(eps_value)) 
 
+detail_temp5 %>% 
+  group_by(ibes_ticker) %>%
+  tally()
 
 stopped_raw <- read_tsv("ibes_data_detail_stopped_estimate.txt",  col_types = cols(.default = "c"))
 
@@ -87,8 +91,12 @@ stopped <- stopped_raw %>%
             firm = CNAME,
             brokerage = ESTIMATOR,
             announce_stop_date = ymd(ASTPDATS), # date when forecast stopped
-            forecast_period = FPEDATS)
+            forecast_period = ymd(FPEDATS))
 
 stopped_temp1 <- stopped %>%
-  arrange(brokerage, announce_stop_date, ibes_ticker)
-  
+  mutate(in_before_interval = announce_stop_date %in% yearbefore_list)
+
+detail_temp6 <- stopped_temp1 %>% 
+  anti_join(detail_temp5, stopped_temp1, by = c("ibes_ticker" = "ibes_ticker", "brokerage" = "brokerage")) %>% 
+  filter(stopped_temp1, in_before_interval == F)
+
