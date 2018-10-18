@@ -9,3 +9,4 @@ closure_events.txt
 ibes_crsp_link_python.txt
 13f_stock_ownership_summary.txt
 13f_s34_master_file.txt
+13f_output.rds
