@@ -7,16 +7,7 @@ library(lubridate)
 
 df_raw <- read_tsv("13f_s34_master_file.txt", col_types = cols(.default = "c"))
 
-df_raw
-
-df_testi <- df_raw %>% 
-  filter(country != "UNITED STATES")
-
-df_testi %>% 
-  group_by(rdate) %>% 
-  tally()
-
-df_temp1 <- df_raw2 %>% 
+df_temp1 <- df_raw %>% 
   transmute(cusip = cusip,
             official_ticker = ticker,
             firm = stkname,
@@ -29,10 +20,29 @@ df_temp1 <- df_raw2 %>%
             shares_outstanding_thousands = as.numeric(shrout2),
             market_price = as.numeric(prc))
 
-df_testi <- df_temp1 %>% 
-  filter(country != "UNITED STATES")
+df_temp1
 
-df_testi %>% 
-  group_by(rdate) %>% 
+df_temp2 <- df_temp1 %>% 
+  group_by(report_date, cusip) %>% 
+  summarise(shares_outstanding = sum(shares_outstanding_thousands)*1000,
+            institutional_ownership_shares = sum(shareholdings_end_qtr),
+            institutional_ownership_percentage = sum(shareholdings_end_qtr)/(sum(shares_outstanding_thousands)*1000),
+            foreign_institutional_ownership_shares = sum(shareholdings_end_qtr[institutional_country != "UNITED STATES"]),
+            foreign_institutional_ownership_percentage = sum(shareholdings_end_qtr[institutional_country != "UNITED STATES"])/(sum(shares_outstanding_thousands)*1000),
+            domestic_institutional_ownership_shares = sum(shareholdings_end_qtr[institutional_country == "UNITED STATES"]),
+            domestic_institutional_ownership_percentage = sum(shareholdings_end_qtr[institutional_country == "UNITED STATES"])/(sum(shares_outstanding_thousands)*1000))
+  
+# think whether to calculate ownership with market prices (values) (CRSP), since lot of NA values in shares outstanding 
+
+summary(df_temp2)
+
+df_temp2 %>% 
+  group_by(report_date) %>% 
   tally()
+
+df_temp2 %>% 
+  group_by(cusip) %>% 
+  tally()
+
+write_rds(df_temp2, "13f_output.rds")
 
