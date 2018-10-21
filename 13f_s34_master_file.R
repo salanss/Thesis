@@ -10,7 +10,7 @@ df_raw <- read_tsv("13f_s34_master_file.txt", col_types = cols(.default = "c"))
 df_temp1 <- df_raw %>% 
   transmute(cusip = cusip,
             official_ticker = ticker,
-            firm = stkname,
+            firm_13f = stkname,
             institutional = mgrno,
             institutional_country = country,
             institutional_type = typecode,
