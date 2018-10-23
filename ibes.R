@@ -27,23 +27,23 @@ detail_temp1 <- detail_raw %>%
 
 # closure events from Kelly and Ljungqvist (2012) Appendix list
 
-events_raw <- read_tsv("closure_events.txt", col_names = F, col_types = cols(.default = "c"))
-events <- events_raw %>% 
-  transmute(brokerage_name = X1,
-            event_date = ymd(paste0(X2, "-15")),
-            event_type = X3,
-            broker_type = X4,
-            terminated_stocks = as.numeric(X5))
+closure_events_raw <- read_tsv("closure_events.txt", col_names = T, col_types = cols(.default = "c"))
+closure_events <- closure_events_raw %>% 
+  transmute(brokerage_name = brokerage_name,
+            event_date = ymd(paste0(event_date, "-15")),
+            event_type = closure_type,
+            brokerage_type = brokerage_type,
+            terminated_stocks = as.numeric(terminated_stocks))
+
 
 # filter only closures and make a [-1,0]-year and a [0,1]-year interval for event_date
 # ask whether should be [-1-3months,0]-year and [0,1+3months]-year
 
-closures <- events %>% 
-  filter(event_type == "Closure") %>% 
-  mutate(event_date_temp1 = event_date - years(1) - months(3),
-         event_date_temp2 = event_date + years(1) + months(3),
-         event_date_yearbefore_interval = interval(event_date  - years(1) - months(3), event_date),
-         event_date_yearafter_interval = interval(event_date, event_date + years(1) + months(3)))
+closures <- closure_events %>% 
+  mutate(event_date_temp1 = event_date - years(1),
+         event_date_temp2 = event_date + years(1),
+         event_date_yearbefore_interval = interval(event_date  - years(1), event_date),
+         event_date_yearafter_interval = interval(event_date, event_date + years(1)))
 
 # generate all the dates that are in the before_interval (i.e. [-1,0]-year)
 
@@ -62,26 +62,31 @@ detail_temp2 <- detail_temp1 %>%
 detail_temp3 <- detail_temp2 %>% 
   filter(in_before_interval == T, !is.na(eps_value))  
 
-# generate all the dates that are in the after_interval (i.e. [0,1]-year)
+# brokerages and codes that closed
 
-yearafter_list <- map2(closures$event_date, closures$event_date_temp2,
-                       ~seq(.x, .y, "day") %>% as.character) %>% 
-  flatten_chr() %>% 
-  ymd()
+closed_brokerages_raw <- read_tsv("brokerage_codes.txt", col_names = T, col_types = cols(.default = "c"))
+closed_brokerages <- closed_brokerages_raw %>% 
+  transmute(brokerage_code = brokerage_code,
+            brokerage_name = brokerage_name,
+            event_date = ymd(paste0(event_date, "-15")))
 
-# filter estimates that are NOT during the year after the disappearance date in order to find out whether an analyst "disappears"
-# see Derrien and Kecskes (2013) p. 1411
-
+brokerage_codes_list <- list(closed_brokerages$brokerage_code) %>% 
+  flatten_chr()
 
 detail_temp4 <- detail_temp3 %>% 
-  mutate(in_after_interval = announce_date %in% yearafter_list)
+  mutate(in_brokerage_list = brokerage %in% brokerage_codes_list)
+
+# filter brokerages that are in the closed_brokerages list
 
 detail_temp5 <- detail_temp4 %>% 
-  filter(in_after_interval == F, !is.na(eps_value)) 
+  filter(in_brokerage_list == T)
 
-detail_temp5 %>% 
-  group_by(ibes_ticker) %>%
-  tally()
+detail_temp6 <- left_join(detail_temp5, closed_brokerages, by = c("brokerage" = "brokerage_code"))
+
+df_output <- detail_temp6 %>% 
+  group_by(cusip, firm) %>% 
+  summarise(event_date = max(event_date))
+  
 
 stopped_raw <- read_tsv("ibes_data_detail_stopped_estimate.txt",  col_types = cols(.default = "c"))
 
