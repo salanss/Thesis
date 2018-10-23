@@ -81,13 +81,12 @@ detail_temp4 <- detail_temp3 %>%
 detail_temp5 <- detail_temp4 %>% 
   filter(in_brokerage_list == T)
 
+# left join to data the information of closure_dates and brokerege_names
+
 detail_temp6 <- left_join(detail_temp5, closed_brokerages, by = c("brokerage" = "brokerage_code"))
 
-df_output <- detail_temp6 %>% 
-  group_by(cusip, firm) %>% 
-  summarise(event_date = max(event_date))
+# read stopped_estimates from ibes to filter out analysts that stopped before the closure_event_date (three months lag?)
   
-
 stopped_raw <- read_tsv("ibes_data_detail_stopped_estimate.txt",  col_types = cols(.default = "c"))
 
 stopped <- stopped_raw %>%
@@ -104,4 +103,8 @@ stopped_temp1 <- stopped %>%
 detail_temp6 <- stopped_temp1 %>% 
   anti_join(detail_temp5, stopped_temp1, by = c("ibes_ticker" = "ibes_ticker", "brokerage" = "brokerage")) %>% 
   filter(stopped_temp1, in_before_interval == F)
+
+df_output <- detail_temp6 %>% 
+  group_by(cusip, firm) %>% 
+  summarise(event_date = max(event_date))
 
