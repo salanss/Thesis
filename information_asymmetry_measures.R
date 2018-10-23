@@ -3,6 +3,7 @@ library(readr)
 library(lubridate)
 
 # PINs by Duarte and Young (2006 or 2009), PIN_DY, PIN_Adjusted and PSOS
+# link http://www.owlnet.rice.edu/~jd10/publications.html
 
 pin_dy_raw <- read_csv("pin_dy_duarte_young.csv", col_types = cols(.default = "c"))
 pin_dy <- pin_dy_raw %>% 
@@ -19,6 +20,7 @@ pin_dy %>%
   tally()
 
 # PINs by Easley, Hvidkjaer and O'Hara (2010), PIN_EHO
+# link https://sites.google.com/site/hvidkjaer/data
 
 pin_eho_raw <- read_delim("pin_eho_easley_hvidkjaer_o'hara.dat", delim = " ", col_types = cols(.default = "c"))
 pin_eho <- pin_eho_raw %>% 
@@ -31,6 +33,7 @@ pin_eho %>%
   tally()
 
 # PINs by Brown, Hillegeist and Lo (2004), PIN_BHL
+# link http://scholar.rhsmith.umd.edu/sbrown/probability-informed-trade-easley-et-al-model
 
 pin_bhl_raw <- read_table("pin_bhl_brown_hillegeist_lo.asc_", col_names = T, col_types = cols(.default = "c"))
 
@@ -40,6 +43,7 @@ pin_bhl <- pin_bhl_raw %>%
             pin_bhl = as.numeric(pinesas))
 
 # PINs by Brown and Hillegeist (2007), PIN_BH
+# link http://scholar.rhsmith.umd.edu/sbrown/pin-data
 
 pin_bh_raw <- read_table("pin_bh_brown_hillegeist.asc_", col_names = T, col_types = cols(.default = "c"))
 
@@ -49,6 +53,7 @@ pin_bh <- pin_bh_raw %>%
             pin_bh = as.numeric(pin))
 
 # MIAs by Johnson and So (2017)
+# link http://travislakejohnson.com/data.html
 
 mia_raw <- read_csv("mia_johnson_so.csv", col_types = cols(.default = "c"))
 
@@ -59,10 +64,10 @@ mia <- mia_raw %>%
             year = year(mdy(DATE)))
 
 
-information_asymmetry_measures_temp1 <- full_join(pin_dy, pin_eho)
+information_asymmetry_measures_temp1 <- full_join(pin_dy, pin_eho, by = c("permno", "year"))
 
-information_asymmetry_measures_temp2 <- full_join(information_asymmetry_measures_temp1, pin_bhl)
+information_asymmetry_measures_temp2 <- full_join(information_asymmetry_measures_temp1, pin_bhl, by = c("permno", "year"))
 
-information_asymmetry_measures_temp3 <- full_join(information_asymmetry_measures_temp2, pin_bh)
+information_asymmetry_measures_temp3 <- full_join(information_asymmetry_measures_temp2, pin_bh, by = c("permno", "year"))
 
 information_asymmetry_measures_temp4 <- full_join(information_asymmetry_measures_temp3, mia)
