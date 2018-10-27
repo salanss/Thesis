@@ -2,9 +2,9 @@ library(tidyverse)
 library(readr)
 library(lubridate)
 
-# reading ibes detail histotry data -> entire database, us file, fy1, q1, q2, q3 and q4, only eps and from 1999-01 to 2010-01
+# reading ibes detail histotry data -> entire database, us file, fy1, q1, q2, q3 and q4, only eps and from 1997-01 to 2011-01
 
-detail_raw <- read_tsv("data/ibes_data_detail_history_detail.txt", col_types = cols(.default = "c"))
+detail_raw <- read_tsv("data/ibes_data_detail_history_detail_old.txt", col_types = cols(.default = "c"))
 
 # renaming, formatting and selecting the variables
 
@@ -18,18 +18,16 @@ detail_temp1 <- detail_raw %>%
             forecast_period_id = FPI,
             measure = MEASURE,
             eps_value = as.numeric(VALUE),
-            activation_date = ymd(ACTDATS), # date when forecast was recorded by Thomson Reuters
-            activation_date_actual = ymd(ACTDATS_ACT), # date when actual was recorded by Thomson Reuters
-            announce_date = ymd(ANNDATS), # date when forecast was reported
-            announce_date_actual = ymd(ANNDATS_ACT), # date when actual was reported
-            forecast_period_end_date = ymd(FPEDATS)) %>% 
-  select(-activation_date_actual, -activation_date, -measure) # dropped, as not of particular interest
+            announce_date = ymd(ANNDATS)) %>% # date when forecast was reported
+  select(-measure, -forecast_period_id, -official_ticker) # dropped, as not of particular interest
+
+rm(detail_raw)
 
 # closure events from Kelly and Ljungqvist (2012) Appendix list
 
-# brokerages and codes that closed
+# brokerages and codes that closed mapped by ibes_names.csv
 
-closures_raw <- read_tsv("data/brokerage_codes.txt", col_names = T, col_types = cols(.default = "c"))
+closures_raw <- read_tsv("data/closure_events.txt", col_names = T, col_types = cols(.default = "c"))
 closures <- closures_raw %>% 
   transmute(brokerage_code = brokerage_code,
             brokerage_name = `brokerage_name (from Appendix list)`,
@@ -38,17 +36,19 @@ closures <- closures_raw %>%
 brokerage_codes_list <- list(closures$brokerage_code) %>% 
   flatten_chr()
 
-brokerage_event_dates_temp <- closures %>% 
+closures_temp1 <- closures %>% 
   select(event_date) %>% 
   distinct()
 
-event_dates <- closures %>% 
+event_dates <- closures_temp1 %>% 
   mutate(event_date_temp1 = event_date - years(1),
          event_date_temp2 = event_date + years(1),
          event_date_temp3 = event_date - years(2),
          event_date_temp4 = event_date + years(2),
          event_date_temp5 = event_date - years(3),
          event_date_temp6 = event_date + years(3))
+
+rm(closures_raw, closures_temp1)
 
 # generate all the dates that are in the before_interval (i.e. [-1,0]-year)
 
@@ -62,57 +62,83 @@ yearbefore_list <- map2(event_dates$event_date_temp1, event_dates$event_date,
 
 
 detail_temp2 <- detail_temp1 %>% 
-  mutate(in_before_interval = announce_date %in% yearbefore_list)
-         
-detail_temp3 <- detail_temp2 %>% 
-  filter(in_before_interval == T, !is.na(eps_value))  
+  mutate(in_year_before_interval = announce_date %in% yearbefore_list) %>% 
+  filter(in_year_before_interval == T, !is.na(eps_value))  %>% 
+  select(-in_year_before_interval)
 
+# # read stopped_estimates from ibes to filter out analysts that stopped before the closure_event_date
 
-detail_temp4 <- detail_temp3 %>% 
-  mutate(in_brokerage_list = brokerage %in% brokerage_codes_list)
+stopped_raw <- read_tsv("data/ibes_data_detail_stopped_estimate.txt",  col_types = cols(.default = "c"))
+
+stopped <- stopped_raw %>%
+  transmute(ibes_ticker = TICKER,
+            official_ticker = OFTIC,
+            firm = CNAME,
+            brokerage = ESTIMATOR,
+            announce_stop_date = ymd(ASTPDATS), # date when forecast stopped
+            forecast_period = ymd(FPEDATS)) %>% 
+  select(-official_ticker, -firm, -forecast_period)
+
+rm(stopped_raw)
+
+## left join detail data and stopped analysts data
+
+detail_temp3 <- left_join(detail_temp2, stopped, by = c("ibes_ticker", "brokerage"))
+
+## left join detail data and closure_dates
+
+detail_temp4 <- left_join(detail_temp3, closures, by = c("brokerage" = "brokerage_code"))
+
+rm(closures, stopped, detail_temp1, detail_temp2, detail_temp3)
+
+detail_temp4
 
 # filter brokerages that are in the closed_brokerages list (i.e. treatment group)
 
 detail_temp5 <- detail_temp4 %>% 
-  filter(in_brokerage_list == T)
+  mutate(in_brokerage_list = brokerage %in% brokerage_codes_list) %>% 
+  filter(in_brokerage_list == T) %>% # have to be in closed brokerages list
+  mutate(estimates_before = (announce_date <= (event_date) + months(3))) %>% 
+  filter(estimates_before == T) %>% # there cannot be estimates after the event_date (relaxing for 3 months)
+  mutate(stopped_before = (announce_stop_date <= (event_date - months(3)))) %>%  
+  filter(stopped_before == F) # filter only firms of which analysts have not stopped before event_date (relax 3 months)
 
-# left join to data the information of closure_dates and brokerege_names
+treated_firms_temp1 <- detail_temp5 %>% 
+  group_by(cusip, firm, event_date) %>% 
+  summarise(treated = 1,
+            after= 0)
 
-detail_temp6 <- left_join(detail_temp5, closed_brokerages, by = c("brokerage" = "brokerage_code"))
+treated_firms_temp2 <- detail_temp5 %>% 
+  group_by(cusip, firm, event_date) %>% 
+  summarise(treated = 1,
+            after= 1)
 
-treatment_firms <- detail_temp6 %>% 
-  group_by(ibes_ticker, cusip, firm) %>% 
-  summarise(event_date = max(event_date))
+treated_firms <- bind_rows(treated_firms_temp1, treated_firms_temp2) %>% 
+  arrange(cusip, event_date)
 
-treatment_firms_list <- list(treatment_firms$ibes_ticker) %>% 
-  flatten_chr()
+treated_firms %>% 
+  group_by(cusip) %>% 
+  tally()
 
-# filter firms that are not in the treatment_firms_list (i.e. control group)
+summary(treated_firms)
 
-control_firms <- detail_temp3 %>% 
-  mutate(in_treatment_list = ibes_ticker %in% treatment_firms_list) %>% 
-  filter(in_treatment_list == F) %>% 
-  group_by(ibes_ticker, cusip, firm) %>% 
-  summarise(max(announce_date))
+rm(treated_firms_temp1, treated_firms_temp2)
 
+# filter firms that are not in the closed brokerages list (i.e. control group)
 
-# # read stopped_estimates from ibes to filter out analysts that stopped before the closure_event_date (three months lag?)
-# 
-# stopped_raw <- read_tsv("data/ibes_data_detail_stopped_estimate.txt",  col_types = cols(.default = "c"))
-# 
-# stopped <- stopped_raw %>%
-#   transmute(ibes_ticker = TICKER,
-#             official_ticker = OFTIC,
-#             firm = CNAME,
-#             brokerage = ESTIMATOR,
-#             announce_stop_date = ymd(ASTPDATS), # date when forecast stopped
-#             forecast_period = ymd(FPEDATS))
-# 
-# stopped_temp1 <- stopped %>%
-#   mutate(in_before_interval = announce_stop_date %in% yearbefore_list)
-# 
-# detail_temp4 <-  left_join(detail_temp3, stopped_temp1, by = c("ibes_ticker" = "ibes_ticker", "brokerage" = "brokerage")) %>% 
-#   select(-eps_value, -official_ticker, -announce_date_actual, -forecast_period_end_date, -forecast_period_id) # %>%
-# #filter(stopped_temp1, in_before_interval == F)
-# 
-# detail_temp4
+detail_temp6 <- detail_temp4 %>% 
+  mutate(in_brokerage_list = brokerage %in% brokerage_codes_list) %>% 
+  filter(in_brokerage_list == F)
+  
+control_firms_temp1 <- detail_temp6 %>% 
+  group_by(cusip, firm, event_date) %>% 
+  summarise(treated = 0,
+            after= 0)
+
+control_firms_temp2 <- detail_temp6 %>% 
+  group_by(cusip, firm, event_date) %>% 
+  summarise(treated = 0,
+            after= 1)
+
+control_firms <- bind_rows(control_firms_temp1, control_firms_temp2) %>% 
+  arrange(cusip, event_date)
