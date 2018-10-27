@@ -27,27 +27,32 @@ detail_temp1 <- detail_raw %>%
 
 # closure events from Kelly and Ljungqvist (2012) Appendix list
 
-closure_events_raw <- read_tsv("data/closure_events.txt", col_names = T, col_types = cols(.default = "c"))
-closure_events <- closure_events_raw %>% 
-  transmute(brokerage_name = brokerage_name,
-            event_date = ymd(paste0(event_date, "-15")),
-            event_type = closure_type,
-            brokerage_type = brokerage_type,
-            terminated_stocks = as.numeric(terminated_stocks))
+# brokerages and codes that closed
 
+closures_raw <- read_tsv("data/brokerage_codes.txt", col_names = T, col_types = cols(.default = "c"))
+closures <- closures_raw %>% 
+  transmute(brokerage_code = brokerage_code,
+            brokerage_name = `brokerage_name (from Appendix list)`,
+            event_date = ymd(event_date))
 
-# filter only closures and make a [-1,0]-year and a [0,1]-year interval for event_date
-# ask whether should be [-1-3months,0]-year and [0,1+3months]-year
+brokerage_codes_list <- list(closures$brokerage_code) %>% 
+  flatten_chr()
 
-closures <- closure_events %>% 
+brokerage_event_dates_temp <- closures %>% 
+  select(event_date) %>% 
+  distinct()
+
+event_dates <- closures %>% 
   mutate(event_date_temp1 = event_date - years(1),
          event_date_temp2 = event_date + years(1),
-         event_date_yearbefore_interval = interval(event_date  - years(1), event_date),
-         event_date_yearafter_interval = interval(event_date, event_date + years(1)))
+         event_date_temp3 = event_date - years(2),
+         event_date_temp4 = event_date + years(2),
+         event_date_temp5 = event_date - years(3),
+         event_date_temp6 = event_date + years(3))
 
 # generate all the dates that are in the before_interval (i.e. [-1,0]-year)
 
-yearbefore_list <- map2(closures$event_date_temp1, closures$event_date,
+yearbefore_list <- map2(event_dates$event_date_temp1, event_dates$event_date,
                      ~seq(.x, .y, "day") %>% as.character) %>% 
   flatten_chr() %>% 
   ymd()
@@ -62,17 +67,6 @@ detail_temp2 <- detail_temp1 %>%
 detail_temp3 <- detail_temp2 %>% 
   filter(in_before_interval == T, !is.na(eps_value))  
 
-
-# brokerages and codes that closed
-
-closed_brokerages_raw <- read_tsv("data/brokerage_codes.txt", col_names = T, col_types = cols(.default = "c"))
-closed_brokerages <- closed_brokerages_raw %>% 
-  transmute(brokerage_code = brokerage_code,
-            brokerage_name = brokerage_name,
-            event_date = ymd(paste0(event_date, "-15")))
-
-brokerage_codes_list <- list(closed_brokerages$brokerage_code) %>% 
-  flatten_chr()
 
 detail_temp4 <- detail_temp3 %>% 
   mutate(in_brokerage_list = brokerage %in% brokerage_codes_list)
