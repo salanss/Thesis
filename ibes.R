@@ -158,3 +158,6 @@ control_firms <- bind_rows(control_firms_temp2, control_firms_temp3) %>%
 control_firms %>%
   group_by(cusip) %>% 
   tally()
+
+ibes_firms <- bind_rows(treated_firms, control_firms) %>% 
+  arrange(cusip, event_date)
