@@ -81,6 +81,7 @@ treated_firms_temp2 <- detail_temp4 %>%
   ungroup()
 
 treated_firms_temp3 <- bind_rows(treated_firms_temp1, treated_firms_temp2) %>% 
+  mutate(event_year = year(event_date)) %>% 
   arrange(cusip, event_date)
 
 treated_firms_distinct <- treated_firms_temp3 %>% 
@@ -91,15 +92,16 @@ treated_firms_list <- list(treated_firms_distinct$cusip) %>%
   flatten_chr()
 
 analyst_coverage_temp1 <- detail_temp3 %>% 
-  mutate(in_treated_list = cusip %in% treated_firms_list) %>% 
+  mutate(announce_year = year(announce_date),
+         in_treated_list = cusip %in% treated_firms_list) %>% 
   filter(in_treated_list == T)
 
 analyst_coverage <- analyst_coverage_temp1 %>% 
-  group_by(cusip) %>% 
+  group_by(cusip, announce_year) %>% 
   summarise(analyst_coverage = n_distinct(analyst)) %>% 
   ungroup()
 
-treated_firms <- left_join(treated_firms_temp3, analyst_coverage, by = "cusip")
+treated_firms <- left_join(treated_firms_temp3, analyst_coverage, by = c("cusip", "event_year" = "announce_year"))
 
 # control group
 
