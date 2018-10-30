@@ -10,18 +10,17 @@ detail_raw <- read_tsv("data/ibes_data_detail_history_detail.txt", col_types = c
 
 detail_temp1 <- detail_raw %>%
   transmute(ibes_ticker = TICKER,
-            official_ticker = OFTIC,
             cusip = CUSIP,
             firm = CNAME,
             brokerage = ESTIMATOR,
             analyst = ANALYS,
             forecast_period_id = FPI,
             measure = MEASURE,
-            eps_value = as.numeric(VALUE),
-            announce_date = ymd(ANNDATS)) %>% # date when forecast was reported
-  select(-measure, -forecast_period_id, -official_ticker) # dropped, as not of particular interest
+            eps_value = parse_double(VALUE),
+            announce_date = ymd(ANNDATS), # date when forecast was reported
+            forecast_period_end_date = ymd(FPEDATS)) %>%
+  select(-measure, -forecast_period_id) # dropped, as not of particular interest
 
-rm(detail_raw)
 
 # closure events from Kelly and Ljungqvist (2012) Appendix list
 
@@ -30,61 +29,51 @@ rm(detail_raw)
 closures_raw <- read_tsv("data/closure_events.txt", col_names = T, col_types = cols(.default = "c"))
 closures <- closures_raw %>% 
   transmute(brokerage_code = brokerage_code,
+            brokerage_name_ibes = `brokerage_name (from ibes_names)`,
             brokerage_name = `brokerage_name (from Appendix list)`,
             event_date = ymd(event_date))
 
 brokerage_codes_list <- list(closures$brokerage_code) %>% 
   flatten_chr()
 
-closures_temp1 <- closures %>% 
+event_dates <- closures %>% 
   select(event_date) %>% 
-  distinct()
-
-event_dates <- closures_temp1 %>% 
-  mutate(event_date_temp1 = event_date - years(1),
-         event_date_temp2 = event_date + years(1),
-         event_date_temp3 = event_date - years(2),
-         event_date_temp4 = event_date + years(2),
-         event_date_temp5 = event_date - years(3),
-         event_date_temp6 = event_date + years(3),
-         event_date_temp7 = event_date %m-%  months(3))
-
-rm(closures_raw, closures_temp1)
+  distinct() %>% 
+  mutate(year_before = event_date - years(1),
+         year_after = event_date + years(1),
+         three_months_before = event_date %m-%  months(3),
+         three_months_after = event_date %m+%  months(3))
 
 # generate all the dates that are in the before_interval (i.e. [-1,0]-year)
 
-yearbefore_list <- map2(event_dates$event_date_temp1, event_dates$event_date,
+yearbefore_list <- map2(event_dates$year_before, event_dates$event_date,
                      ~seq(.x, .y, "day") %>% as.character) %>% 
   flatten_chr() %>% 
   ymd()
 
-yearbefore_list2 <- map2(event_dates$event_date_temp1, event_dates$event_date_temp7,
+yearbefore_list2 <- map2(event_dates$year_before, event_dates$three_months_before,
                         ~seq(.x, .y, "day") %>% as.character) %>% 
   flatten_chr() %>% 
   ymd()
 
-# # read stopped_estimates from ibes to filter out analysts that stopped before the closure_event_date
+# read stopped_estimates from ibes to filter out analysts that stopped before the closure_event_date
 
 stopped_raw <- read_tsv("data/ibes_data_detail_stopped_estimate.txt",  col_types = cols(.default = "c"))
 
 stopped <- stopped_raw %>%
   transmute(ibes_ticker = TICKER,
-            official_ticker = OFTIC,
             firm = CNAME,
-            brokerage = ESTIMATOR,
+            brokerage_code = ESTIMATOR,
             announce_stop_date = ymd(ASTPDATS), # date when forecast stopped
-            forecast_period = ymd(FPEDATS)) %>% 
-  select(-official_ticker, -firm, -forecast_period) %>% 
-  distinct() %>% 
-  arrange(ibes_ticker, brokerage, announce_stop_date)
+            forecast_period_end_date = ymd(FPEDATS)) %>% 
+  select(-firm) %>% 
+  arrange(ibes_ticker, brokerage_code, announce_stop_date)
 
-rm(stopped_raw)
-
-## left join detail data and stopped analysts data
+# left join detail data and stopped analysts data
 
 detail_temp2 <- left_join(detail_temp1, stopped, by = c("ibes_ticker", "brokerage"))
 
-## left join detail data and closure_dates
+# left join detail data and closure_dates
 
 detail_temp3 <- left_join(detail_temp2, closures, by = c("brokerage" = "brokerage_code"))
 
