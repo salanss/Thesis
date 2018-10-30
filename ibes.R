@@ -12,15 +12,14 @@ detail_temp1 <- detail_raw %>%
   transmute(ibes_ticker = TICKER,
             cusip = CUSIP,
             firm = CNAME,
-            brokerage = ESTIMATOR,
+            brokerage_code = ESTIMATOR,
             analyst = ANALYS,
             forecast_period_id = FPI,
             measure = MEASURE,
             eps_value = parse_double(VALUE),
-            announce_date = ymd(ANNDATS), # date when forecast was reported
-            forecast_period_end_date = ymd(FPEDATS)) %>%
+            forecast_period_end_date = ymd(FPEDATS),
+            announce_date = ymd(ANNDATS)) %>% # date when forecast was reported
   select(-measure, -forecast_period_id) # dropped, as not of particular interest
-
 
 # closure events from Kelly and Ljungqvist (2012) Appendix list
 
@@ -36,26 +35,6 @@ closures <- closures_raw %>%
 brokerage_codes_list <- list(closures$brokerage_code) %>% 
   flatten_chr()
 
-event_dates <- closures %>% 
-  select(event_date) %>% 
-  distinct() %>% 
-  mutate(year_before = event_date - years(1),
-         year_after = event_date + years(1),
-         three_months_before = event_date %m-%  months(3),
-         three_months_after = event_date %m+%  months(3))
-
-# generate all the dates that are in the before_interval (i.e. [-1,0]-year)
-
-yearbefore_list <- map2(event_dates$year_before, event_dates$event_date,
-                     ~seq(.x, .y, "day") %>% as.character) %>% 
-  flatten_chr() %>% 
-  ymd()
-
-yearbefore_list2 <- map2(event_dates$year_before, event_dates$three_months_before,
-                        ~seq(.x, .y, "day") %>% as.character) %>% 
-  flatten_chr() %>% 
-  ymd()
-
 # read stopped_estimates from ibes to filter out analysts that stopped before the closure_event_date
 
 stopped_raw <- read_tsv("data/ibes_data_detail_stopped_estimate.txt",  col_types = cols(.default = "c"))
@@ -67,54 +46,60 @@ stopped <- stopped_raw %>%
             announce_stop_date = ymd(ASTPDATS), # date when forecast stopped
             forecast_period_end_date = ymd(FPEDATS)) %>% 
   select(-firm) %>% 
+  distinct() %>% 
   arrange(ibes_ticker, brokerage_code, announce_stop_date)
 
 # left join detail data and stopped analysts data
 
-detail_temp2 <- left_join(detail_temp1, stopped, by = c("ibes_ticker", "brokerage"))
+detail_temp2 <- left_join(detail_temp1, stopped, by = c("ibes_ticker", "brokerage_code", "forecast_period_end_date"))
 
 # left join detail data and closure_dates
 
-detail_temp3 <- left_join(detail_temp2, closures, by = c("brokerage" = "brokerage_code"))
-
-rm(closures, stopped, detail_temp1, detail_temp2)
-
-detail_temp3
+detail_temp3 <- left_join(detail_temp2, closures, by = c("brokerage_code")) %>% 
+  select(-brokerage_name, -brokerage_name_ibes)
 
 # filter brokerages that are in the closed_brokerages list (i.e. treatment group)
 
 detail_temp4 <- detail_temp3 %>% 
-  mutate(yearbefore = announce_date >= (event_date - years(1))) %>% 
-  filter(yearbefore == T) %>%  # filter only analysts that "covers" the firm, see Derrien and Keckses (2013) p. 1411
-  mutate(in_brokerage_list = brokerage %in% brokerage_codes_list) %>% 
+  mutate(in_brokerage_list = brokerage_code %in% brokerage_codes_list) %>% 
   filter(in_brokerage_list == T) %>% # have to be in closed brokerages list
-  mutate(estimates_after = (announce_date > (event_date %m-% months(3)))) %>% 
-  filter(estimates_after == F) %>% # there cannot be estimates after the event_date (relaxing for 3 months)
-  mutate(stopped_before = (announce_stop_date <= (event_date %m-% months(3)))) %>%  
-  filter(stopped_before == F)  # filter only firms of which analysts have not stopped before event_date (relax 3 months)
+  mutate(yearbefore = announce_date %within% interval(event_date - years(1), event_date)) %>% 
+  filter(yearbefore == T) %>%  # filter only analysts that "covers" the firm, see Derrien and Keckses (2013) p. 1411
+  mutate(stopped_before = announce_stop_date %within% interval(announce_date, event_date %m-% months(3))) %>%  
+  filter(stopped_before == F) # filter only firms of which analysts have not stopped before event_date (relax 3 months)
 
 treated_firms_temp1 <- detail_temp4 %>% 
-  group_by(cusip, event_date) %>% 
+  group_by(ibes_ticker, cusip, event_date) %>% 
   summarise(treated = 1,
-            after= 0,
-            analysts = n_distinct(analyst)) %>% 
+            after= 0) %>% 
   ungroup()
 
 treated_firms_temp2 <- detail_temp4 %>% 
-  group_by(cusip, event_date) %>% 
+  group_by(ibes_ticker, cusip, event_date) %>% 
   summarise(treated = 1,
-            after= 1,
-            analysts = n_distinct(analyst)) %>% 
+            after= 1) %>% 
   ungroup()
 
-treated_firms <- bind_rows(treated_firms_temp1, treated_firms_temp2) %>% 
+treated_firms_temp3 <- bind_rows(treated_firms_temp1, treated_firms_temp2) %>% 
   arrange(cusip, event_date)
 
-treated_firms %>% 
-  group_by(cusip) %>% 
-  tally()
+treated_firms_distinct <- treated_firms_temp3 %>% 
+  select(cusip) %>% 
+  distinct()
 
-rm(treated_firms_temp1, treated_firms_temp2)
+treated_firms_list <- list(treated_firms_distinct$cusip) %>% 
+  flatten_chr()
+
+analyst_coverage_temp1 <- detail_temp3 %>% 
+  mutate(in_treated_list = cusip %in% treated_firms_list) %>% 
+  filter(in_treated_list == T)
+
+analyst_coverage <- analyst_coverage_temp1 %>% 
+  group_by(cusip) %>% 
+  summarise(analyst_coverage = n_distinct(analyst)) %>% 
+  ungroup()
+
+treated_firms <- left_join(treated_firms_temp3, analyst_coverage, by = "cusip")
 
 # control group
 
