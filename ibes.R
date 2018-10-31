@@ -66,16 +66,17 @@ detail_temp4 <- detail_temp3 %>%
   mutate(yearbefore = announce_date %within% interval(event_date - years(1), event_date)) %>% 
   filter(yearbefore == T) %>%  # filter only analysts that "covers" the firm, see Derrien and Keckses (2013) p. 1411
   mutate(stopped_before = announce_stop_date %within% interval(announce_date, event_date %m-% months(3))) %>%  
-  filter(stopped_before == F) # filter only firms of which analysts have not stopped before event_date (relax 3 months)
+  filter(stopped_before == F) %>%  # filter only firms of which analysts have not stopped before event_date (relax 3 months)
+  filter(!is.na(cusip))
 
 treated_firms_temp1 <- detail_temp4 %>% 
-  group_by(ibes_ticker, cusip, event_date) %>% 
+  group_by(cusip, event_date) %>% 
   summarise(treated = 1,
             after= 0) %>% 
   ungroup()
 
 treated_firms_temp2 <- detail_temp4 %>% 
-  group_by(ibes_ticker, cusip, event_date) %>% 
+  group_by(cusip, event_date) %>% 
   summarise(treated = 1,
             after= 1) %>% 
   ungroup()
@@ -102,6 +103,8 @@ analyst_coverage <- analyst_coverage_temp1 %>%
   ungroup()
 
 treated_firms <- left_join(treated_firms_temp3, analyst_coverage, by = c("cusip", "event_year" = "announce_year"))
+
+write_rds(treated_firms, "data/treated_firms_ibes.rds")
 
 # control group
 
