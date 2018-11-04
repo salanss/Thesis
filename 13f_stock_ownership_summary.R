@@ -22,3 +22,6 @@ df_temp1 <- df_raw %>%
             ownership_of_largest_institutional = parse_double(MaxInstOwn),
             index_of_institutional_ownership = parse_double(InstOwn_HHI),
             ownership_of_institutionals_percentage = parse_double(InstOwn_Perc)) # as a share of shares outstanding
+
+df_temp2 <- df_temp1 %>% 
+  filter(!is.na(ownership_of_institutionals_percentage))
