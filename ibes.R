@@ -19,12 +19,8 @@ detail_temp1 <- detail_raw %>%
             eps_value = parse_double(VALUE),
             forecast_period_end_date = ymd(FPEDATS),
             announce_date = ymd(ANNDATS)) %>% # date when forecast was reported
-<<<<<<< HEAD
-  select(-measure, -official_ticker) # dropped, as not of particular interest
-
-=======
   select(-measure, -forecast_period_id) # dropped, as not of particular interest
->>>>>>> ecc40751808939acabe29bb3f36ecc6eeed9cf7f
+
 
 # closure events from Kelly and Ljungqvist (2012) Appendix list
 
@@ -49,22 +45,10 @@ stopped <- stopped_raw %>%
             firm = CNAME,
             brokerage_code = ESTIMATOR,
             announce_stop_date = ymd(ASTPDATS), # date when forecast stopped
-<<<<<<< HEAD
-            forecast_period = ymd(FPEDATS)) %>% 
-  select(-firm) %>% 
-  distinct() %>% 
-  arrange(ibes_ticker, brokerage_code, announce_stop_date)
-
-
-## left join detail data and stopped analysts data
-
-detail_temp2 <- left_join(detail_temp1, stopped, by = c("ibes_ticker", "brokerage_code"))
-=======
             forecast_period_end_date = ymd(FPEDATS)) %>% 
   select(-firm) %>% 
   distinct() %>% 
   arrange(ibes_ticker, brokerage_code, announce_stop_date)
->>>>>>> ecc40751808939acabe29bb3f36ecc6eeed9cf7f
 
 # left join detail data and stopped analysts data
 
