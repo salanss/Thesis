@@ -13,15 +13,14 @@ detail_temp1 <- detail_raw %>%
             official_ticker = OFTIC,
             cusip = CUSIP,
             firm = CNAME,
-            brokerage = ESTIMATOR,
+            brokerage_code = ESTIMATOR,
             analyst = ANALYS,
             forecast_period_id = FPI,
             measure = MEASURE,
             eps_value = as.numeric(VALUE),
             announce_date = ymd(ANNDATS)) %>% # date when forecast was reported
-  select(-measure, -forecast_period_id, -official_ticker) # dropped, as not of particular interest
+  select(-measure, -official_ticker) # dropped, as not of particular interest
 
-rm(detail_raw)
 
 # closure events from Kelly and Ljungqvist (2012) Appendix list
 
@@ -30,6 +29,7 @@ rm(detail_raw)
 closures_raw <- read_tsv("data/closure_events.txt", col_names = T, col_types = cols(.default = "c"))
 closures <- closures_raw %>% 
   transmute(brokerage_code = brokerage_code,
+            brokerage_name_ibes = `brokerage_name (from ibes_names)`,
             brokerage_name = `brokerage_name (from Appendix list)`,
             event_date = ymd(event_date))
 
@@ -69,20 +69,18 @@ stopped_raw <- read_tsv("data/ibes_data_detail_stopped_estimate.txt",  col_types
 
 stopped <- stopped_raw %>%
   transmute(ibes_ticker = TICKER,
-            official_ticker = OFTIC,
             firm = CNAME,
-            brokerage = ESTIMATOR,
+            brokerage_code = ESTIMATOR,
             announce_stop_date = ymd(ASTPDATS), # date when forecast stopped
             forecast_period = ymd(FPEDATS)) %>% 
-  select(-official_ticker, -firm, -forecast_period) %>% 
+  select(-firm) %>% 
   distinct() %>% 
-  arrange(ibes_ticker, brokerage, announce_stop_date)
+  arrange(ibes_ticker, brokerage_code, announce_stop_date)
 
-rm(stopped_raw)
 
 ## left join detail data and stopped analysts data
 
-detail_temp2 <- left_join(detail_temp1, stopped, by = c("ibes_ticker", "brokerage"))
+detail_temp2 <- left_join(detail_temp1, stopped, by = c("ibes_ticker", "brokerage_code"))
 
 ## left join detail data and closure_dates
 
