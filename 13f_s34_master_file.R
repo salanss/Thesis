@@ -6,11 +6,18 @@ library(lubridate)
 
 
 df_raw <- read_tsv("data/13f_s34_master_file.txt", col_types = cols(.default = "c"))
-df_institutions <- read_tsv("data/13f_institutions.txt", col_types = cols(.default = "c"))
+df_institutions_raw <- read_tsv("data/13f_institutions.txt", col_types = cols(.default = "c"))
 
-df_institutions_temp1 <- df_institutions %>% 
-  select(mgrno) %>% 
-  distinct()
+df_institutions <- df_institutions_raw %>% 
+  group_by(mgrno) %>% 
+  fill(country, .direction = "up") %>% 
+  fill(country, .direction = "down") %>% 
+  ungroup()
+  
+testi <- df_institutions %>%
+  filter(!(is.na(country))) %>%
+  group_by(mgrno) %>% 
+  tally()
 
 df_institutions_temp2 <- df_institutions %>% 
   select(mgrno, country) %>% 
