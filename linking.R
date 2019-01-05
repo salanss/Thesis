@@ -7,7 +7,8 @@ crsp_monthly_stock <- read_rds("data/crsp_monthly_stock.rds")
 treated_firms_ibes <- read_rds("data/treated_firms_ibes.rds")
 
 
-thirteenf_temp1 <- left_join(thirteenf, crsp_monthly_stock, by = c("cusip" = "ncusip", "report_date" = "date")) %>% 
+thirteenf_temp1 <- thirteenf %>% 
+  left_join(crsp_monthly_stock, by = c("cusip" = "ncusip", "report_date" = "date")) %>% 
   filter(!is.na(permno))
 
 ibes_crsp_link1 <- left_join(treated_firms_ibes, crsp_monthly_stock, by = c("cusip" = "ncusip")) %>% 
