@@ -17,22 +17,28 @@ data_all
 
 res <- dbSendQuery(wrds, "select distinct table_name
                    from information_schema.columns
-                   where table_schema='ibes'
+                   where table_schema='tfn'
                    order by table_name")
-ibes <- dbFetch(res, n=-1)
+tfn <- dbFetch(res, n=-1)
 dbClearResult(res)
-ibes
+tfn
 
 res <- dbSendQuery(wrds, "select column_name
                    from information_schema.columns
-                   where table_schema='ibes'
-                   and table_name='recddet'
+                   where table_schema='tfn'
+                   and table_name='s34'
                    order by column_name")
 data <- dbFetch(res, n=-1)
 dbClearResult(res)
 data
 
-res <- dbSendQuery(wrds, "SELECT * FROM ibes.det_epsus")
+res <- dbSendQuery(wrds, "select rdate, 
+                                 cusip, 
+                                 sum(shares) as shares
+                          from tfn.s34
+                          where rdate between '1979-12-31'
+                          and '2017-01-01'
+                          group by cusip, rdate")
 data <- dbFetch(res, n=100)
 dbClearResult(res)
 library(tidyverse)
