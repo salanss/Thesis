@@ -25,7 +25,9 @@ library(feather)
 # write_feather(df_raw, "data/13_raw_master.feather")
 
 df_institutions <- read_feather("data/13_institutions.feather") %>% 
-  distinct()
+  distinct() %>% 
+  arrange(rdate) #%>% 
+  filter(is.na(country))
 
 # df_institutions_testi <- df_institutions %>% 
 #   group_by(mgrno, rdate) %>% 
