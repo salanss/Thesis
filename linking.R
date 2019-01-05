@@ -2,14 +2,38 @@ library(tidyverse)
 library(readr)
 library(lubridate)
 
-thirteenf <- read_rds("data/13f_output.rds")
-crsp_monthly_stock <- read_rds("data/crsp_monthly_stock.rds")
+thirteenf <- read_rds("data/13f_output.rds") %>% 
+  mutate(report_date = ceiling_date(report_date, unit = "month") - days(1))
+
+crsp_monthly_stock <- read_rds("data/crsp_monthly_stock.rds") %>% 
+  select(-return, -trading_volume, -ncusip) %>% 
+  distinct() %>% 
+  arrange(permno) %>% 
+  fill(shares_outstanding, .direction = "up") %>% 
+  mutate(date = ceiling_date(date, unit = "month") - days(1))
+
+crsp_monthly_stock_linking <- read_rds("data/crsp_monthly_stock.rds") %>% 
+  select(date, ncusip, permno) %>% 
+  distinct() %>% 
+  arrange(permno) %>% 
+  fill(ncusip, .direction = "up") %>% 
+  mutate(date = ceiling_date(date, unit = "month") - days(1))
+
 treated_firms_ibes <- read_rds("data/treated_firms_ibes.rds")
 
 
-thirteenf_temp1 <- thirteenf %>% 
-  left_join(crsp_monthly_stock, by = c("cusip" = "ncusip", "report_date" = "date")) %>% 
-  filter(!is.na(permno))
+thirteenf_temp1 <- thirteenf %>%
+  select(-shares_outstanding, -institutional_ownership_percentage, -foreign_institutional_ownership_percentage, 
+         -domestic_institutional_ownership_percentage) %>% 
+  filter(!(is.na(foreign_institutional_ownership_shares))) %>% 
+  filter(!(is.na(cusip))) %>% 
+  left_join(crsp_monthly_stock_linking, by = c("cusip" = "ncusip", "report_date" = "date")) %>%
+  arrange(cusip) %>% 
+  fill(permno, .direction = "up") %>% 
+  filter(!(is.na(permno))) %>%
+  left_join(crsp_monthly_stock, by = c("permno", "report_date" = "date")) #%>% 
+  group_by(cusip, report_date) %>% 
+  ungroup()
 
 ibes_crsp_link1 <- left_join(treated_firms_ibes, crsp_monthly_stock, by = c("cusip" = "ncusip")) %>% 
   select(-date, -price, -shares_outstanding, -return, -trading_volume) %>%
