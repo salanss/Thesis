@@ -5,7 +5,7 @@ library(lubridate)
 # PINs by Duarte and Young (2006 or 2009), PIN_DY, PIN_Adjusted and PSOS
 # link http://www.owlnet.rice.edu/~jd10/publications.html
 
-pin_dy_raw <- read_csv("pin_dy_duarte_young.csv", col_types = cols(.default = "c"))
+pin_dy_raw <- read_csv("data/pin_dy_duarte_young.csv", col_types = cols(.default = "c"))
 pin_dy <- pin_dy_raw %>% 
   transmute(permno = permno,
             year = as.numeric(year),
@@ -22,7 +22,7 @@ pin_dy %>%
 # PINs by Easley, Hvidkjaer and O'Hara (2010), PIN_EHO
 # link https://sites.google.com/site/hvidkjaer/data
 
-pin_eho_raw <- read_delim("pin_eho_easley_hvidkjaer_o'hara.dat", delim = " ", col_types = cols(.default = "c"))
+pin_eho_raw <- read_delim("data/pin_eho_easley_hvidkjaer_o'hara.dat", delim = " ", col_types = cols(.default = "c"))
 pin_eho <- pin_eho_raw %>% 
   transmute(permno = permn,
             year = as.numeric(year),
@@ -35,7 +35,7 @@ pin_eho %>%
 # PINs by Brown, Hillegeist and Lo (2004), PIN_BHL
 # link http://scholar.rhsmith.umd.edu/sbrown/probability-informed-trade-easley-et-al-model
 
-pin_bhl_raw <- read_table("pin_bhl_brown_hillegeist_lo.asc_", col_names = T, col_types = cols(.default = "c"))
+pin_bhl_raw <- read_table("data/pin_bhl_brown_hillegeist_lo.asc_", col_names = T, col_types = cols(.default = "c"))
 
 pin_bhl <- pin_bhl_raw %>% 
   transmute(permno = permno,
@@ -45,7 +45,7 @@ pin_bhl <- pin_bhl_raw %>%
 # PINs by Brown and Hillegeist (2007), PIN_BH
 # link http://scholar.rhsmith.umd.edu/sbrown/pin-data
 
-pin_bh_raw <- read_table("pin_bh_brown_hillegeist.asc_", col_names = T, col_types = cols(.default = "c"))
+pin_bh_raw <- read_table("data/pin_bh_brown_hillegeist.asc_", col_names = T, col_types = cols(.default = "c"))
 
 pin_bh <- pin_bh_raw %>% 
   transmute(permno = permno,
@@ -55,19 +55,22 @@ pin_bh <- pin_bh_raw %>%
 # MIAs by Johnson and So (2017)
 # link http://travislakejohnson.com/data.html
 
-mia_raw <- read_csv("mia_johnson_so.csv", col_types = cols(.default = "c"))
+mia_raw <- read_csv("data/mia_johnson_so.csv", col_types = cols(.default = "c"))
 
 mia <- mia_raw %>% 
   transmute(permno = PERMNO,
             date = mdy(DATE),
-            mia = as.numeric(MIA),
-            year = year(mdy(DATE)))
+            mia_daily = as.numeric(MIA),
+            year = year(mdy(DATE))) %>% 
+  group_by(permno, year) %>% 
+  summarise(mia = mean(mia_daily)) %>% 
+  ungroup()
 
 
-information_asymmetry_measures_temp1 <- full_join(pin_dy, pin_eho, by = c("permno", "year"))
+information_asymmetry_measures <- pin_dy %>% 
+  full_join(pin_eho, by = c("permno", "year")) %>% 
+  full_join(pin_bhl, by = c("permno", "year")) %>% 
+  full_join(pin_bh, by = c("permno", "year")) %>% 
+  full_join(mia, by = c("permno", "year"))
 
-information_asymmetry_measures_temp2 <- full_join(information_asymmetry_measures_temp1, pin_bhl, by = c("permno", "year"))
-
-information_asymmetry_measures_temp3 <- full_join(information_asymmetry_measures_temp2, pin_bh, by = c("permno", "year"))
-
-information_asymmetry_measures_temp4 <- full_join(information_asymmetry_measures_temp3, mia)
+write_rds(information_asymmetry_measures, "data/information_asymmetry_measures.rds")
