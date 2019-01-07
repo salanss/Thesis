@@ -12,12 +12,20 @@ crsp_monthly_stock <- crsp_monthly_stock_raw %>%
             ncusip = NCUSIP,
             official_ticker = TICKER,
             firm = COMNAM,
-            cusip = CUSIP,
+            sic_code = SICCD, # historical
+            exchange_code = EXCHCD,
             price = abs(parse_double(PRC)),
+            price_delisting = abs(parse_double(DLPRC)),
+            bid = abs(parse_double(BIDLO)),
+            ask = abs(parse_double(ASKHI)),
+            bid_ask_spread = (ask - bid)/price,
             shares_outstanding = parse_double(SHROUT)*1000, # in 1000s
-            return = parse_double(RET), # e.g. value "C" is converted to NA
+            return = case_when(
+              RET == "C" ~ NA_real_,
+              TRUE ~ parse_double(RET)), # e.g. value "C" is converted to NA
+            return_delisting = parse_double(DLRET),
             trading_volume = parse_double(VOL)) %>% 
-  select(-cusip, -official_ticker, -firm)
+  select(-official_ticker, -firm)
 
 write_rds(crsp_monthly_stock, "data/crsp_monthly_stock.rds")
 
