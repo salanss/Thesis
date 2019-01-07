@@ -13,7 +13,7 @@ compustat_annual <- compustat_annual_raw %>%
             datadate = ymd(datadate),
             fiscal_year = parse_integer(fyear),
             fiscal_year_end_month = parse_integer(fyr),
-            total_assets = parse_double(at),
+            assets = parse_double(at),
             bookvaluepershare = parse_double(bkvlps),
             common_equity = parse_double(ceq),
             common_equity_liquidation_value = parse_double(ceql),
@@ -48,7 +48,9 @@ compustat_annual_final <- compustat_annual %>%
            sum(common_equity + preferred_stock, na.rm = T)),
          book_equity = shareholders_equity - coalesce(preferred_stock_liquidation_value, preferred_stock, 0),
          book_to_market = book_equity / market_cap,
-         leverage = (debt_in_current_liabilities + debt_long_term) / total_assets) %>% 
+         leverage = (debt_in_current_liabilities + debt_long_term) / assets,
+         roa = net_income / assets,
+         tobin_q = (assets + book_equity + market_cap) / assets) %>% 
   ungroup()
 
 
