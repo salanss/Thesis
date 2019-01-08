@@ -21,7 +21,7 @@ compustat_annual <- compustat_annual_raw %>%
             shares_outstanding = parse_double(csho),
             debt_in_current_liabilities = parse_double(dlc),
             debt_long_term = parse_double(dltt),
-            debt_liabilities = parse_date(lt),
+            debt_liabilities = parse_double(lt),
             net_income = parse_double(ni),
             preferred_stock = parse_double(pstk),
             preferred_stock_convertible = parse_double(pstkc),
@@ -50,9 +50,10 @@ compustat_annual_final <- compustat_annual %>%
          book_to_market = book_equity / market_cap,
          leverage = (debt_in_current_liabilities + debt_long_term) / assets,
          roa = net_income / assets,
-         tobin_q = (assets + book_equity + market_cap) / assets) %>% 
+         tobin_q = (assets + market_cap - book_equity) / assets) %>% 
   ungroup()
 
+write_rds(compustat_annual_final, "data/compustat_annual_final.rds")
 
 # compustat quarter data
 
@@ -74,7 +75,7 @@ compustat_quarter <- compustat_quarter_raw %>%
             shares_outstanding = parse_double(cshoq),
             debt_in_current_liabilities = parse_double(dlcq),
             debt_long_term = parse_double(dlttq),
-            debt_liabilities = parse_date(ltq),
+            debt_liabilities = parse_double(ltq),
             net_income = parse_double(niq),
             preferred_stock = parse_double(pstkq),
             #preferred_stock_convertible = parse_double(pstkc),
@@ -91,3 +92,19 @@ compustat_quarter <- compustat_quarter_raw %>%
             gics_group = ggroup,
             gics_industry = gind,
             gics_subindustry = gsubind)
+
+compustat_quarter_final <- compustat_quarter %>% 
+  rowwise() %>% 
+  mutate(market_cap = price_close_calendar * shares_outstanding,
+         log_market_cap = log(market_cap),
+         shareholders_equity = if_else(
+           !is.na(stockholders_equity) == T, stockholders_equity,
+           sum(common_equity + preferred_stock, na.rm = T)),
+         book_equity = shareholders_equity - coalesce(preferred_stock, 0),
+         book_to_market = book_equity / market_cap,
+         leverage = (debt_in_current_liabilities + debt_long_term) / assets,
+         roa = net_income / assets,
+         tobin_q = (assets + market_cap - book_equity) / assets) %>% 
+  ungroup()
+
+write_rds(compustat_quarter_final, "data/compustat_quarter_final.rds")
