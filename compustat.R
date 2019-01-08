@@ -94,17 +94,15 @@ compustat_quarter <- compustat_quarter_raw %>%
             gics_subindustry = gsubind)
 
 compustat_quarter_final <- compustat_quarter %>% 
-  rowwise() %>% 
   mutate(market_cap = price_close_calendar * shares_outstanding,
          log_market_cap = log(market_cap),
          shareholders_equity = if_else(
            !is.na(stockholders_equity) == T, stockholders_equity,
-           sum(common_equity + preferred_stock, na.rm = T)),
+           coalesce(common_equity, 0) + coalesce(preferred_stock, 0)),
          book_equity = shareholders_equity - coalesce(preferred_stock, 0),
          book_to_market = book_equity / market_cap,
          leverage = (debt_in_current_liabilities + debt_long_term) / assets,
          roa = net_income / assets,
-         tobin_q = (assets + market_cap - book_equity) / assets) %>% 
-  ungroup()
+         tobin_q = (assets + market_cap - book_equity) / assets)
 
 write_rds(compustat_quarter_final, "data/compustat_quarter_final.rds")
