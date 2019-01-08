@@ -25,8 +25,7 @@ library(feather)
 
 df_institutions <- read_feather("data/13_institutions.feather") %>% 
   distinct() %>% 
-  arrange(rdate) #%>% 
-  filter(is.na(country))
+  arrange(rdate)
 
 df <- read_feather("data/13_raw_master.feather") %>% 
   distinct()
