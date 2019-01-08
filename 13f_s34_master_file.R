@@ -17,7 +17,6 @@ library(feather)
 # 
 # write_feather(df_institutions, "data/13_institutions.feather")
 # 
-# rm(df_institutions_raw)
 # 
 # df_raw <- read_tsv("data/13f_s34_master_file.txt", col_types = cols(.default = "c")) %>% 
 #   select(-country)
@@ -28,10 +27,6 @@ df_institutions <- read_feather("data/13_institutions.feather") %>%
   distinct() %>% 
   arrange(rdate) #%>% 
   filter(is.na(country))
-
-# df_institutions_testi <- df_institutions %>% 
-#   group_by(mgrno, rdate) %>% 
-#   tally()
 
 df <- read_feather("data/13_raw_master.feather") %>% 
   distinct()
