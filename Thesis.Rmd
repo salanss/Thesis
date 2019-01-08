@@ -14,7 +14,7 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 ```{r cars}
-summary(cars)
+stargazer(lm_model_1, lm_model_2, lm_model_3, lm_model_4, title = "Baseline regression results (H1)")
 ```
 
 Table Header | Second Header
