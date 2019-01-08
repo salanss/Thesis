@@ -4,53 +4,43 @@ library(lubridate)
 
 thirteenf <- read_rds("data/13f_output.rds") %>% 
   mutate(report_date = ceiling_date(report_date, unit = "month") - days(1)) %>% 
-  select(-shares_outstanding, -institutional_ownership_percentage, -foreign_institutional_ownership_percentage, 
+  select(-institutional_ownership_percentage, -foreign_institutional_ownership_percentage, 
          -domestic_institutional_ownership_percentage) %>% 
-  distinct() %>% 
   filter(!(is.na(foreign_institutional_ownership_shares))) %>% 
-  filter(!(is.na(cusip)))
+  filter(!(is.na(cusip))) %>% 
+  distinct()
 
-# crsp_monthly_stock <- read_rds("data/crsp_monthly_stock.rds") %>% 
-#   select(-return, -trading_volume, -ncusip) %>% 
-#   distinct() %>% 
-#   group_by(permno) %>% 
-#   fill(shares_outstanding, .direction = "up") %>% 
-#   mutate(date = ceiling_date(date, unit = "month") - days(1)) %>% 
-#   ungroup()
-# 
-# write_rds(crsp_monthly_stock, "data/crsp_monthly_stock_final.rds")
+crsp_monthly_stock <- read_rds("data/crsp_monthly_stock.rds")
 
-crsp_monthly_stock_final <- read_rds("data/crsp_monthly_stock_final.rds")
-
-# crsp_monthly_stock_linking <- read_rds("data/crsp_monthly_stock.rds") %>% 
-#   select(date, ncusip, permno) %>% 
-#   distinct() %>% 
-#   group_by(permno) %>% 
-#   fill(ncusip, .direction = "up") %>% 
-#   ungroup() %>% 
-#   mutate(date = ceiling_date(date, unit = "month") - days(1))
-
-# write_rds(crsp_monthly_stock_linking, "data/crsp_monthly_stock_linking_final.rds")
-
-crsp_monthly_stock_linking_final <- read_rds("data/crsp_monthly_stock_linking_final.rds")
+compustat_quarter <- read_rds("data/compustat_quarter_final.rds") %>% 
+  mutate(datadate = ceiling_date(datadate, unit = "month") - days(1)) # sanity check
 
 treated_firms_ibes <- read_rds("data/treated_firms_ibes.rds")
 
-# thirteenf_temp1 <- thirteenf %>%
-#   left_join(crsp_monthly_stock_linking_final, by = c("cusip" = "ncusip", "report_date" = "date")) %>%
-#   group_by(cusip) %>%
-#   fill(permno, .direction = "up") %>%
-#   ungroup() %>%
-#   filter(!(is.na(permno))) %>%
-#   left_join(crsp_monthly_stock_final, by = c("permno", "report_date" = "date")) %>%
-#   select(-price) %>%
-#   arrange(report_date, permno) %>% 
-#   group_by(permno) %>% 
-#   fill(shares_outstanding, .direction = "up") %>% 
-#   ungroup() %>% 
-#   filter(!(is.na(shares_outstanding)))
+thirteenf_crsp_merged <- thirteenf %>%
+  inner_join(crsp_monthly_stock, by = c("cusip" = "ncusip", "report_date" = "date"))
 
-# write_rds(thirteenf_temp1, "data/thirteenf_crsp_merged.rds")
+thirteenf_crsp_compustat_quarter_merged <- thirteenf_crsp_merged %>% 
+  inner_join(compustat_quarter, by = c("permno", "report_date" = "datadate")) %>% 
+  transmute(report_date = report_date,
+            permno = permno,
+            cusip = cusip,
+            shares_outstanding = shares_outstanding.y, #coalesce(shares_outstanding.x, shares_outstanding.y, shares_outstanding)
+            institutional_ownership_shares = institutional_ownership_shares,
+            foreign_institutional_ownership_shares = foreign_institutional_ownership_shares,
+            domestic_institutional_ownership_shares = domestic_institutional_ownership_shares,
+            inst_percentage = institutional_ownership_shares / shares_outstanding,
+            foreign_inst_percentage = foreign_institutional_ownership_shares / shares_outstanding,
+            sic_code = if_else(sic_code.x == "0" | is.na(sic_code.x) == T, sic_code.y, sic_code.x),
+            price = price, # coalesce(price, price_close_calendar)
+            market_cap = shares_outstanding * price,
+            log_market_cap = log(market_cap),
+            book_equity = book_equity,
+            book_to_market = book_to_market,
+            leverage = leverage,
+            roa = roa,
+            tobin_q = tobin_q) %>% 
+  arrange(report_date, permno)
 
 thirteenf_crsp_merged <- read_rds("data/thirteenf_crsp_merged.rds") %>% 
   transmute(report_date = report_date, 
@@ -73,6 +63,8 @@ thirteenf_crsp_ia_merged <- thirteenf_crsp_merged %>%
   inner_join(information_asymmetry_measures, by = c("permno", "year"))
 
 write_rds(thirteenf_crsp_ia_merged, "data/baseline_regression_raw.rds")
+
+##
 
 ibes_crsp_link1 <- left_join(treated_firms_ibes, crsp_monthly_stock, by = c("cusip" = "ncusip")) %>% 
   select(-date, -price, -shares_outstanding, -return, -trading_volume) %>%
