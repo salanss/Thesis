@@ -23,10 +23,6 @@ rnm <- function(df, ia_meas, dep_meas) {
   rename(df, !!!rnm_list)
 }
 
-baseline_names <- mutate(baseline_regression,
-                         data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
-                         model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
-
 model_function <- function(df, ia_meas, dep_meas) {
   f <- dep_measure ~ ia_measure + log_market_cap  + leverage +
     roa + tobin_q|year + sic_code|0|year+sic_code
@@ -34,6 +30,11 @@ model_function <- function(df, ia_meas, dep_meas) {
   f[[3]][[2]][[2]][[2]][[2]][[2]][[2]][[2]] <- sym(ia_meas)
   felm(f, data = df)
 }
+
+baseline_names <- mutate(baseline_regression,
+                         data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
+                         model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
+
 
 models <- baseline_regression %>%
   transmute(model = map(data, model_function))
