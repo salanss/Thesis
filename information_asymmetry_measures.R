@@ -15,8 +15,8 @@ pin_dy <- pin_dy_raw %>%
             psos_dy = as.numeric(psos)) %>% 
   select(-exchange)
 
-pin_dy %>% 
-  group_by(permno) %>% 
+e <- pin_dy %>% 
+  group_by(year) %>% 
   tally()
 
 # PINs by Easley, Hvidkjaer and O'Hara (2010), PIN_EHO
@@ -28,8 +28,8 @@ pin_eho <- pin_eho_raw %>%
             year = as.numeric(year),
             pin_eho = as.numeric(pin))
 
-pin_eho %>%
-  group_by(permno) %>% 
+f <- pin_eho %>%
+  group_by(year) %>% 
   tally()
 
 # PINs by Brown, Hillegeist and Lo (2004), PIN_BHL
@@ -42,6 +42,9 @@ pin_bhl <- pin_bhl_raw %>%
             year = as.numeric(year),
             pin_bhl = as.numeric(pinesas))
 
+g <- pin_bhl %>% group_by(year) %>% 
+  tally()
+
 # PINs by Brown and Hillegeist (2007), PIN_BH
 # link http://scholar.rhsmith.umd.edu/sbrown/pin-data
 
@@ -51,6 +54,10 @@ pin_bh <- pin_bh_raw %>%
   transmute(permno = permno,
             year = as.numeric(year),
             pin_bh = as.numeric(pin))
+
+h <- pin_bh %>%
+  group_by(year) %>% 
+  tally()
 
 # MIAs by Johnson and So (2017)
 # link http://travislakejohnson.com/data.html
