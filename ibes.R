@@ -147,4 +147,4 @@ ibes_did <- ibes_did_raw %>%
   select(-next_year_quarter, -lag_year_quarter, -analyst_coverage.x, -analyst_coverage.y) %>% 
   filter(!is.na(cusip))
 
-write_rds(ibes_did, "data/did_regression_raw.rds")
+write_rds(ibes_did, "data/ibes_did")
