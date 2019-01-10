@@ -2,7 +2,7 @@ library(tidyverse)
 library(readr)
 library(lubridate)
 
-treated_firms_ibes <- read_rds("data/treated_firms_ibes.rds")
+# baseline linking
 
 thirteenf <- read_rds("data/13f_output.rds") %>% 
   mutate(report_date = ceiling_date(report_date, unit = "month") - days(1)) %>% 
@@ -65,9 +65,18 @@ thirteenf_crsp_compustat_ia_merged <- thirteenf_crsp_compustat_quarter_merged %>
 
 write_rds(thirteenf_crsp_compustat_ia_merged, "data/baseline_regression_raw.rds")
 
-##
+## did linking
 
-ibes_crsp_link1 <- left_join(treated_firms_ibes, crsp_monthly_stock, by = c("cusip" = "ncusip")) %>% 
+ibes_did <- read_rds("data/ibes_did")
+
+crsp_monthly_stock <- read_rds("data/crsp_monthly_stock.rds") %>% 
+  mutate(year_quarter = quarter(date, with_year = T))
+  
+compustat_quarter <- read_rds("data/compustat_quarter_final.rds") %>% 
+  mutate(datadate = ceiling_date(datadate, unit = "month") - days(1)) # sanity check
+
+ibes_crsp_link1 <- ibes_did %>% 
+  inner_join(crsp_monthly_stock, by = c("cusip" = "ncusip", "measurement_year_quarter" = "year_quarter")) #%>% 
   select(-date, -price, -shares_outstanding, -return, -trading_volume) %>%
   distinct()
 
