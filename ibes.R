@@ -32,7 +32,9 @@ closures <- closures_raw %>%
             brokerage_name_ibes = `brokerage_name (from ibes_names)`,
             brokerage_name = `brokerage_name (from Appendix list)`,
             event_date = ymd(event_date),
-            event_date_temp1 = event_date - years(1))
+            event_date_temp1 = event_date - years(1),
+            event_date_temp2 = event_date %m-% months(3) - years(1),
+            event_date_temp3 = event_date %m-% months(3))
 
 brokerage_codes_list <- list(closures$brokerage_code) %>% 
   flatten_chr()
@@ -112,7 +114,8 @@ all_firms <- inner_join(all_firms_temp1, closures_temp1, by = 'k') %>%
   mutate(event_year_quarter = quarter(event_date, with_year = T)) %>% 
   distinct()
 
-control_firms_temp1 <- anti_join(all_firms, treated_firms, by = c("cusip", "event_date"))
+control_firms_temp1 <- all_firms %>% 
+  anti_join(treated_firms, by = c("cusip", "event_date"))
 
 control_firms_temp2 <- control_firms_temp1 %>%
   mutate(treated = 0,
@@ -131,20 +134,45 @@ ibes_did_raw <- bind_rows(treated_firms, control_firms) %>%
          lag_year_quarter = if_else(row_number() == 1, quarter("2000-03-31", with_year = T), 
                                     if_else(after == 1, NA_real_, quarter(event_date %m-% months(3), with_year = T))))
 
+rolling_count <- function(df, after, event_date, group) {
+  df %>%
+    mutate(interval = if_else(after == F, 
+                              interval(event_date %m-% months(3), event_date %m-% months(3) - years(1)),
+                              interval(event_date %m+% months(3), event_date %m+% months(3) + years(1)))) %>%
+    filter(announce_date %within% interval) %>%
+    group_by(group, event_date) %>% 
+    summarise(count = n_distinct(analyst)) %>% 
+    ungroup()
+}
+
+rolling_count <- rollify(.f = n_distinct(analyst), window = 12, unlist = T)
+
+l <- mapply(rolling_count, detail_temp3)
+
+t <- pmap_dfr(list(analyst_coverage, after = T, events, analyst_coverage$cusip), rolling_count)
+
+yearbefore_list2 <- map2(closures$event_date_temp2, closures$event_date_temp3,
+                        ~seq(.x, .y, "day") %>% as.character) %>% 
+  flatten_chr() %>% 
+  ymd()
+
+events <- closures %>% select(event_date) %>% transmute(event_date = as.character(event_date)) %>% 
+  distinct() %>% flatten_chr() %>% ymd()
+
 analyst_coverage <- detail_temp3 %>%
+  select(cusip, announce_date, analyst) %>% 
+  arrange(cusip, announce_date, analyst) %>% 
+  distinct() #%>% 
+  mutate(announce_month = month(announce_date),
+         announce_year = year(announce_date)) %>% 
+  group_by(cusip, announce_year, announce_month) %>% 
+  summarise(analyst_in_month = n_distinct(analyst)) %>% 
+  ungroup() #%>% 
   mutate(inyearbeforelist = announce_date %in% yearbefore_list) %>% 
   filter(inyearbeforelist == T) %>% # require control to be "actively" covered, i.e. year before
-  mutate(announce_year_quarter = quarter(announce_date, with_year = T)) %>% 
   group_by(cusip, announce_year_quarter) %>%
   summarise(analyst_coverage = n_distinct(analyst)) %>%
   ungroup()
 
-ibes_did <- ibes_did_raw %>% 
-  left_join(analyst_coverage, by = c("cusip", "next_year_quarter" = "announce_year_quarter")) %>% 
-  left_join(analyst_coverage, by = c("cusip", "lag_year_quarter" = "announce_year_quarter")) %>% 
-  mutate(measurement_year_quarter = coalesce(next_year_quarter, lag_year_quarter),
-         analyst_coverage = coalesce(analyst_coverage.x, analyst_coverage.y)) %>% 
-  select(-next_year_quarter, -lag_year_quarter, -analyst_coverage.x, -analyst_coverage.y) %>% 
-  filter(!is.na(cusip))
 
 write_rds(ibes_did, "data/ibes_did")
