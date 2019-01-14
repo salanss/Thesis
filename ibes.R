@@ -129,27 +129,16 @@ control_firms <- bind_rows(control_firms_temp2, control_firms_temp3) %>%
   arrange(cusip, event_date)
 
 ibes_did_raw <- bind_rows(treated_firms, control_firms) %>% 
-  arrange(cusip, event_date) %>% 
-  mutate(next_year_quarter = if_else(after == 0, NA_real_, quarter(event_date %m+% months(3), with_year = T)),
-         lag_year_quarter = if_else(row_number() == 1, quarter("2000-03-31", with_year = T), 
-                                    if_else(after == 1, NA_real_, quarter(event_date %m-% months(3), with_year = T))))
+  arrange(cusip, event_date)
 
-rolling_count <- function(df, after, event_date, group) {
+rolling_count <- function(df, event_date) {
   df %>%
-    mutate(interval = if_else(after == F, 
-                              interval(event_date %m-% months(3), event_date %m-% months(3) - years(1)),
-                              interval(event_date %m+% months(3), event_date %m+% months(3) + years(1)))) %>%
+    mutate(interval = interval(event_date %m-% months(3), event_date %m-% months(3) - years(1))) %>%
     filter(announce_date %within% interval) %>%
-    group_by(group, event_date) %>% 
-    summarise(count = n_distinct(analyst)) %>% 
-    ungroup()
+    summarise_(count = n_distinct(analyst))
 }
 
-rolling_count <- rollify(.f = n_distinct(analyst), window = 12, unlist = T)
-
-l <- mapply(rolling_count, detail_temp3)
-
-t <- pmap_dfr(list(analyst_coverage, after = T, events, analyst_coverage$cusip), rolling_count)
+t <- pmap_chr(list(analyst_coverage, after = T, events, analyst_coverage$cusip), rolling_count)
 
 yearbefore_list2 <- map2(closures$event_date_temp2, closures$event_date_temp3,
                         ~seq(.x, .y, "day") %>% as.character) %>% 
@@ -160,19 +149,28 @@ events <- closures %>% select(event_date) %>% transmute(event_date = as.characte
   distinct() %>% flatten_chr() %>% ymd()
 
 analyst_coverage <- detail_temp3 %>%
-  select(cusip, announce_date, analyst) %>% 
-  arrange(cusip, announce_date, analyst) %>% 
-  distinct() #%>% 
-  mutate(announce_month = month(announce_date),
-         announce_year = year(announce_date)) %>% 
-  group_by(cusip, announce_year, announce_month) %>% 
-  summarise(analyst_in_month = n_distinct(analyst)) %>% 
-  ungroup() #%>% 
   mutate(inyearbeforelist = announce_date %in% yearbefore_list) %>% 
   filter(inyearbeforelist == T) %>% # require control to be "actively" covered, i.e. year before
-  group_by(cusip, announce_year_quarter) %>%
-  summarise(analyst_coverage = n_distinct(analyst)) %>%
-  ungroup()
+  select(cusip, announce_date, analyst) %>% 
+  arrange(cusip, announce_date, analyst) %>% 
+  distinct()
 
+rolling_count <- function(announce, analyst, event) {
+    if_else(announce %within% interval(event %m-% months(3), event %m-% months(3) - years(1)),
+    n_distinct(analyst), 0L)
+}
+
+t <- analyst_coverage %>% 
+  mutate(analyst_coverage = map_dbl(events, ~ map2(announce_date, analyst, rolling_count, event = .)))
+
+r <- pmap_dbl(list(analyst_coverage, ibes_did_raw$event_date), rolling_count)
+
+ibes <- ibes_did_raw %>% 
+  select(-event_year_quarter) %>% 
+  mutate(analyst_coverage = pmap_dbl(list(analyst_coverage, ibes_did_raw$event_date, ibes_did_raw$cusip), rolling_count))
 
 write_rds(ibes_did, "data/ibes_did")
+
+df <- analyst_coverage %>%
+  group_by(cusip) %>% 
+  nest()
