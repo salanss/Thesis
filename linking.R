@@ -72,7 +72,7 @@ write_rds(thirteenf_crsp_compustat_ia_merged, "data/baseline_regression_raw.rds"
 ibes_did <- read_rds("data/ibes_did")
 
 crsp_compustat_keys <- thirteenf_crsp_compustat_merged %>% 
-  select(permno, cusip, sic_code) %>% 
+  select(permno, cusip) %>% 
   distinct()
 
 did_temp1 <- ibes_did %>% 
@@ -85,29 +85,58 @@ did_temp1 <- ibes_did %>%
 events <- read_rds("data/events.rds")
 
 columns_for_summarise <- c("inst_percentage", "foreign_inst_percentage", "domestic_inst_percentage", 
-                           "market_cap", "log_market_cap", "book_to_market", "leverage", "roa", "tobin_q")
+                           "market_cap", "log_market_cap", "book_to_market", "leverage", "roa", "tobin_q", "sic_code")
 
 filter1 <- function (df, interval){
   filter(df, report_date %within% interval)
 }
 
-summarise_mean <- function (df) {
+summarise1 <- function (df) {
   df %>% 
     group_by(permno, event_date) %>% 
-    summarise_at(columns_for_summarise, mean) %>% 
-    ungroup()
+    summarise_at(columns_for_summarise, funs(mean, last)) %>% 
+    ungroup() %>% 
+    transmute(permno, event_date, 
+              sic_code = sic_code_last,
+              inst_percentage = inst_percentage_mean,
+              foreign_inst_percentage = foreign_inst_percentage_mean,
+              domestic_inst_percentage = domestic_inst_percentage_mean,
+              market_cap = market_cap_mean,
+              log_market_cap = log_market_cap_mean,
+              book_to_market = book_to_market_mean,
+              leverage = leverage_mean,
+              roa = roa_mean,
+              tobin_q = tobin_q_mean)
+}
+
+summarise2 <- function (df) {
+  df %>% 
+    group_by(permno, event_date) %>% 
+    summarise_at(columns_for_summarise, funs(mean, first)) %>% 
+    ungroup() %>% 
+    transmute(permno, event_date, 
+              sic_code = sic_code_first,
+              inst_percentage = inst_percentage_mean,
+              foreign_inst_percentage = foreign_inst_percentage_mean,
+              domestic_inst_percentage = domestic_inst_percentage_mean,
+              market_cap = market_cap_mean,
+              log_market_cap = log_market_cap_mean,
+              book_to_market = book_to_market_mean,
+              leverage = leverage_mean,
+              roa = roa_mean,
+              tobin_q = tobin_q_mean)
 }
 
 before_val <- map2(events$before_interval,
                    events$event_date,
                    ~filter1(thirteenf_crsp_compustat_merged, .x) %>% mutate(event_date = .y)) %>% 
-  map_df(~summarise_mean(.x)) %>% 
+  map_df(~summarise1(.x)) %>% 
   mutate(after = 0)
 
 after_val <- map2(events$after_interval,
                   events$event_date,
                   ~filter1(thirteenf_crsp_compustat_merged, .x) %>% mutate(event_date = .y)) %>% 
-  map_df(~summarise_mean(.x)) %>% 
+  map_df(~summarise2(.x)) %>% 
   mutate(after = 1)
 
 vals <- bind_rows(before_val, after_val) %>% 
