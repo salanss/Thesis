@@ -19,7 +19,9 @@ detail_temp1 <- detail_raw %>%
             eps_value = parse_double(VALUE),
             forecast_period_end_date = ymd(FPEDATS),
             announce_date = ymd(ANNDATS)) %>% # date when forecast was reported
-  select(-measure, -forecast_period_id) # dropped, as not of particular interest
+  select(-measure, -forecast_period_id) %>%  # dropped, as not of particular interest
+  filter(!is.na(cusip)) %>% # filter NA Cusips away, since can not be linked to other datasources
+  distinct()
 
 
 # closure events from Kelly and Ljungqvist (2012) Appendix list
@@ -70,9 +72,8 @@ detail_temp4 <- detail_temp3 %>%
   filter(yearbefore == T) %>%  # filter only analysts that actively "covers" the firm, see Derrien and Keckses (2013) p. 1411
   mutate(announce_stop_date = if_else(is.na(announce_stop_date), event_date - years(1), announce_stop_date)) %>% 
   mutate(stopped_before = announce_stop_date %within% interval(announce_date, event_date %m-% months(3))) %>%  
-  filter(stopped_before == F) %>%  # filter only firms of which analysts have not stopped before event_date (relax 3 months)
+  filter(stopped_before == F)  # filter only firms of which analysts have not stopped before event_date (relax 3 months)
                                     # otherwise endogenous "stoppings", i.e. decided to stop covering
-  filter(!is.na(cusip))
 
 treated_firms_temp1 <- detail_temp4 %>% 
   group_by(cusip, event_date) %>% 
@@ -131,20 +132,12 @@ control_firms <- bind_rows(control_firms_temp2, control_firms_temp3) %>%
   arrange(cusip, event_date)
 
 
-rolling_count <- function(df, event_date) {
-  df %>%
-    mutate(interval = interval(event_date %m-% months(3), event_date %m-% months(3) - years(1))) %>%
-    filter(announce_date %within% interval) %>%
-    summarise_(count = n_distinct(analyst))
-}
-
-
 ## identified firms to either treatment group (treated = 1) or control group (treated = 0) for each event date
 
 ibes_did_raw <- bind_rows(treated_firms, control_firms) %>% 
   arrange(cusip, event_date)
 
-## events and corresponding intervals 8-15;-3] and [+3;+15] months
+## events and corresponding intervals [-15;-3] and [+3;+15] months
 
 events <- closures %>% 
   select(event_date) %>% 
@@ -156,13 +149,13 @@ events <- closures %>%
          before_interval = interval(before_event_start, before_event_end),
          after_interval = interval(after_event_start, after_event_end))
 
+write_rds(events, "data/events.rds")
+
 before_intervals <- events$before_interval
 
 ## total analyst coverage, used for calculating number of distinct analysts
 
 analyst_coverage <- detail_temp3 %>%
-  mutate(inyearbeforelist = announce_date %in% yearbefore_list) %>% 
-  filter(inyearbeforelist == T) %>% # require control to be "actively" covered, i.e. year before
   select(cusip, announce_date, analyst) %>% 
   arrange(cusip, announce_date, analyst) %>% 
   distinct()
@@ -204,7 +197,7 @@ summarise1 <- function (df) {
 summarise2 <- function (df, fun) {
   df %>% 
     group_by(cusip, event_date) %>% 
-    summarise(result = fun(analyst)) %>% 
+    summarise(result = mean(analyst)) %>% 
     ungroup()
 }
 
@@ -212,16 +205,22 @@ before_val <- map2(events$before_interval,
                    events$event_date,
                    ~filter1(analyst_coverage, .x) %>% mutate(event_date = .y)) %>% 
   map_df(~summarise1(.x)) %>% 
-  rename(result_after = result)
+  rename(analyst_coverage = result) %>% 
+  mutate(after = 0)
 
 after_val <- map2(events$after_interval,
                    events$event_date,
                    ~filter1(analyst_coverage, .x) %>% mutate(event_date = .y)) %>% 
   map_df(~summarise1(.x)) %>% 
-  rename(result_after = result)
+  rename(analyst_coverage = result) %>% 
+  mutate(after = 1)
 
-vals <- full_join(before_val, after_val, by = c("cusip", "event_date"))
+#vals <- full_join(before_val, after_val, by = c("cusip", "event_date"))
 
+vals <- bind_rows(before_val, after_val)
 
+ibes_did <- ibes_did_raw %>% 
+  left_join(vals, by = c("cusip", "event_date", "after")) %>% 
+  filter(!is.na(analyst_coverage))
 
 write_rds(ibes_did, "data/ibes_did")
