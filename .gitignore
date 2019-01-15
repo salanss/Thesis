@@ -3,5 +3,4 @@
 .RData
 .Ruserdata
 data
-Thesis.html
-.html
+*.html
