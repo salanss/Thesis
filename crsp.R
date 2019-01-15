@@ -21,6 +21,7 @@ crsp_monthly_stock <- crsp_monthly_stock_raw %>%
             ask = abs(parse_double(ASKHI)),
             bid_ask_spread = (ask - bid)/price,
             shares_outstanding = parse_double(SHROUT)*1000, # in 1000s
+            market_cap = price * shares_outstanding,
             return = if_else(is.na(RET), parse_double(DLRET),
                              parse_double(RET)), # e.g. value "C" is converted to NA
             return_delisting = parse_double(DLRET),
