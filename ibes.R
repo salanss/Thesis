@@ -34,9 +34,7 @@ closures <- closures_raw %>%
             brokerage_name_ibes = `brokerage_name (from ibes_names)`,
             brokerage_name = `brokerage_name (from Appendix list)`,
             event_date = ymd(event_date),
-            event_date_temp1 = event_date - years(1),
-            event_date_temp2 = event_date %m-% months(3) - years(1),
-            event_date_temp3 = event_date %m-% months(3))
+            event_date_temp1 = event_date %m-% months(12))
 
 brokerage_codes_list <- list(closures$brokerage_code) %>% 
   flatten_chr()
