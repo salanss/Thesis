@@ -24,10 +24,10 @@ rnm <- function(df, ia_meas, dep_meas) {
 }
 
 model_function <- function(df, ia_meas, dep_meas) {
-  f <- dep_measure ~ ia_measure + log_market_cap  + leverage +
-    roa + tobin_q|year + sic_code|0|year+sic_code
+  f <- dep_measure ~ ia_measure + log_market_cap  + book_to_market + 
+    leverage + roa + tobin_q|year + sic_code|0|year+sic_code
   f[[2]] <- sym(dep_meas)
-  f[[3]][[2]][[2]][[2]][[2]][[2]][[2]][[2]] <- sym(ia_meas)
+  f[[3]][[2]][[2]][[2]][[2]][[2]][[2]][[2]][[2]] <- sym(ia_meas)
   felm(f, data = df)
 }
 
@@ -35,15 +35,7 @@ baseline_names <- mutate(baseline_regression,
                          data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
                          model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
 
-
-models <- baseline_regression %>%
-  transmute(model = map(data, model_function))
-
-models
-
-l <- models[[1]]
-
-stargazer(baseline_names$model, title = "Baseline regression results (H1)", out = ".html")
+stargazer(baseline_names$model, title = "Baseline regression results (H1)", out = "Baseline_results.html")
 
 models_list <- models %>% 
   mutate(models_list = map2(data, models, list))
@@ -57,3 +49,50 @@ lm_model2 <- felm(foreign_inst_percentage ~ pin_dy + log_market_cap  +
                    leverage + roa + tobin_q, data = baseline_regression_raw)
 
 stargazer(lm_model, lm_model2, title = "Baseline regression results (H1)", out = ".html")
+
+
+## difference-in-differences regressions (did)
+
+did_regression_raw <- read_rds("data/did_regression_raw.rds")
+
+did_regression <- did_regression_raw %>% 
+  mutate(year = year(event_date),
+         log_market_cap = log(market_cap)) # log_market_cap = mean(log_market_cap, win_e.g. = [-15;-3]) or 
+                                           # log_market_cap = log(mean(market_cap), win_e.g. = [-15;-3])
+
+# did_regression <- did_regression_raw %>% 
+#   gather(dep_measure_name, dep_measure, inst_percentage:domestic_inst_percentage) %>% 
+#   filter_all(all_vars(!is.na(.))) %>% 
+#   group_by(dep_measure_name) %>% 
+#   nest()
+
+did_function <- function (df, dep_meas) {
+  f <- dep_measure ~ treated + after + treated * after + log_market_cap + book_to_market + 
+    leverage + roa + tobin_q |year + sic_code|0|year+sic_code
+  f[[2]] <- sym(dep_meas)
+  felm(f, data = df)
+}
+
+rnm_did <- function(df, dep_meas) {
+  rnm_list <- set_names(c("dep_measure"), syms(c(dep_meas)))
+  rename(df, !!!rnm_list)
+}
+
+did_names <- mutate(did_regression,
+                         data_named = pmap(list(data, dep_measure_name), rnm_did),
+                         model = pmap(list(data_named, dep_measure_name), did_function))
+
+stargazer(did_names$model, title = "Difference-in-differences regression results (H2)", 
+          out = "DiD H2 results.html")
+
+did_model1 <- felm(foreign_inst_percentage ~ ptreated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year+sic_code, data = did_regression)
+
+did_model1 <- felm(domestic_inst_percentage ~ ptreated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year+sic_code, data = did_regression)
+
+did_model1 <- felm(inst_percentage ~ ptreated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year+sic_code, data = did_regression)
+
+
+stargazer(did_model, did_model1, title = "Baseline regression results (H1)", out = ".html")
