@@ -60,39 +60,15 @@ did_regression <- did_regression_raw %>%
          log_market_cap = log(market_cap)) # log_market_cap = mean(log_market_cap, win_e.g. = [-15;-3]) or 
                                            # log_market_cap = log(mean(market_cap), win_e.g. = [-15;-3])
 
-# did_regression <- did_regression_raw %>% 
-#   gather(dep_measure_name, dep_measure, inst_percentage:domestic_inst_percentage) %>% 
-#   filter_all(all_vars(!is.na(.))) %>% 
-#   group_by(dep_measure_name) %>% 
-#   nest()
-
-did_function <- function (df, dep_meas) {
-  f <- dep_measure ~ treated + after + treated * after + log_market_cap + book_to_market + 
-    leverage + roa + tobin_q |year + sic_code|0|year+sic_code
-  f[[2]] <- sym(dep_meas)
-  felm(f, data = df)
-}
-
-rnm_did <- function(df, dep_meas) {
-  rnm_list <- set_names(c("dep_measure"), syms(c(dep_meas)))
-  rename(df, !!!rnm_list)
-}
-
-did_names <- mutate(did_regression,
-                         data_named = pmap(list(data, dep_measure_name), rnm_did),
-                         model = pmap(list(data_named, dep_measure_name), did_function))
-
-stargazer(did_names$model, title = "Difference-in-differences regression results (H2)", 
-          out = "DiD H2 results.html")
-
-did_model1 <- felm(foreign_inst_percentage ~ ptreated + after + treated * after + log_market_cap + book_to_market + 
+did_model1 <- felm(foreign_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
                      leverage + roa + tobin_q |year + sic_code|0|year+sic_code, data = did_regression)
 
-did_model1 <- felm(domestic_inst_percentage ~ ptreated + after + treated * after + log_market_cap + book_to_market + 
+did_model2 <- felm(domestic_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
                      leverage + roa + tobin_q |year + sic_code|0|year+sic_code, data = did_regression)
 
-did_model1 <- felm(inst_percentage ~ ptreated + after + treated * after + log_market_cap + book_to_market + 
+did_model3 <- felm(inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
                      leverage + roa + tobin_q |year + sic_code|0|year+sic_code, data = did_regression)
 
+did_list <- list(did_model1, did_model2, did_model3)
 
-stargazer(did_model, did_model1, title = "Baseline regression results (H1)", out = ".html")
+stargazer(did_list, title = "Difference-in-differences regression results (H2)", out = "DiD H2 results.html")
