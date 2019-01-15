@@ -87,7 +87,6 @@ treated_firms_temp2 <- detail_temp4 %>%
   ungroup()
 
 treated_firms <- bind_rows(treated_firms_temp1, treated_firms_temp2) %>% 
-  mutate(event_year_quarter = quarter(event_date, with_year = T)) %>% 
   arrange(cusip, event_date)
 
 
@@ -101,7 +100,7 @@ yearbefore_list <- map2(closures$event_date_temp1, closures$event_date,
 all_firms_temp1 <- detail_temp3 %>% 
   mutate(inyearbeforelist = announce_date %in% yearbefore_list) %>% 
   filter(inyearbeforelist == T) %>% # require control to be "actively" covered, i.e. year before
-  group_by(cusip) %>% 
+  group_by(cusip, announce_date) %>% 
   summarise(k = 1) %>% 
   ungroup()
 
@@ -111,13 +110,16 @@ closures_temp1 <- closures %>%
 
 all_firms <- inner_join(all_firms_temp1, closures_temp1, by = 'k') %>% 
   select(-k) %>%
-  mutate(event_year_quarter = quarter(event_date, with_year = T)) %>% 
   distinct()
 
 control_firms_temp1 <- all_firms %>% 
+  mutate(yearbefore = announce_date %within% interval(event_date %m-% months(12), event_date)) %>%
+  filter(yearbefore == T) %>% # potential controls have to be similarly actively covered year before
   anti_join(treated_firms, by = c("cusip", "event_date"))
 
 control_firms_temp2 <- control_firms_temp1 %>%
+  select(-announce_date, -yearbefore) %>% 
+  distinct() %>% 
   mutate(treated = 0,
          after = 0)
 
@@ -128,8 +130,6 @@ control_firms_temp3 <- control_firms_temp2 %>%
 control_firms <- bind_rows(control_firms_temp2, control_firms_temp3) %>% 
   arrange(cusip, event_date)
 
-ibes_did_raw <- bind_rows(treated_firms, control_firms) %>% 
-  arrange(cusip, event_date)
 
 rolling_count <- function(df, event_date) {
   df %>%
@@ -138,15 +138,27 @@ rolling_count <- function(df, event_date) {
     summarise_(count = n_distinct(analyst))
 }
 
-t <- pmap_chr(list(analyst_coverage, after = T, events, analyst_coverage$cusip), rolling_count)
 
-yearbefore_list2 <- map2(closures$event_date_temp2, closures$event_date_temp3,
-                        ~seq(.x, .y, "day") %>% as.character) %>% 
-  flatten_chr() %>% 
-  ymd()
+## identified firms to either treatment group (treated = 1) or control group (treated = 0) for each event date
 
-events <- closures %>% select(event_date) %>% transmute(event_date = as.character(event_date)) %>% 
-  distinct() %>% flatten_chr() %>% ymd()
+ibes_did_raw <- bind_rows(treated_firms, control_firms) %>% 
+  arrange(cusip, event_date)
+
+## events and corresponding intervals 8-15;-3] and [+3;+15] months
+
+events <- closures %>% 
+  select(event_date) %>% 
+  distinct() %>% 
+  mutate(before_event_start = event_date %m-% months(3) %m-% months(12),
+         before_event_end = event_date %m-% months(3),
+         after_event_start = event_date %m+% months(3),
+         after_event_end = event_date %m+% months(3) %m+% months(12),
+         before_interval = interval(before_event_start, before_event_end),
+         after_interval = interval(after_event_start, after_event_end))
+
+before_intervals <- events$before_interval
+
+## total analyst coverage, used for calculating number of distinct analysts
 
 analyst_coverage <- detail_temp3 %>%
   mutate(inyearbeforelist = announce_date %in% yearbefore_list) %>% 
@@ -155,22 +167,61 @@ analyst_coverage <- detail_temp3 %>%
   arrange(cusip, announce_date, analyst) %>% 
   distinct()
 
-rolling_count <- function(announce, analyst, event) {
-    if_else(announce %within% interval(event %m-% months(3), event %m-% months(3) - years(1)),
-    n_distinct(analyst), 0L)
+#### calculating distinct analysts during the given events-intervals, for each event and for each stock (cusip)
+
+## manual way (first event example)
+
+analysts_before <- analyst_coverage %>% 
+  filter(announce_date %within% interval(events$before_event_start[1], events$before_event_end[1])) %>% 
+  mutate(event_date = events$event_date[1],
+         after = 0) %>% 
+  group_by(cusip, event_date, after) %>% 
+  summarise(distinct_analysts = n_distinct(analyst))
+
+analysts_after <- analyst_coverage %>% 
+  filter(announce_date %within% interval(events$after_event_start[1], events$after_event_end[1])) %>% 
+  mutate(event_date = events$event_date[1],
+         after = 1) %>% 
+  group_by(cusip, event_date, after) %>% 
+  summarise(distinct_analysts = n_distinct(analyst))
+
+analysts <- bind_rows(ibes_before, ibes_after) %>% 
+  arrange(cusip, event_date)
+
+## elegant way
+
+filter1 <- function (df, interval){
+  filter(df, announce_date %within% interval)
 }
 
-t <- analyst_coverage %>% 
-  mutate(analyst_coverage = map_dbl(events, ~ map2(announce_date, analyst, rolling_count, event = .)))
+summarise1 <- function (df) {
+  df %>% 
+    group_by(cusip, event_date) %>% 
+    summarise(result = n_distinct(analyst)) %>% 
+    ungroup()
+}
 
-r <- pmap_dbl(list(analyst_coverage, ibes_did_raw$event_date), rolling_count)
+summarise2 <- function (df, fun) {
+  df %>% 
+    group_by(cusip, event_date) %>% 
+    summarise(result = fun(analyst)) %>% 
+    ungroup()
+}
 
-ibes <- ibes_did_raw %>% 
-  select(-event_year_quarter) %>% 
-  mutate(analyst_coverage = pmap_dbl(list(analyst_coverage, ibes_did_raw$event_date, ibes_did_raw$cusip), rolling_count))
+before_val <- map2(events$before_interval,
+                   events$event_date,
+                   ~filter1(analyst_coverage, .x) %>% mutate(event_date = .y)) %>% 
+  map_df(~summarise1(.x)) %>% 
+  rename(result_after = result)
+
+after_val <- map2(events$after_interval,
+                   events$event_date,
+                   ~filter1(analyst_coverage, .x) %>% mutate(event_date = .y)) %>% 
+  map_df(~summarise1(.x)) %>% 
+  rename(result_after = result)
+
+vals <- full_join(before_val, after_val, by = c("cusip", "event_date"))
+
+
 
 write_rds(ibes_did, "data/ibes_did")
-
-df <- analyst_coverage %>%
-  group_by(cusip) %>% 
-  nest()
