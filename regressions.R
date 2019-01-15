@@ -61,14 +61,26 @@ did_regression <- did_regression_raw %>%
                                            # log_market_cap = log(mean(market_cap), win_e.g. = [-15;-3])
 
 did_model1 <- felm(foreign_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year+sic_code, data = did_regression)
+                     leverage + roa + tobin_q |year + permno|0|year+permno, data = did_regression)
 
 did_model2 <- felm(domestic_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year+sic_code, data = did_regression)
+                     leverage + roa + tobin_q |year + permno|0|year+permno, data = did_regression)
 
 did_model3 <- felm(inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year+sic_code, data = did_regression)
+                     leverage + roa + tobin_q |year + permno|0|year+permno, data = did_regression)
 
 did_list <- list(did_model1, did_model2, did_model3)
 
 stargazer(did_list, title = "Difference-in-differences regression results (H2)", out = "DiD H2 results.html")
+
+library(ggplot2)
+data <- did_regression
+fpool <- as.factor(utown$pool)
+futown <- as.factor(utown$utown)
+event_date_year <- as.factor(data$year)
+# treated <- as.factor(data$treated)
+# after <- as.factor(data$after)
+plot <- ggplot(data = data) + 
+  geom_point(mapping = aes(x = treated*after, y = foreign_inst_percentage, 
+                           color = treated))
+plot
