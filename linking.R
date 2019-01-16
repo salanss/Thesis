@@ -82,18 +82,39 @@ did_temp1 <- ibes_did %>%
 # retrieve data from thirteenf_crsp_compustat-data and do the interval filtering [-15;-3] and [3;15] for all measures
 # and link that to ibes firms (treated, control, before and after events)
 
-events <- read_rds("data/events.rds")
+closures <- read_rds("data/closures.rds")
 
 columns_for_summarise <- c("inst_percentage", "foreign_inst_percentage", "domestic_inst_percentage", 
                            "market_cap", "log_market_cap", "book_to_market", "leverage", "roa", "tobin_q", "sic_code")
 
-filter1 <- function (df, interval){
-  filter(df, report_date %within% interval)
+year_index <- c(1, 2, 3, 4, 5)
+
+before_interval_fun <- function (event_date, year_index) {
+  i <- 3 + (year_index - 1) * 12
+  j <- 3 + (year_index) * 12
+  df <- tibble(event_date = event_date,
+               interval = interval(event_date %m-% months(j),event_date %m-% months(i)),
+               year_index = year_index)
+  df
+}
+
+after_interval_fun <- function (event_date, year_index) {
+  i <- 3 + (year_index - 1) * 12
+  j <- 3 + (year_index) * 12
+  df <- tibble(event_date = event_date,
+               interval = interval(event_date %m+% months(i),event_date %m+% months(j)),
+               year_index = year_index)
+  df
+}
+
+filter1 <- function (df_measures, df_events){
+  interval <- df_events$interval  
+  filter(df_measures, report_date %within% interval)
 }
 
 summarise1 <- function (df) {
   df %>% 
-    group_by(permno, event_date) %>% 
+    group_by(permno, event_date, year_index) %>% 
     summarise_at(columns_for_summarise, funs(mean, last)) %>% 
     ungroup() %>% 
     transmute(permno, event_date, 
@@ -109,35 +130,43 @@ summarise1 <- function (df) {
               tobin_q = tobin_q_mean)
 }
 
-summarise2 <- function (df) {
-  df %>% 
-    group_by(permno, event_date) %>% 
-    summarise_at(columns_for_summarise, funs(mean, first)) %>% 
-    ungroup() %>% 
-    transmute(permno, event_date, 
-              sic_code = sic_code_first,
-              inst_percentage = inst_percentage_mean,
-              foreign_inst_percentage = foreign_inst_percentage_mean,
-              domestic_inst_percentage = domestic_inst_percentage_mean,
-              market_cap = market_cap_mean,
-              log_market_cap = log_market_cap_mean,
-              book_to_market = book_to_market_mean,
-              leverage = leverage_mean,
-              roa = roa_mean,
-              tobin_q = tobin_q_mean)
-}
+# map every before_interval (5) to every distinct event_date (20) and flatten to list of 100
+# do the filtering for list of data frames based on intervals and add columns event_date and year_index
+# do the summarising for the measure of interest (number of distinct analysts in this case)
+# and set corresponding after value (before = 0, after = 1)
 
-before_val <- map2(events$before_interval,
-                   events$event_date,
-                   ~filter1(thirteenf_crsp_compustat_merged, .x) %>% mutate(event_date = .y)) %>% 
+before_val <- map(year_index, ~map(closures$event_date, ~before_interval_fun(.x, .y), .y = .x)) %>%
+  flatten() %>% 
+  map(~filter1(thirteenf_crsp_compustat_merged, .x) %>%
+        mutate(event_date = .x$event_date,
+               year_index = .x$year_index)) %>% 
   map_df(~summarise1(.x)) %>% 
-  mutate(after = 0)
+  mutate(after = 0,
+         year_index = (-1)*year_index) %>% 
+  arrange(cusip, event_date, year_index)
 
-after_val <- map2(events$after_interval,
-                  events$event_date,
-                  ~filter1(thirteenf_crsp_compustat_merged, .x) %>% mutate(event_date = .y)) %>% 
-  map_df(~summarise2(.x)) %>% 
-  mutate(after = 1)
+after_val <- map(year_index, ~map(closures$event_date, 
+                                  ~after_interval_fun(.x, .y), .y = .x)) %>% 
+  flatten() %>% 
+  map(~filter1(thirteenf_crsp_compustat_merged, .x) %>%
+        mutate(event_date = .x$event_date,
+               year_index = .x$year_index)) %>% 
+  map_df(~summarise1(.x)) %>% 
+  mutate(after = 1) %>% 
+  arrange(cusip, event_date, year_index)
+
+
+# before_val <- map2(events$before_interval,
+#                    events$event_date,
+#                    ~filter1(thirteenf_crsp_compustat_merged, .x) %>% mutate(event_date = .y)) %>% 
+#   map_df(~summarise1(.x)) %>% 
+#   mutate(after = 0)
+# 
+# after_val <- map2(events$after_interval,
+#                   events$event_date,
+#                   ~filter1(thirteenf_crsp_compustat_merged, .x) %>% mutate(event_date = .y)) %>% 
+#   map_df(~summarise2(.x)) %>% 
+#   mutate(after = 1)
 
 vals <- bind_rows(before_val, after_val) %>% 
   arrange(permno, event_date, after)
