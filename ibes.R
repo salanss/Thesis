@@ -137,17 +137,17 @@ ibes_did_raw <- bind_rows(treated_firms, control_firms) %>%
 
 ## events and corresponding intervals [-15;-3] and [+3;+15] months (e.g.)
 
-# events <- closures %>% 
-#   select(event_date) %>% 
-#   distinct() %>% 
-#   mutate(before_interval = interval(event_date %m-% months(39),event_date %m-% months(3)),
-#          after_interval = interval(event_date %m+% months(3), event_date %m+% months(39)),
-#          before_zero_to_one_interval = interval(event_date %m-% months(15), event_date %m-% months(3)),
-#          before_one_to_two_interval = interval(event_date %m-% months(27), event_date %m-% months(15)),
-#          before_two_to_three_interval = interval(event_date %m-% months(39), event_date %m-% months(27)),
-#          after_zero_to_one_interval = interval(event_date %m+% months(3), event_date %m+% months(15)),
-#          after_one_to_two_interval = interval(event_date %m+% months(15), event_date %m+% months(27)),
-#          after_two_to_three_interval = interval(event_date %m+% months(27), event_date %m+% months(39)))
+events <- closures %>%
+  select(event_date) %>%
+  distinct() %>%
+  mutate(before_interval = interval(event_date %m-% months(15),event_date %m-% months(3)),
+         after_interval = interval(event_date %m+% months(3), event_date %m+% months(15)),
+         before_zero_to_one_interval = interval(event_date %m-% months(15), event_date %m-% months(3)),
+         before_one_to_two_interval = interval(event_date %m-% months(27), event_date %m-% months(15)),
+         before_two_to_three_interval = interval(event_date %m-% months(39), event_date %m-% months(27)),
+         after_zero_to_one_interval = interval(event_date %m+% months(3), event_date %m+% months(15)),
+         after_one_to_two_interval = interval(event_date %m+% months(15), event_date %m+% months(27)),
+         after_two_to_three_interval = interval(event_date %m+% months(27), event_date %m+% months(39)))
 
 # events <- bind_rows(events1, events2, events3)
 
@@ -169,55 +169,64 @@ analyst_coverage <- detail_temp3 %>%
 
 ## elegant way
 
-year_index <- c(1, 2, 3)
+year_index <- c(1, 2, 3, 4, 5)
 
 before_interval_fun <- function (event_date, year_index) {
   i <- 3 + (year_index - 1) * 12
   j <- 3 + (year_index) * 12
-  interval <- interval(event_date %m-% months(j),event_date %m-% months(i))
-  interval
+  #interval <- interval(event_date %m-% months(j),event_date %m-% months(i))
+  df <- tibble(event_date = event_date,
+               interval = interval(event_date %m-% months(j),event_date %m-% months(i)),
+               year_index = year_index)
+  df
 }
 
-periods_to_event<- function(announce_date, event_date){
-  # (-3, 3, NA)
-  
-  
-}
+# periods_to_event<- function(announce_date, event_date){
+#   # (-3, 3, NA)
+#   
+# }
 
-# filter1 <- function (df, interval){
-filter1 <- function (df, event_date){
-  mutate(df, t = periods_to_event(announce_date, event_date)) %>% 
-    filter(!is.na(t))
-  # filter(df, announce_date %within% interval)
+filter1 <- function (df, df2){
+  #filter1 <- function (df, event_date){
+  #mutate(df, t = periods_to_event(announce_date, event_date)) %>% 
+  #filter(!is.na(t))
+  interval <- df2$interval  
+  filter(df, announce_date %within% interval)
+}
+ 
+filter1 <- function (df, interval){
+  #mutate(df, t = periods_to_event(announce_date, event_date)) %>% 
+  #filter(!is.na(t))
+  filter(df, announce_date %within% interval)
 }
 
 summarise1 <- function (df) {
   df %>% 
-    group_by(cusip, event_date) %>% 
+    group_by(cusip, event_date, year_index) %>% 
     summarise(result = n_distinct(analyst)) %>% 
     ungroup()
 }
 
-t <- map(events$event_date, ~before_interval_fun(.x, year_index))
-t[[1]][[3]]
+str(before_val)
 
-p <- map(events$event_date, ~before_interval_fun(.x, year_index)) %>% 
-  map2(events$event_date, ~filter1(analyst_coverage, .x) %>% mutate(event_date = .y)) 
-
-p[[2]]
-
-before_val <- map(events$event_date, ~before_interval_fun(.x, year_index)) %>% 
-  map2(events$event_date, ~filter1(analyst_coverage, .x) %>% mutate(event_date = .y)) %>% 
+before_val <- map(year_index, ~map(events$event_date, ~before_interval_fun(.x, .y), .y = .x)) %>% 
+  flatten() %>% 
+  map(~filter1(analyst_coverage, .x) %>%
+        mutate(event_date = .x$event_date,
+               year_index = .x$year_index)) %>% 
   map_df(~summarise1(.x)) %>% 
   rename(analyst_coverage = result) %>% 
-  mutate(after = 0)
+  mutate(after = 0) %>% 
+  arrange(cusip, event_date, year_index)
 
 after_val <- map2(events$after_interval,
                    events$event_date,
-                   ~filter1(analyst_coverage, .x) %>% mutate(event_date = .y)) %>% 
+                   ~filter1(analyst_coverage, .x) %>% mutate(event_date = .y)) #%>% 
   map_df(~summarise1(.x)) %>% 
   rename(analyst_coverage = result) %>% 
   mutate(after = 1)
+  
+after_val[[1]]  
 
 #vals <- full_join(before_val, after_val, by = c("cusip", "event_date"))
 
