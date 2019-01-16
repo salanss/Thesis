@@ -151,7 +151,7 @@ ibes_did_raw <- bind_rows(treated_firms, control_firms) %>%
 
 # events <- bind_rows(events1, events2, events3)
 
-write_rds(events, "data/events.rds")
+#write_rds(events, "data/events.rds")
 
 # before_intervals <- events %>% 
 #   select(before_zero_to_one_interval, before_zero_to_two_interval, before_zero_to_three_interval) %>% 
@@ -178,8 +178,17 @@ before_interval_fun <- function (event_date, year_index) {
   interval
 }
 
-filter1 <- function (df, interval){
-  filter(df, announce_date %within% interval)
+periods_to_event<- function(announce_date, event_date){
+  # (-3, 3, NA)
+  
+  
+}
+
+# filter1 <- function (df, interval){
+filter1 <- function (df, event_date){
+  mutate(df, t = periods_to_event(announce_date, event_date)) %>% 
+    filter(!is.na(t))
+  # filter(df, announce_date %within% interval)
 }
 
 summarise1 <- function (df) {
