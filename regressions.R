@@ -37,25 +37,16 @@ baseline_names <- mutate(baseline_regression,
 
 stargazer(baseline_names$model, title = "Baseline regression results (H1)", out = "Baseline_results.html")
 
-models_list <- models %>% 
-  mutate(models_list = map2(data, models, list))
-
-
-lm_model <- felm(foreign_inst_percentage ~ pin_dy_adj + log_market_cap  + 
-                     leverage + roa + tobin_q, data = baseline_regression_raw)
-
-
-lm_model2 <- felm(foreign_inst_percentage ~ pin_dy + log_market_cap  + 
-                   leverage + roa + tobin_q, data = baseline_regression_raw)
-
-stargazer(lm_model, lm_model2, title = "Baseline regression results (H1)", out = ".html")
-
 
 ## difference-in-differences regressions (did)
 
 did_regression_raw <- read_rds("data/did_regression_raw.rds")
 
+summary(did_regression_raw)
+
 did_regression <- did_regression_raw %>% 
+  filter_all(all_vars(!is.infinite(.))) %>% 
+  filter_all(all_vars(!is.na(.))) %>% 
   mutate(year = year(event_date),
          log_market_cap = log(market_cap)) # log_market_cap = mean(log_market_cap, win_e.g. = [-15;-3]) or 
                                            # log_market_cap = log(mean(market_cap), win_e.g. = [-15;-3])
@@ -74,13 +65,24 @@ did_list <- list(did_model1, did_model2, did_model3)
 stargazer(did_list, title = "Difference-in-differences regression results (H2)", out = "DiD H2 results.html")
 
 library(ggplot2)
-data <- did_regression
-fpool <- as.factor(utown$pool)
-futown <- as.factor(utown$utown)
-event_date_year <- as.factor(data$year)
-# treated <- as.factor(data$treated)
-# after <- as.factor(data$after)
-plot <- ggplot(data = data) + 
-  geom_point(mapping = aes(x = treated*after, y = foreign_inst_percentage, 
-                           color = treated))
-plot
+
+data <- did_regression %>% 
+  filter(foreign_inst_percentage <= 1 & foreign_inst_percentage >= 0) %>% 
+  mutate(treated = if_else(treated == 1, "treated", "control")) %>% 
+  group_by(treated, year_index) %>% 
+  summarise(foreign_inst_percentage = mean(foreign_inst_percentage)) %>% 
+  ungroup()
+
+ggplot(data, aes(year_index, foreign_inst_percentage, group = treated, color = treated)) + 
+  geom_line() +
+  geom_vline(xintercept=0) +
+  theme_classic()
+
+d <- baseline_regression_raw %>% 
+  filter(inst_percentage <= 1 & inst_percentage >= 0) %>% 
+  group_by(year) %>% 
+  summarise(inst_percentage = mean(inst_percentage))
+
+ggplot(d, aes(year, inst_percentage)) + geom_line() + theme_classic()
+
+       
