@@ -2,6 +2,7 @@ library(tidyverse)
 library(readr)
 library(lubridate)
 
+
 # annual data
 
 compustat_annual_raw <- read_tsv("data/crsp_compustat_merged_annual.txt", col_types = cols(.default = "c"))
@@ -92,6 +93,7 @@ compustat_quarter <- compustat_quarter_raw %>%
             gics_group = ggroup,
             gics_industry = gind,
             gics_subindustry = gsubind)
+  
 
 compustat_quarter_final <- compustat_quarter %>% 
   mutate(market_cap = price_close_calendar * shares_outstanding,
