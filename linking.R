@@ -85,9 +85,13 @@ did_temp1 <- ibes_did %>%
 closures <- read_rds("data/closures.rds")
 
 columns_for_summarise <- c("inst_percentage", "foreign_inst_percentage", "domestic_inst_percentage", 
-                           "market_cap", "log_market_cap", "book_to_market", "leverage", "roa", "tobin_q", "sic_code")
+                           "market_cap", "log_market_cap", "book_to_market", "leverage", "roa", "tobin_q")
+
+columns_for_summarise <- c("foreign_inst_percentage")
 
 year_index <- c(1, 2, 3, 4, 5)
+
+#year_index <- c(1)
 
 before_interval_fun <- function (event_date, year_index) {
   i <- 3 + (year_index - 1) * 12
@@ -115,19 +119,8 @@ filter1 <- function (df_measures, df_events){
 summarise1 <- function (df) {
   df %>% 
     group_by(permno, event_date, year_index) %>% 
-    summarise_at(columns_for_summarise, funs(mean, last)) %>% 
-    ungroup() %>% 
-    transmute(permno, event_date, 
-              sic_code = sic_code_last,
-              inst_percentage = inst_percentage_mean,
-              foreign_inst_percentage = foreign_inst_percentage_mean,
-              domestic_inst_percentage = domestic_inst_percentage_mean,
-              market_cap = market_cap_mean,
-              log_market_cap = log_market_cap_mean,
-              book_to_market = book_to_market_mean,
-              leverage = leverage_mean,
-              roa = roa_mean,
-              tobin_q = tobin_q_mean)
+    summarise_at(columns_for_summarise, funs(mean(., na.rm = TRUE))) %>% 
+    ungroup()
 }
 
 # map every before_interval (5) to every distinct event_date (20) and flatten to list of 100
@@ -143,7 +136,7 @@ before_val <- map(year_index, ~map(closures$event_date, ~before_interval_fun(.x,
   map_df(~summarise1(.x)) %>% 
   mutate(after = 0,
          year_index = (-1)*year_index) %>% 
-  arrange(cusip, event_date, year_index)
+  arrange(permno, event_date, year_index)
 
 after_val <- map(year_index, ~map(closures$event_date, 
                                   ~after_interval_fun(.x, .y), .y = .x)) %>% 
@@ -153,7 +146,7 @@ after_val <- map(year_index, ~map(closures$event_date,
                year_index = .x$year_index)) %>% 
   map_df(~summarise1(.x)) %>% 
   mutate(after = 1) %>% 
-  arrange(cusip, event_date, year_index)
+  arrange(permno, event_date, year_index)
 
 
 # before_val <- map2(events$before_interval,
@@ -172,6 +165,7 @@ vals <- bind_rows(before_val, after_val) %>%
   arrange(permno, event_date, after)
 
 did <- did_temp1 %>% 
-  inner_join(vals, by = c("permno", "event_date", "after"))
+  inner_join(vals, by = c("permno", "event_date", "after", "year_index")) %>% 
+  distinct()
 
 write_rds(did, "data/did_regression_raw.rds")
