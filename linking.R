@@ -1,35 +1,68 @@
 library(tidyverse)
 library(readr)
 library(lubridate)
+library(robustHD)
 
 # baseline linking
 
-thirteenf <- read_rds("data/13f_output.rds") %>% 
-  mutate(report_date = ceiling_date(report_date, unit = "month") - days(1)) %>% 
-  select(-institutional_ownership_percentage, -foreign_institutional_ownership_percentage, 
-         -domestic_institutional_ownership_percentage) %>% 
-  filter(!(is.na(foreign_institutional_ownership_shares))) %>% 
-  filter(!(is.na(cusip))) %>% 
-  distinct()
+thirteenf <- read_rds("data/13f_output.rds") 
+thirteenf_institutionals_quarterly <- read_rds("data/13f_institutionals_quarterly.rds") %>% 
+  transmute(report_date,
+            total_institutions = institutional_numbers)
 
-crsp_monthly_stock <- read_rds("data/crsp_monthly_stock.rds")
+thirteenf_merged <- thirteenf %>%
+  left_join(thirteenf_institutionals_quarterly, by = "report_date") %>% 
+  mutate(report_date = ceiling_date(report_date, unit = "month") - days(1))
+
+crsp_quarter_stock <- read_rds("data/crsp_quarter_stock.rds")
 
 compustat_quarter <- read_rds("data/compustat_quarter_final.rds") %>% 
   mutate(datadate = ceiling_date(datadate, unit = "month") - days(1)) # sanity check
 
 information_asymmetry_measures <- read_rds("data/information_asymmetry_measures.rds")
 
-thirteenf_crsp_merged <- thirteenf %>%
-  inner_join(crsp_monthly_stock, by = c("cusip" = "ncusip", "report_date" = "date"))
+thirteenf_crsp_merged <- thirteenf_merged %>%
+  left_join(crsp_quarter_stock, by = c("permno", "report_date" = "quarter_date"))
+
+thirteenf_crsp_not_merged <- crsp_quarter_stock %>% 
+  anti_join(thirteenf_merged, by = c("permno")) %>% 
+  filter(quarter_date >= ymd(19971231)) %>% 
+  mutate(report_date = quarter_date,
+         institutional_ownership_shares = 0,
+         foreign_institutional_ownership_shares = 0,
+         domestic_institutional_ownership_shares = 0,
+         institutional_numbers = 0,
+         foreign_institutional_numbers = 0,
+         domestic_institutional_numbers = 0) %>% 
+  select(-quarter_date) %>% 
+  left_join(thirteenf_institutionals_quarterly, by = "report_date")
+
+thirteenf_crsp <- bind_rows(thirteenf_crsp_merged, thirteenf_crsp_not_merged) %>% 
+  mutate(inst_ownership_percentage = if_else(shares_outstanding_adjusted > 0, 
+                                             institutional_ownership_shares / shares_outstanding_adjusted, NA_real_),
+         foreign_ownership_percentage = if_else(shares_outstanding_adjusted > 0, 
+                                                foreign_institutional_ownership_shares / shares_outstanding_adjusted, NA_real_),
+         domestic_ownership_percentage = if_else(shares_outstanding_adjusted > 0, 
+                                                 domestic_institutional_ownership_shares / shares_outstanding_adjusted, NA_real_),
+         inst_breadth = institutional_numbers / total_institutions,
+         foreign_breadth = foreign_institutional_numbers / total_institutions,
+         domestic_breadth = domestic_institutional_numbers / total_institutions) %>% 
+  filter(!is.na(foreign_ownership_percentage))
+
+thirteenf_crsp2 <- thirteenf_crsp %>% 
+  mutate(foreign_ownership_percentage = winsorize(foreign_ownership_percentage, prob = 0.99))
+
+
+
+summary(thirteenf_crsp2)
 
 thirteenf_crsp_compustat_merged <- thirteenf_crsp_merged %>% 
   inner_join(compustat_quarter, by = c("permno", "report_date" = "datadate")) %>% 
   transmute(report_date = report_date,
             year = year(report_date),
             permno = permno,
-            cusip = cusip,
             sic_code = if_else(sic_code.x == "0" | is.na(sic_code.x) == T, sic_code.y, sic_code.x),
-            shares_outstanding = shares_outstanding.y, #crsp 
+            shares_outstanding_adjusted = shares_outstanding_adjusted, #crsp 
                                               # coalesce(shares_outstanding.x, shares_outstanding.y, shares_outstanding)
             institutional_ownership_shares = institutional_ownership_shares,
             foreign_institutional_ownership_shares = foreign_institutional_ownership_shares,
