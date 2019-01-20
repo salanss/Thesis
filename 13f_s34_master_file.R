@@ -14,7 +14,7 @@ df_institutions <- df_institutions_raw %>%
             country = country,
             mgrno = mgrno,
             manager = mgrname) %>% 
-  filter(report_date >= ymd(19971231)) %>% 
+  filter(file_date >= ymd(19970630)) %>% 
   group_by(mgrno) %>% 
   fill(country, .direction = "down") %>% 
   fill(country, .direction = "up") %>% 
@@ -41,13 +41,14 @@ write_feather(df_holdings, "data/13f_holdings.feather")
 
 
 df_institutions <- read_rds("data/13f_institutions.rds") %>% 
-  distinct()
+  distinct() 
 
 df <- read_feather("data/13f_holdings.feather") %>% 
+  filter(file_date >= ymd(19971231)) %>% 
   distinct()
 
 df_temp1 <- df %>% 
-  left_join(df_institutions, by = c("mgrno", "file_date"))
+  right_join(df_institutions, by = c("mgrno", "file_date"))
 
 write_feather(df_temp1, "data/13f_masterfile_merged.feather")
 
@@ -61,24 +62,47 @@ df_temp2 <- read_feather("data/13f_masterfile_merged.feather") %>%
 
 ## crsp link
 
-crsp_quarter_stock <- read_rds("data/crsp_quarter_stock.rds") %>% 
+crsp_quarter_stock_link <- read_rds("data/crsp_quarter_stock.rds") %>% 
   select(permno, ncusip) %>% 
   distinct()
 
+crsp_quarter_stock_link2 <- read_rds("data/crsp_quarter_stock.rds") %>% 
+  select(permno, quarter_date, cumulative_shares_factor) %>% 
+  distinct()
+
 df_temp3 <- df_temp2 %>% 
-  group_by(report_date, cusip) %>% 
-  summarise(shares_outstanding = sum(shares_outstanding_thousands)*1000,
-            institutional_ownership_shares = sum(shareholdings_end_qtr),
-            institutional_ownership_percentage = sum(shareholdings_end_qtr)/(sum(shares_outstanding_thousands)*1000),
-            foreign_institutional_ownership_shares = sum(shareholdings_end_qtr[institutional_country != "UNITED STATES"]),
-            foreign_institutional_ownership_percentage = sum(shareholdings_end_qtr[institutional_country != "UNITED STATES"])/(sum(shares_outstanding_thousands)*1000),
-            domestic_institutional_ownership_shares = sum(shareholdings_end_qtr[institutional_country == "UNITED STATES"]),
-            domestic_institutional_ownership_percentage = sum(shareholdings_end_qtr[institutional_country == "UNITED STATES"])/(sum(shares_outstanding_thousands)*1000)) %>% 
-  ungroup()  
+  inner_join(crsp_quarter_stock_link, by = c("cusip" = "ncusip"))
+
+df_temp4 <- df_temp3 %>% 
+  inner_join(crsp_quarter_stock_link2, by = c("permno", "file_date" = "quarter_date"))
+
+write_rds(df_temp4, "data/13f_crsp_merged.rds")
+
+df_temp5 <- read_rds("data/13f_crsp_merged.rds") %>% 
+  mutate(shareholdings_adjusted = if_else(is.na(cumulative_shares_factor), 
+                                          shareholdings_end_qtr, shareholdings_end_qtr * cumulative_shares_factor))
+
+write_rds(df_temp5, "data/13f_crsp_merged_final.rds")
+
+df_temp6 <- read_rds("data/13f_crsp_merged_final.rds") %>% 
+  group_by(permno, report_date) %>% 
+  summarise(institutional_ownership_shares = sum(shareholdings_adjusted),
+            foreign_institutional_ownership_shares = sum(shareholdings_adjusted[institutional_country != "UNITED STATES"]),
+            domestic_institutional_ownership_shares = sum(shareholdings_adjusted[institutional_country == "UNITED STATES"]),
+            institutional_numbers = n_distinct(institutional),
+            foreign_institutional_numbers = n_distinct(institutional[institutional_country != "UNITED STATES"]),
+            domestic_institutional_numbers = n_distinct(institutional[institutional_country == "UNITED STATES"])) %>% 
+  ungroup()
+
+df_temp7 <- read_rds("data/13f_crsp_merged_final.rds") %>% 
+  group_by(report_date) %>% 
+  summarise(institutional_numbers = n_distinct(institutional)) %>% 
+  ungroup()
 
 # think whether to calculate ownership with market prices (values) (CRSP), since lot of NA values in shares outstanding 
 
+write_feather(df_temp6, "data/13f_output.feather")
+write_rds(df_temp6, "data/13f_output.rds")
 
-write_feather(df_temp3, "data/13f_output.feather")
-write_rds(df_temp3, "data/13f_output.rds")
+write_rds(df_temp7, "data/13f_institutionals_quarterly.rds")
 
