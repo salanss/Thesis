@@ -22,7 +22,7 @@ crsp_monthly_stock <- crsp_monthly_stock_raw %>%
             price_delisting = abs(parse_double(DLPRC)),
             bid = abs(parse_double(BIDLO)),
             ask = abs(parse_double(ASKHI)),
-            bid_ask_spread = (ask - bid)/price,
+            bid_ask_spread = if_else(price == 0, NA_real_, (ask - bid)/price),
             cumulative_shares_factor = parse_double(CFACSHR),
             shares_outstanding = parse_double(SHROUT)*1000, # in 1000s
             shares_outstanding_adjusted = if_else(is.na(cumulative_shares_factor),
@@ -39,9 +39,11 @@ crsp_monthly_stock <- crsp_monthly_stock_raw %>%
 
 crsp_quarter_stock <- crsp_monthly_stock %>% 
   mutate(quarter_date = ceiling_date(date, "quarter") - days(1)) %>% 
-  group_by(permno, quarter_date, ncusip, sic_code, exchange_code) %>% 
+  group_by(permno, quarter_date, ncusip) %>% 
   summarise_all(last) %>% 
-  ungroup()
+  ungroup() %>% 
+  select(-date) %>% 
+  distinct()
 
 write_rds(crsp_quarter_stock, "data/crsp_quarter_stock.rds")
 
