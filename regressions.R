@@ -12,8 +12,8 @@ baseline_regression_raw <- read_rds("data/baseline_regression_raw.rds")
 # gather ia_measures for single column, create nested data frames and apply functional programming for lm model ->
 
 baseline_regression <- baseline_regression_raw %>% 
-  gather(ia_measure_name, ia_measure, pin_dy:mia) %>% 
-  gather(dep_measure_name, dep_measure, inst_percentage:domestic_inst_percentage) %>% 
+  gather(ia_measure_name, ia_measure, bid_ask_spread:mia) %>% 
+  gather(dep_measure_name, dep_measure, foreign_inst_percentage:domestic_breadth) %>% 
   filter_all(all_vars(!is.na(.))) %>% 
   group_by(dep_measure_name, ia_measure_name) %>% 
   nest()
@@ -35,8 +35,17 @@ baseline_names <- mutate(baseline_regression,
                          data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
                          model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
 
-stargazer(baseline_names$model, title = "Baseline regression results (H1)", out = "Baseline_results.html")
+stargazer(baseline_names$model, column.labels =c("Foreign ownership",
+                                                 "Foreign breadth", "Domestic ownership", "Domestic breadth"),
+          dep.var.labels.include = F,
+          column.separate = c(8, 8, 8, 8),
+          title = "Baseline regression results (H1)", out = "Baseline_results.html")
 
+baseline_regression_summary <- baseline_regression_raw %>% 
+  select(-permno, -year, -sic_code) %>% 
+  as.data.frame()
+
+stargazer(baseline_regression_summary, title = "Baseline summary statistics", out = "Baseline_summary.html")
 
 ## difference-in-differences regressions (did)
 
