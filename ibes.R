@@ -171,23 +171,25 @@ analyst_coverage <- detail_temp3 %>%
 
 ## elegant way
 
-year_index <- c(1, 2, 3, 4, 5)
+quarter_index <- c(1:12) # 12 quarters = 3 years
 
-before_interval_fun <- function (event_date, year_index) {
-  i <- 3 + (year_index - 1) * 12
-  j <- 3 + (year_index) * 12
+before_interval_fun <- function (event_date, quarter_index) {
+  i <- 3 + (quarter_index - 1) * 3
+  j <- 3 + (quarter_index) * 3
   df <- tibble(event_date = event_date,
-               interval = interval(event_date %m-% months(j),event_date %m-% months(i)),
-               year_index = year_index)
+               interval = interval(floor_date(event_date %m-% months(j) + days(1), unit = "quarter") - days(1),
+                                   floor_date(event_date %m-% months(i) + days(1), unit = "quarter") - days(1)),
+               quarter_index = quarter_index)
   df
 }
 
-after_interval_fun <- function (event_date, year_index) {
-  i <- 3 + (year_index - 1) * 12
-  j <- 3 + (year_index) * 12
+after_interval_fun <- function (event_date, quarter_index) {
+  i <- 3 + (quarter_index - 1) * 3
+  j <- 3 + (quarter_index) * 3
   df <- tibble(event_date = event_date,
-               interval = interval(event_date %m+% months(i),event_date %m+% months(j)),
-               year_index = year_index)
+               interval = interval(ceiling_date(event_date %m+% months(i), unit = "quarter") - days(1),
+                                   ceiling_date(event_date %m+% months(j), unit = "quarter") - days(1)),
+               quarter_index = quarter_index)
   df
 }
 
@@ -198,37 +200,37 @@ filter1 <- function (df_measures, df_events){
  
 summarise1 <- function (df) {
   df %>% 
-    group_by(cusip, event_date, year_index) %>% 
+    group_by(cusip, event_date, quarter_index) %>% 
     summarise(result = n_distinct(analyst)) %>% 
     ungroup()
 }
 
-# map every before_interval (5) to every distinct event_date (20) and flatten to list of 100
+# map every before_interval (12) to every distinct event_date (20) and flatten to list of 12*20
 # do the filtering for list of data frames based on intervals and add columns event_date and year_index
 # do the summarising for the measure of interest (number of distinct analysts in this case)
 # and set corresponding after value (before = 0, after = 1)
 
-before_val <- map(year_index, ~map(closures$event_date, ~before_interval_fun(.x, .y), .y = .x)) %>%
+before_val <- map(quarter_index, ~map(closures$event_date, ~before_interval_fun(.x, .y), .y = .x)) %>%
   flatten() %>% 
   map(~filter1(analyst_coverage, .x) %>%
         mutate(event_date = .x$event_date,
-               year_index = .x$year_index)) %>% 
+               quarter_index = .x$quarter_index)) %>% 
   map_df(~summarise1(.x)) %>% 
   rename(analyst_coverage = result) %>% 
   mutate(after = 0,
-         year_index = (-1)*year_index) %>% 
-  arrange(cusip, event_date, year_index)
+         quarter_index = (-1)*quarter_index) %>% 
+  arrange(cusip, event_date, quarter_index)
 
-after_val <- map(year_index, ~map(closures$event_date, 
+after_val <- map(quarter_index, ~map(closures$event_date, 
                                   ~after_interval_fun(.x, .y), .y = .x)) %>% 
   flatten() %>% 
   map(~filter1(analyst_coverage, .x) %>%
         mutate(event_date = .x$event_date,
-               year_index = .x$year_index)) %>% 
+               quarter_index = .x$quarter_index)) %>% 
   map_df(~summarise1(.x)) %>% 
   rename(analyst_coverage = result) %>% 
   mutate(after = 1) %>% 
-  arrange(cusip, event_date, year_index)
+  arrange(cusip, event_date, quarter_index)
 
 #vals <- full_join(before_val, after_val, by = c("cusip", "event_date"))
 
