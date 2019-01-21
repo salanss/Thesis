@@ -2,6 +2,7 @@ library(tidyverse)
 library(readr)
 library(lubridate)
 library(robustHD)
+library(DescTools)
 
 # baseline linking
 
@@ -49,51 +50,74 @@ thirteenf_crsp <- bind_rows(thirteenf_crsp_merged, thirteenf_crsp_not_merged) %>
          domestic_breadth = domestic_institutional_numbers / total_institutions) %>% 
   filter(!is.na(foreign_ownership_percentage))
 
-thirteenf_crsp2 <- thirteenf_crsp %>% 
-  mutate(foreign_ownership_percentage = winsorize(foreign_ownership_percentage, prob = 0.99))
+# thirteenf_crsp2 <- thirteenf_crsp %>% 
+#   mutate(foreign_ownership_percentage = Winsorize(foreign_ownership_percentage, probs = c(0.01, 0.99))
+# 
+# summary(thirteenf_crsp)
+# 
+# summary(thirteenf_crsp2)
 
-
-
-summary(thirteenf_crsp2)
-
-thirteenf_crsp_compustat_merged <- thirteenf_crsp_merged %>% 
+thirteenf_crsp_compustat_temp <- thirteenf_crsp %>% 
   inner_join(compustat_quarter, by = c("permno", "report_date" = "datadate")) %>% 
   transmute(report_date = report_date,
             year = year(report_date),
             permno = permno,
-            sic_code = if_else(sic_code.x == "0" | is.na(sic_code.x) == T, sic_code.y, sic_code.x),
+            sic_code = if_else(sic_code.x == "0" | is.na(sic_code.x) == T, NA_character_, sic_code.x),
             shares_outstanding_adjusted = shares_outstanding_adjusted, #crsp 
                                               # coalesce(shares_outstanding.x, shares_outstanding.y, shares_outstanding)
-            institutional_ownership_shares = institutional_ownership_shares,
-            foreign_institutional_ownership_shares = foreign_institutional_ownership_shares,
-            domestic_institutional_ownership_shares = domestic_institutional_ownership_shares,
-            inst_percentage = institutional_ownership_shares / shares_outstanding,
-            foreign_inst_percentage = foreign_institutional_ownership_shares / shares_outstanding,
-            domestic_inst_percentage = domestic_institutional_ownership_shares / shares_outstanding,
-            price = price, # coalesce(price, price_close_calendar)
-            market_cap = market_cap.x/1000000, # crsp to same units as compustat
-            log_market_cap = log(market_cap),
+            inst_percentage = inst_ownership_percentage,
+            foreign_inst_percentage = foreign_ownership_percentage,
+            domestic_inst_percentage = domestic_ownership_percentage,
+            inst_breadth = inst_breadth,
+            foreign_breadth = foreign_breadth,
+            domestic_breadth = domestic_breadth,
+            price = price_adjusted, # coalesce(price, price_close_calendar)
+            market_cap = market_cap.x, 
+            log_market_cap = log(market_cap.x),
             book_equity = book_equity,
             book_to_market = book_to_market,
             leverage = leverage,
             roa = roa,
-            tobin_q = tobin_q) %>% 
+            tobin_q = tobin_q,
+            bid_ask_spread = bid_ask_spread) %>% 
   arrange(report_date, permno)
 
-thirteenf_crsp_compustat_ia_merged <- thirteenf_crsp_compustat_merged %>% 
+summary(thirteenf_crsp_compustat_temp)
+
+thirteenf_crsp_compustat <- thirteenf_crsp_compustat_temp %>% 
   select(permno, year, sic_code, inst_percentage, foreign_inst_percentage, domestic_inst_percentage,
-         market_cap, log_market_cap, book_equity, book_to_market, leverage, roa, tobin_q) %>% 
+         inst_breadth, foreign_breadth, domestic_breadth, market_cap, log_market_cap,
+         book_to_market, leverage, roa, tobin_q, bid_ask_spread) %>% 
   filter_all(all_vars(!is.na(.))) %>% # filter all NAs away, since going to be used in regression 
-  group_by(permno, year, sic_code) %>% 
-  summarise(inst_percentage = mean(inst_percentage),
+  mutate(inst_percentage = Winsorize(inst_percentage, probs = c(0.01, 0.99)), # winsorize all variables to mitigate outliers
+         foreign_inst_percentage = Winsorize(foreign_inst_percentage, probs = c(0.01, 0.99)),
+         domestic_inst_percentage = Winsorize(domestic_inst_percentage, probs = c(0.01, 0.99)),
+         inst_breadth = Winsorize(inst_breadth, probs = c(0.01, 0.99)),
+         foreign_breadth = Winsorize(foreign_breadth, probs = c(0.01, 0.99)),
+         domestic_breadth = Winsorize(domestic_breadth, probs = c(0.01, 0.99)),
+         market_cap = Winsorize(market_cap, probs = c(0.01, 0.99)),
+         book_to_market = Winsorize(book_to_market, probs = c(0.01, 0.99)),
+         leverage = Winsorize(leverage, probs = c(0.01, 0.99)),
+         roa = Winsorize(roa, probs = c(0.01, 0.99)),
+         tobin_q = Winsorize(tobin_q, probs = c(0.01, 0.99)),
+         bid_ask_spread = Winsorize(bid_ask_spread, probs = c(0.01, 0.99))) %>% 
+  group_by(permno, year) %>% 
+  summarise(sic_code = last(sic_code),
+            inst_percentage = mean(inst_percentage),
+            inst_breadth = mean(inst_breadth),
             foreign_inst_percentage = mean(foreign_inst_percentage),
+            foreign_breadth = mean(foreign_breadth),
             domestic_inst_percentage = mean(domestic_inst_percentage),
+            domestic_breadth = mean(domestic_breadth),
             log_market_cap = log(mean(market_cap)),
             book_to_market = mean(book_to_market),
             leverage = mean(leverage),
             roa = mean(roa),
-            tobin_q = mean(tobin_q)) %>% 
-  ungroup() %>% 
+            tobin_q = mean(tobin_q),
+            bid_ask_spread = mean(bid_ask_spread)) %>% 
+  ungroup()
+
+thirteenf_crsp_compustat_ia <- thirteenf_crsp_compustat %>% 
   inner_join(information_asymmetry_measures, by = c("permno", "year"))
 
 write_rds(thirteenf_crsp_compustat_ia_merged, "data/baseline_regression_raw.rds")
@@ -104,12 +128,12 @@ write_rds(thirteenf_crsp_compustat_ia_merged, "data/baseline_regression_raw.rds"
 
 ibes_did <- read_rds("data/ibes_did")
 
-crsp_compustat_keys <- thirteenf_crsp_compustat_merged %>% 
-  select(permno, cusip) %>% 
+crsp_compustat_keys <- crsp_quarter_stock %>% 
+  select(permno, ncusip) %>% 
   distinct()
 
 did_temp1 <- ibes_did %>% 
-  left_join(crsp_compustat_keys, by = "cusip") %>% 
+  left_join(crsp_compustat_keys, by = c("cusip" = "ncusip")) %>% 
   filter(!is.na(permno))
 
 # retrieve data from thirteenf_crsp_compustat-data and do the interval filtering [-15;-3] and [3;15] for all measures
