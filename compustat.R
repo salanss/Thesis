@@ -82,8 +82,10 @@ compustat_quarter <- compustat_quarter_raw %>%
             #preferred_stock_convertible = parse_double(pstkc),
             #preferred_stock_liquidation_value = parse_double(pstklq),
             sales = parse_double(saleq), # = turnover
-            stockholders_equity = parse_double(teqq), # common equity (ceq) + preferred stock (pstk), lot of NA
+            stockholders_equity1 = parse_double(seqq),
+            stockholders_equity2 = parse_double(teqq), # common equity (ceq) + preferred stock (pstk), lot of NA
             price_close_calendar = parse_double(prccq),
+            deferred_taxes_inv_credit = parse_double(txditcq),
             #price_close_fiscal = parse_double(prcc_fq),
             market_cap = parse_double(mkvaltq), # lot of NA
             exchange_code = exchg,
@@ -96,15 +98,19 @@ compustat_quarter <- compustat_quarter_raw %>%
   
 
 compustat_quarter_final <- compustat_quarter %>% 
-  mutate(market_cap = price_close_calendar * shares_outstanding,
-         log_market_cap = log(market_cap),
+  mutate(market_cap = if_else(price_close_calendar * shares_outstanding > 0,
+                              price_close_calendar * shares_outstanding, NA_real_),
          shareholders_equity = if_else(
-           !is.na(stockholders_equity) == T, stockholders_equity,
+           !is.na(stockholders_equity1) == T, stockholders_equity1,
            coalesce(common_equity, 0) + coalesce(preferred_stock, 0)),
-         book_equity = shareholders_equity - coalesce(preferred_stock, 0),
+         book_equity_temp = if_else(stockholders_equity1 > 0,
+                               shareholders_equity + coalesce(deferred_taxes_inv_credit, 0)
+                               - coalesce(preferred_stock, 0), NA_real_),
+         book_equity = if_else(book_equity_temp < 0, NA_real_, book_equity_temp),
          book_to_market = book_equity / market_cap,
-         leverage = (debt_in_current_liabilities + debt_long_term) / assets,
-         roa = net_income / assets,
-         tobin_q = (assets + market_cap - book_equity) / assets)
+         leverage = if_else(assets <= 0, NA_real_, (debt_in_current_liabilities + debt_long_term) / assets),
+         roa = if_else(assets <= 0, NA_real_, net_income / assets),
+         tobin_q = if_else(assets <= 0, NA_real_, (assets + market_cap - book_equity) / assets))
+
 
 write_rds(compustat_quarter_final, "data/compustat_quarter_final.rds")
