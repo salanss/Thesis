@@ -39,6 +39,9 @@ stargazer(baseline_names$model, column.labels =c("Foreign ownership",
                                                  "Foreign breadth", "Domestic ownership", "Domestic breadth"),
           dep.var.labels.include = F,
           column.separate = c(8, 8, 8, 8),
+          omit.stat = c("ser"),
+          add.lines = list(c("Industry fixed effects", rep("Yes", times = 32)), 
+                           c("Year fixed effects", rep("Yes", times = 32))),
           title = "Baseline regression results (H1)", out = "Baseline_results.html")
 
 baseline_regression_summary <- baseline_regression_raw %>% 
@@ -83,7 +86,8 @@ did_model4 <- felm(domestic_breadth ~ treated + after + treated * after + log_ma
 
 did_list <- list(did_model1, did_model2, did_model3, did_model4)
 
-stargazer(did_list, title = "Difference-in-differences regression results (H2)", out = "DiD H2 results.html")
+stargazer(did_list, title = "Difference-in-differences regression results (H2)", 
+          omit.stat = c("ser"), out = "DiD H2 results.html")
 
 data <- did_regression_raw %>% 
   mutate(treated = if_else(treated == 1, "treated", "control")) %>% 
