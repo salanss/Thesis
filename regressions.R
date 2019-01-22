@@ -64,8 +64,8 @@ columns_for_summarise <- c("inst_percentage", "foreign_inst_percentage", "domest
                            "market_cap", "book_to_market", "leverage", "roa", "tobin_q")
 
 did_regression <- did_regression_raw %>% 
-  filter(quarter_index %in% c(-12:12)) %>% 
-  group_by(permno, event_date, treated, after) %>% 
+  filter(quarter_index %in% c(-4:4)) %>% 
+  group_by(permno, event_date, treated, after, sic_code) %>% 
   summarise_at(columns_for_summarise, mean) %>% 
   ungroup() %>% 
   mutate(year = year(event_date),
@@ -73,21 +73,24 @@ did_regression <- did_regression_raw %>%
   
 
 did_model1 <- felm(foreign_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
-                     leverage + roa + tobin_q |year + permno|0|year+permno, data = did_regression)
+                     leverage + roa + tobin_q |year + sic_code|0|year+sic_code, data = did_regression)
 
 did_model2 <- felm(domestic_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
-                     leverage + roa + tobin_q |year + permno|0|year+permno, data = did_regression)
+                     leverage + roa + tobin_q |year + sic_code|0|year+sic_code, data = did_regression)
 
 did_model3 <- felm(foreign_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
-                     leverage + roa + tobin_q |year + permno|0|year+permno, data = did_regression)
+                     leverage + roa + tobin_q |year + sic_code|0|year+sic_code, data = did_regression)
 
 did_model4 <- felm(domestic_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
-                     leverage + roa + tobin_q |year + permno|0|year+permno, data = did_regression)
+                     leverage + roa + tobin_q |year + sic_code|0|year+sic_code, data = did_regression)
 
 did_list <- list(did_model1, did_model2, did_model3, did_model4)
 
 stargazer(did_list, title = "Difference-in-differences regression results (H2)", 
-          omit.stat = c("ser"), out = "DiD H2 results.html")
+          omit.stat = c("ser"), 
+          add.lines = list(c("Industry fixed effects", rep("Yes", times = 4)), 
+                           c("Year fixed effects", rep("Yes", times = 4))),
+          out = "DiD H2 results.html")
 
 data <- did_regression_raw %>% 
   mutate(treated = if_else(treated == 1, "treated", "control")) %>% 
