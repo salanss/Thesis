@@ -50,13 +50,6 @@ thirteenf_crsp <- bind_rows(thirteenf_crsp_merged, thirteenf_crsp_not_merged) %>
          domestic_breadth = domestic_institutional_numbers / total_institutions) %>% 
   filter(!is.na(foreign_ownership_percentage))
 
-# thirteenf_crsp2 <- thirteenf_crsp %>% 
-#   mutate(foreign_ownership_percentage = Winsorize(foreign_ownership_percentage, probs = c(0.01, 0.99))
-# 
-# summary(thirteenf_crsp)
-# 
-# summary(thirteenf_crsp2)
-
 thirteenf_crsp_compustat_temp <- thirteenf_crsp %>% 
   inner_join(compustat_quarter, by = c("permno", "report_date" = "datadate")) %>% 
   transmute(report_date = report_date,
@@ -85,9 +78,6 @@ thirteenf_crsp_compustat_temp <- thirteenf_crsp %>%
 summary(thirteenf_crsp_compustat_temp)
 
 thirteenf_crsp_compustat <- thirteenf_crsp_compustat_temp %>% 
-  select(permno, year, sic_code, inst_percentage, foreign_inst_percentage, domestic_inst_percentage,
-         inst_breadth, foreign_breadth, domestic_breadth, market_cap, log_market_cap,
-         book_to_market, leverage, roa, tobin_q, bid_ask_spread) %>% 
   filter_all(all_vars(!is.na(.))) %>% # filter all NAs away, since going to be used in regression 
   mutate(inst_percentage = Winsorize(inst_percentage, probs = c(0.01, 0.99)), # winsorize all variables to mitigate outliers
          foreign_inst_percentage = Winsorize(foreign_inst_percentage, probs = c(0.01, 0.99)),
@@ -100,7 +90,9 @@ thirteenf_crsp_compustat <- thirteenf_crsp_compustat_temp %>%
          leverage = Winsorize(leverage, probs = c(0.01, 0.99)),
          roa = Winsorize(roa, probs = c(0.01, 0.99)),
          tobin_q = Winsorize(tobin_q, probs = c(0.01, 0.99)),
-         bid_ask_spread = Winsorize(bid_ask_spread, probs = c(0.01, 0.99))) %>% 
+         bid_ask_spread = Winsorize(bid_ask_spread, probs = c(0.01, 0.99)))
+
+thirteenf_crsp_compustat_ia <- thirteenf_crsp_compustat %>% 
   group_by(permno, year) %>% 
   summarise(sic_code = last(sic_code),
             inst_percentage = mean(inst_percentage),
@@ -115,18 +107,18 @@ thirteenf_crsp_compustat <- thirteenf_crsp_compustat_temp %>%
             roa = mean(roa),
             tobin_q = mean(tobin_q),
             bid_ask_spread = mean(bid_ask_spread)) %>% 
-  ungroup()
+  ungroup() %>% 
+  inner_join(information_asymmetry_measures, by = c("permno", "year")) %>% 
+  distinct()
 
-thirteenf_crsp_compustat_ia <- thirteenf_crsp_compustat %>% 
-  inner_join(information_asymmetry_measures, by = c("permno", "year"))
-
-write_rds(thirteenf_crsp_compustat_ia_merged, "data/baseline_regression_raw.rds")
+write_rds(thirteenf_crsp_compustat_ia, "data/baseline_regression_raw.rds")
 
 ## did linking
 
 # first by id:s cusip (and filter NA permnos)
 
-ibes_did <- read_rds("data/ibes_did")
+ibes_did <- read_rds("data/ibes_did") %>% 
+  distinct()
 
 crsp_compustat_keys <- crsp_quarter_stock %>% 
   select(permno, ncusip) %>% 
@@ -139,32 +131,34 @@ did_temp1 <- ibes_did %>%
 # retrieve data from thirteenf_crsp_compustat-data and do the interval filtering [-15;-3] and [3;15] for all measures
 # and link that to ibes firms (treated, control, before and after events)
 
-closures <- read_rds("data/closures.rds")
+events <- read_rds("data/closures.rds") %>% 
+  select(event_date, event_date_temp1) %>% 
+  distinct()
 
 columns_for_summarise <- c("inst_percentage", "foreign_inst_percentage", "domestic_inst_percentage", 
+                           "inst_breadth", "foreign_breadth", "domestic_breadth", 
                            "market_cap", "log_market_cap", "book_to_market", "leverage", "roa", "tobin_q")
 
-columns_for_summarise <- c("foreign_inst_percentage")
 
-year_index <- c(1, 2, 3, 4, 5)
+quarter_index <- c(1:12)
 
-#year_index <- c(1)
-
-before_interval_fun <- function (event_date, year_index) {
-  i <- 3 + (year_index - 1) * 12
-  j <- 3 + (year_index) * 12
+before_interval_fun <- function (event_date, quarter_index) {
+  i <- 3 + (quarter_index - 1) * 3
+  j <- 3 + (quarter_index) * 3
   df <- tibble(event_date = event_date,
-               interval = interval(event_date %m-% months(j),event_date %m-% months(i)),
-               year_index = year_index)
+               interval = interval(floor_date(event_date %m-% months(j) + days(1), unit = "quarter") - days(1),
+                                   floor_date(event_date %m-% months(i) + days(1), unit = "quarter") - days(1)),
+               quarter_index = quarter_index)
   df
 }
 
-after_interval_fun <- function (event_date, year_index) {
-  i <- 3 + (year_index - 1) * 12
-  j <- 3 + (year_index) * 12
+after_interval_fun <- function (event_date, quarter_index) {
+  i <- 3 + (quarter_index - 1) * 3
+  j <- 3 + (quarter_index) * 3
   df <- tibble(event_date = event_date,
-               interval = interval(event_date %m+% months(i),event_date %m+% months(j)),
-               year_index = year_index)
+               interval = interval(ceiling_date(event_date %m+% months(i), unit = "quarter") - days(1),
+                                   ceiling_date(event_date %m+% months(j), unit = "quarter") - days(1)),
+               quarter_index = quarter_index)
   df
 }
 
@@ -175,54 +169,43 @@ filter1 <- function (df_measures, df_events){
 
 summarise1 <- function (df) {
   df %>% 
-    group_by(permno, event_date, year_index) %>% 
+    group_by(permno, event_date, quarter_index) %>% 
     summarise_at(columns_for_summarise, funs(mean(., na.rm = TRUE))) %>% 
     ungroup()
 }
 
-# map every before_interval (5) to every distinct event_date (20) and flatten to list of 100
-# do the filtering for list of data frames based on intervals and add columns event_date and year_index
+# map every before_interval (12) to every distinct event_date (20) and flatten to list of 12*20
+# do the filtering for list of data frames based on intervals and add columns event_date and quarter_index
 # do the summarising for the measure of interest (number of distinct analysts in this case)
 # and set corresponding after value (before = 0, after = 1)
 
-before_val <- map(year_index, ~map(closures$event_date, ~before_interval_fun(.x, .y), .y = .x)) %>%
+before_val <- map(quarter_index, ~map(events$event_date, ~before_interval_fun(.x, .y), .y = .x)) %>%
   flatten() %>% 
-  map(~filter1(thirteenf_crsp_compustat_merged, .x) %>%
+  map(~filter1(thirteenf_crsp_compustat, .x) %>%
         mutate(event_date = .x$event_date,
-               year_index = .x$year_index)) %>% 
+               quarter_index = .x$quarter_index)) %>% 
   map_df(~summarise1(.x)) %>% 
   mutate(after = 0,
-         year_index = (-1)*year_index) %>% 
-  arrange(permno, event_date, year_index)
+         quarter_index = (-1)*quarter_index) %>% 
+  arrange(permno, event_date, quarter_index)
 
-after_val <- map(year_index, ~map(closures$event_date, 
+
+after_val <- map(quarter_index, ~map(events$event_date, 
                                   ~after_interval_fun(.x, .y), .y = .x)) %>% 
   flatten() %>% 
-  map(~filter1(thirteenf_crsp_compustat_merged, .x) %>%
+  map(~filter1(thirteenf_crsp_compustat, .x) %>%
         mutate(event_date = .x$event_date,
-               year_index = .x$year_index)) %>% 
+               quarter_index = .x$quarter_index)) %>% 
   map_df(~summarise1(.x)) %>% 
   mutate(after = 1) %>% 
-  arrange(permno, event_date, year_index)
-
-
-# before_val <- map2(events$before_interval,
-#                    events$event_date,
-#                    ~filter1(thirteenf_crsp_compustat_merged, .x) %>% mutate(event_date = .y)) %>% 
-#   map_df(~summarise1(.x)) %>% 
-#   mutate(after = 0)
-# 
-# after_val <- map2(events$after_interval,
-#                   events$event_date,
-#                   ~filter1(thirteenf_crsp_compustat_merged, .x) %>% mutate(event_date = .y)) %>% 
-#   map_df(~summarise2(.x)) %>% 
-#   mutate(after = 1)
+  arrange(permno, event_date, quarter_index)
 
 vals <- bind_rows(before_val, after_val) %>% 
-  arrange(permno, event_date, after)
+  arrange(permno, event_date, after) %>% 
+  distinct()
 
 did <- did_temp1 %>% 
-  inner_join(vals, by = c("permno", "event_date", "after", "year_index")) %>% 
+  inner_join(vals, by = c("permno", "event_date", "after", "quarter_index")) %>% 
   distinct()
 
 write_rds(did, "data/did_regression_raw.rds")
