@@ -170,7 +170,15 @@ filter1 <- function (df_measures, df_events){
 summarise1 <- function (df) {
   df %>% 
     group_by(permno, event_date, quarter_index) %>% 
-    summarise_at(columns_for_summarise, funs(mean(., na.rm = TRUE))) %>% 
+    summarise(sic_code = last(sic_code)) %>% 
+    summarise_at(columns_for_summarise, funs(mean(., na.rm = TRUE))) %>%
+    ungroup()
+}
+
+summarise2 <- function (df) {
+  df %>% 
+    group_by(permno, event_date, quarter_index) %>% 
+    summarise(sic_code = last(sic_code)) %>% 
     ungroup()
 }
 
@@ -189,6 +197,18 @@ before_val <- map(quarter_index, ~map(events$event_date, ~before_interval_fun(.x
          quarter_index = (-1)*quarter_index) %>% 
   arrange(permno, event_date, quarter_index)
 
+before_val_sic_code <- map(quarter_index, ~map(events$event_date, ~before_interval_fun(.x, .y), .y = .x)) %>%
+  flatten() %>% 
+  map(~filter1(thirteenf_crsp_compustat, .x) %>%
+        mutate(event_date = .x$event_date,
+               quarter_index = .x$quarter_index)) %>% 
+  map_df(~summarise2(.x)) %>% 
+  mutate(after = 0,
+         quarter_index = (-1)*quarter_index) %>% 
+  arrange(permno, event_date, quarter_index)
+
+before_vals <- before_val %>% 
+  inner_join(before_val_sic_code)
 
 after_val <- map(quarter_index, ~map(events$event_date, 
                                   ~after_interval_fun(.x, .y), .y = .x)) %>% 
@@ -200,7 +220,20 @@ after_val <- map(quarter_index, ~map(events$event_date,
   mutate(after = 1) %>% 
   arrange(permno, event_date, quarter_index)
 
-vals <- bind_rows(before_val, after_val) %>% 
+after_val_sic_code <- map(quarter_index, ~map(events$event_date, 
+                                     ~after_interval_fun(.x, .y), .y = .x)) %>% 
+  flatten() %>% 
+  map(~filter1(thirteenf_crsp_compustat, .x) %>%
+        mutate(event_date = .x$event_date,
+               quarter_index = .x$quarter_index)) %>% 
+  map_df(~summarise2(.x)) %>% 
+  mutate(after = 1) %>% 
+  arrange(permno, event_date, quarter_index)
+
+after_vals <- after_val %>% 
+  inner_join(after_val_sic_code)
+
+vals <- bind_rows(before_vals, after_vals) %>% 
   arrange(permno, event_date, after) %>% 
   distinct()
 
