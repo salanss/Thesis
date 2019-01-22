@@ -38,6 +38,10 @@ closures <- closures_raw %>%
 
 write_rds(closures, "data/closures.rds")
 
+events <- closures %>%
+  select(event_date, event_date_temp1) %>% 
+  distinct()
+
 brokerage_codes_list <- list(closures$brokerage_code) %>% 
   flatten_chr()
 
@@ -93,7 +97,7 @@ treated_firms <- bind_rows(treated_firms_temp1, treated_firms_temp2) %>%
 
 # control group
 
-yearbefore_list <- map2(closures$event_date_temp1, closures$event_date,
+yearbefore_list <- map2(events$event_date_temp1, events$event_date,
                         ~seq(.x, .y, "day") %>% as.character) %>% 
   flatten_chr() %>% 
   ymd()
@@ -105,7 +109,7 @@ all_firms_temp1 <- detail_temp3 %>%
   summarise(k = 1) %>% 
   ungroup()
 
-closures_temp1 <- closures %>%
+closures_temp1 <- events %>%
   select(event_date) %>% 
   mutate(k = 1)
 
@@ -136,28 +140,6 @@ control_firms <- bind_rows(control_firms_temp2, control_firms_temp3) %>%
 
 ibes_did_raw <- bind_rows(treated_firms, control_firms) %>% 
   arrange(cusip, event_date)
-
-## events and corresponding intervals [-15;-3] and [+3;+15] months (e.g.)
-
-# events <- closures %>%
-#   select(event_date) %>%
-#   distinct() %>%
-#   mutate(before_interval = interval(event_date %m-% months(15),event_date %m-% months(3)),
-#          after_interval = interval(event_date %m+% months(3), event_date %m+% months(15)),
-#          before_zero_to_one_interval = interval(event_date %m-% months(15), event_date %m-% months(3)),
-#          before_one_to_two_interval = interval(event_date %m-% months(27), event_date %m-% months(15)),
-#          before_two_to_three_interval = interval(event_date %m-% months(39), event_date %m-% months(27)),
-#          after_zero_to_one_interval = interval(event_date %m+% months(3), event_date %m+% months(15)),
-#          after_one_to_two_interval = interval(event_date %m+% months(15), event_date %m+% months(27)),
-#          after_two_to_three_interval = interval(event_date %m+% months(27), event_date %m+% months(39)))
-
-# events <- bind_rows(events1, events2, events3)
-
-#write_rds(events, "data/events.rds")
-
-# before_intervals <- events %>% 
-#   select(before_zero_to_one_interval, before_zero_to_two_interval, before_zero_to_three_interval) %>% 
-#   gather(before_interval_name, before_interval, before_zero_to_one_interval:before_zero_to_three_interval)
 
 
 ## total analyst coverage, used for calculating number of distinct analysts
@@ -210,7 +192,7 @@ summarise1 <- function (df) {
 # do the summarising for the measure of interest (number of distinct analysts in this case)
 # and set corresponding after value (before = 0, after = 1)
 
-before_val <- map(quarter_index, ~map(closures$event_date, ~before_interval_fun(.x, .y), .y = .x)) %>%
+before_val <- map(quarter_index, ~map(events$event_date, ~before_interval_fun(.x, .y), .y = .x)) %>%
   flatten() %>% 
   map(~filter1(analyst_coverage, .x) %>%
         mutate(event_date = .x$event_date,
@@ -221,7 +203,7 @@ before_val <- map(quarter_index, ~map(closures$event_date, ~before_interval_fun(
          quarter_index = (-1)*quarter_index) %>% 
   arrange(cusip, event_date, quarter_index)
 
-after_val <- map(quarter_index, ~map(closures$event_date, 
+after_val <- map(quarter_index, ~map(events$event_date, 
                                   ~after_interval_fun(.x, .y), .y = .x)) %>% 
   flatten() %>% 
   map(~filter1(analyst_coverage, .x) %>%
@@ -238,6 +220,7 @@ vals <- bind_rows(before_val, after_val)
 
 ibes_did <- ibes_did_raw %>% 
   left_join(vals, by = c("cusip", "event_date", "after")) %>% 
-  filter(!is.na(analyst_coverage))
+  filter(!is.na(analyst_coverage)) %>% 
+  distinct()
 
 write_rds(ibes_did, "data/ibes_did")
