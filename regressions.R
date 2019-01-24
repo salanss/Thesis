@@ -1,5 +1,4 @@
 library(tidyverse)
-library(readr)
 library(lubridate)
 library(lfe)
 library(stargazer)
@@ -61,28 +60,29 @@ summary(did_regression_raw)
 
 columns_for_summarise <- c("inst_percentage", "foreign_inst_percentage", "domestic_inst_percentage", 
                            "inst_breadth", "foreign_breadth", "domestic_breadth", 
-                           "market_cap", "book_to_market", "leverage", "roa", "tobin_q")
+                           "log_market_cap", "book_to_market", "leverage", "roa", "tobin_q")
 
 did_regression <- did_regression_raw %>% 
-  filter(quarter_index %in% c(-4:4)) %>% 
+  filter(year(event_date) < 2007) %>% 
+  mutate(log_market_cap = log(market_cap)) %>% 
+  filter(quarter_index %in% c(-12:12)) %>% 
   group_by(permno, event_date, treated, after, sic_code) %>% 
   summarise_at(columns_for_summarise, mean) %>% 
   ungroup() %>% 
-  mutate(year = year(event_date),
-         log_market_cap = log(market_cap))
+  mutate(year = year(event_date))
   
 
 did_model1 <- felm(foreign_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year+sic_code, data = did_regression)
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression)
 
 did_model2 <- felm(domestic_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year+sic_code, data = did_regression)
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression)
 
 did_model3 <- felm(foreign_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year+sic_code, data = did_regression)
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression)
 
 did_model4 <- felm(domestic_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year+sic_code, data = did_regression)
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression)
 
 did_list <- list(did_model1, did_model2, did_model3, did_model4)
 
@@ -93,6 +93,7 @@ stargazer(did_list, title = "Difference-in-differences regression results (H2)",
           out = "DiD H2 results.html")
 
 data <- did_regression_raw %>% 
+  filter(year(event_date) < 2007) %>% 
   mutate(treated = if_else(treated == 1, "treated", "control")) %>% 
   group_by(treated, quarter_index) %>% 
   summarise(foreign_inst_percentage = mean(foreign_inst_percentage),
@@ -101,7 +102,7 @@ data <- did_regression_raw %>%
             domestic_breadth = mean(domestic_breadth)) %>% 
   ungroup()
 
-ggplot(data, aes(quarter_index, domestic_breadth, group = treated, color = treated)) + 
+ggplot(data, aes(quarter_index, foreign_inst_percentage, group = treated, color = treated)) + 
   geom_line() +
   geom_vline(xintercept=0) +
   theme_classic()
@@ -110,7 +111,8 @@ d <- baseline_regression_raw %>%
   group_by(year) %>% 
   summarise(inst_percentage = mean(inst_percentage),
             foreign_inst_percentage = mean(foreign_inst_percentage),
-            domestic_inst_percentage = mean(domestic_inst_percentage))
+            domestic_inst_percentage = mean(domestic_inst_percentage)) %>% 
+  ungroup()
 
 ggplot(d, aes(year)) + 
   #geom_line(aes(y = inst_percentage, colour = "inst_percentage")) + 
