@@ -60,7 +60,7 @@ summary(did_regression_raw)
 
 columns_for_summarise <- c("inst_percentage", "foreign_inst_percentage", "domestic_inst_percentage", 
                            "inst_breadth", "foreign_breadth", "domestic_breadth", 
-                           "log_market_cap", "book_to_market", "leverage", "roa", "tobin_q")
+                           "log_market_cap", "book_to_market", "leverage", "roa", "tobin_q", "analyst_coverage")
 
 did_regression <- did_regression_raw %>% 
   filter(year(event_date) < 2007) %>% 
@@ -70,6 +70,8 @@ did_regression <- did_regression_raw %>%
   summarise_at(columns_for_summarise, mean) %>% 
   ungroup() %>% 
   mutate(year = year(event_date))
+
+summary(did_regression)
   
 
 did_model1 <- felm(foreign_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
@@ -107,6 +109,21 @@ ggplot(data, aes(quarter_index, foreign_inst_percentage, group = treated, color 
   geom_vline(xintercept=0) +
   theme_classic()
 
+data2 <- did_regression_raw %>% 
+  filter(year(event_date) < 2007) %>% 
+  mutate(treated = if_else(treated == 1, "treated", "control")) %>% 
+  group_by(treated, quarter_index, event_date) %>% 
+  summarise(foreign_inst_percentage = mean(foreign_inst_percentage),
+            foreign_breadth = mean(foreign_breadth),
+            domestic_inst_percentage = mean(domestic_inst_percentage),
+            domestic_breadth = mean(domestic_breadth)) %>% 
+  ungroup()
+
+ggplot(data2, aes(quarter_index, foreign_breadth, group = treated, color = treated)) + 
+  geom_line() +
+  geom_vline(xintercept=0) +
+  theme_classic() + facet_grid(. ~ event_date)
+
 d <- baseline_regression_raw %>% 
   group_by(year) %>% 
   summarise(inst_percentage = mean(inst_percentage),
@@ -120,4 +137,33 @@ ggplot(d, aes(year)) +
   #geom_line(aes(y = domestic_inst_percentage, colour = "domestic_inst_percentage")) + 
   theme_classic()
 
-       
+
+did_regression_h3 <- did_regression_raw %>% 
+  filter(year(event_date) < 2007) %>% 
+  mutate(log_market_cap = log(market_cap)) %>% 
+  filter(quarter_index %in% c(-12:12)) %>% 
+  filter(inst_percentage < 0.10) %>% 
+  group_by(permno, event_date, treated, after, sic_code) %>% 
+  summarise_at(columns_for_summarise, mean) %>% 
+  ungroup() %>% 
+  mutate(year = year(event_date))
+
+did_model1 <- felm(foreign_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_h3)
+
+did_model2 <- felm(domestic_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_h3)
+
+did_model3 <- felm(foreign_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_h3)
+
+did_model4 <- felm(domestic_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_h3)
+
+did_list <- list(did_model1, did_model2, did_model3, did_model4)
+
+stargazer(did_list, title = "Difference-in-differences regression results (H3)", 
+          omit.stat = c("ser"), 
+          add.lines = list(c("Industry fixed effects", rep("Yes", times = 4)), 
+                           c("Year fixed effects", rep("Yes", times = 4))),
+          out = "DiD H3 results.html")
