@@ -74,8 +74,6 @@ thirteenf_crsp_compustat_temp <- thirteenf_crsp %>%
             bid_ask_spread = bid_ask_spread) %>% 
   arrange(report_date, permno)
 
-summary(thirteenf_crsp_compustat_temp)
-
 thirteenf_crsp_compustat <- thirteenf_crsp_compustat_temp %>% 
   filter_all(all_vars(!is.na(.))) %>% # filter all NAs away, since going to be used in regression 
   mutate(inst_percentage = Winsorize(inst_percentage, probs = c(0.01, 0.99)), # winsorize all variables to mitigate outliers
@@ -116,7 +114,7 @@ write_rds(thirteenf_crsp_compustat_ia, "data/baseline_regression_raw.rds")
 
 # first by id:s cusip (and filter NA permnos)
 
-ibes_did <- read_rds("data/ibes_did") %>% 
+ibes_did <- read_rds("data/ibes_did.rds") %>% 
   distinct()
 
 crsp_compustat_keys <- crsp_quarter_stock %>% 
