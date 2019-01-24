@@ -1,5 +1,4 @@
 library(tidyverse)
-library(readr)
 library(lubridate)
 
 # reading ibes detail histotry data -> entire database, us file, fy1, q1, q2, q3 and q4, only eps and from 1997-01 to 2011-01
@@ -220,13 +219,10 @@ after_val <- map(quarter_index, ~map(events$event_date,
   mutate(after = 1) %>% 
   arrange(cusip, event_date, quarter_index)
 
-#vals <- full_join(before_val, after_val, by = c("cusip", "event_date"))
-
 vals <- bind_rows(before_val, after_val)
 
 ibes_did <- ibes_did_raw %>% 
   left_join(vals, by = c("cusip", "event_date", "after")) %>% 
-  filter(!is.na(analyst_coverage)) %>% 
   distinct()
 
-write_rds(ibes_did, "data/ibes_did")
+write_rds(ibes_did, "data/ibes_did.rds")
