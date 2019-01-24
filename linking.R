@@ -1,5 +1,4 @@
 library(tidyverse)
-library(readr)
 library(lubridate)
 library(robustHD)
 library(DescTools)
@@ -145,22 +144,29 @@ quarter_index <- c(1:12)
 before_interval_fun <- function (event_date, quarter_index) {
   i <- 3 + (quarter_index - 1) * 3
   j <- 3 + (quarter_index) * 3
+  g <- if_else(event_date == ceiling_date(event_date, unit = "quarter") - days(1), 
+               floor_date(event_date %m-% months(i), unit ="quarter"), 
+               floor_date(event_date %m-% months(j), unit = "quarter"))
+  j <- if_else(event_date == ceiling_date(event_date, unit = "quarter") - days(1), 
+               ceiling_date(event_date %m-% months(i), unit ="quarter") - days(1), 
+               ceiling_date(event_date %m-% months(j), unit = "quarter") - days(1))
   df <- tibble(event_date = event_date,
-               interval = interval(floor_date(event_date %m-% months(j) + days(1), unit = "quarter") - days(1),
-                                   floor_date(event_date %m-% months(i) + days(1), unit = "quarter") - days(1)),
+               interval = interval(g, j),
                quarter_index = quarter_index)
   df
 }
 
 after_interval_fun <- function (event_date, quarter_index) {
-  i <- 3 + (quarter_index - 1) * 3
-  j <- 3 + (quarter_index) * 3
+  i <- (quarter_index - 1) * 3
+  j <- (quarter_index) * 3
+  g <- ceiling_date(event_date %m+% months(i), unit = "quarter")
+  j <- ceiling_date(event_date %m+% months(j), unit = "quarter") - days(1)
   df <- tibble(event_date = event_date,
-               interval = interval(ceiling_date(event_date %m+% months(i), unit = "quarter") - days(1),
-                                   ceiling_date(event_date %m+% months(j), unit = "quarter") - days(1)),
+               interval = interval(g, j),
                quarter_index = quarter_index)
   df
 }
+
 
 filter1 <- function (df_measures, df_events){
   interval <- df_events$interval  
@@ -170,8 +176,7 @@ filter1 <- function (df_measures, df_events){
 summarise1 <- function (df) {
   df %>% 
     group_by(permno, event_date, quarter_index) %>% 
-    summarise(sic_code = last(sic_code)) %>% 
-    summarise_at(columns_for_summarise, funs(mean(., na.rm = TRUE))) %>%
+    summarise_at(columns_for_summarise, last) %>%
     ungroup()
 }
 
