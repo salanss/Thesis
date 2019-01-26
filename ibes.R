@@ -1,5 +1,6 @@
 library(tidyverse)
 library(lubridate)
+library(readxl)
 
 # reading ibes detail histotry data -> entire database, us file, fy1, q1, q2, q3 and q4, only eps and from 1997-01 to 2011-01
 
@@ -27,9 +28,10 @@ detail_temp1 <- detail_raw %>%
 
 # brokerages and codes that closed mapped by ibes_names.csv
 
-closures_raw <- read_tsv("data/closure_events.txt", col_names = T, col_types = cols(.default = "c"))
+
+closures_raw <- read_excel("data/closure_events.xlsx")
 closures <- closures_raw %>% 
-  transmute(brokerage_code = brokerage_code,
+  transmute(brokerage_code = str_pad(brokerage_code, 5, side = c("left"), pad = "0"),
             brokerage_name_ibes = `brokerage_name (from ibes_names)`,
             brokerage_name = `brokerage_name (from Appendix list)`,
             event_date = ymd(event_date),
@@ -65,16 +67,16 @@ detail_temp2 <- detail_temp1 %>%
 
 detail_temp3 <- detail_temp2 %>% 
   left_join(closures, by = c("brokerage_code")) %>% 
-  select(-brokerage_name, -brokerage_name_ibes)
+  select(-brokerage_name_ibes)
 
 # filter brokerages that are in the closed_brokerages list (i.e. treatment group)
 
 detail_temp4 <- detail_temp3 %>% 
   filter(!is.na(event_date)) %>% # have to have a closure date to be in treatment group
-  mutate(yearbefore = announce_date %within% interval(event_date - years(1), event_date)) %>% 
+  mutate(yearbefore = announce_date %within% interval(event_date %m-% months(12), event_date)) %>% 
   filter(yearbefore == T) %>%  # filter only analysts that actively "covers" the firm, see Derrien and Keckses (2013) p. 1411
-  mutate(announce_stop_date = if_else(is.na(announce_stop_date), event_date - years(1), announce_stop_date)) %>% 
-  mutate(stopped_before = announce_stop_date %within% interval(announce_date, event_date %m-% months(3))) %>%  
+  mutate(announce_stop_date = if_else(is.na(announce_stop_date), event_date %m-% months(12), announce_stop_date)) %>% 
+  mutate(stopped_before = announce_stop_date %within% interval(announce_date, event_date %m-% months(1))) %>%  
   filter(stopped_before == F)  # filter only firms of which analysts have not stopped before event_date (relax 3 months)
                                     # otherwise endogenous "stoppings", i.e. decided to stop covering
 
