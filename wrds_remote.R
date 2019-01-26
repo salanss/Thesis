@@ -12,6 +12,7 @@ res <- dbSendQuery(wrds, "select distinct table_schema
                    where table_type ='VIEW'
                    order by table_schema")
 data_all <- dbFetch(res, n=-1)
+
 dbClearResult(res)
 data_all
 
@@ -35,8 +36,8 @@ data
 res <- dbSendQuery(wrds, "select *
                           from crsp.msf
                           where date between '1980-01-01'
-                          and '2017-01-01'")
-data <- dbFetch(res, n=-1)
+                          and '2017-12-31'")
+data <- system.time(dbFetch(res, n=-1))
 dbClearResult(res)
 library(tidyverse)
 data <- as.tbl(data)
