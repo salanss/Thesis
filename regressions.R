@@ -53,59 +53,34 @@ stargazer(baseline_regression_summary, title = "Baseline summary statistics", ou
 ## difference-in-differences regressions (did)
 
 did_regression_raw <- read_rds("data/did_regression_raw.rds") %>% 
+  mutate(log_market_cap = log(market_cap),
+         year = year(event_date)) %>% 
+  group_by(permno, event_date, treated) %>%
+  mutate(n = n_distinct(after)) %>%
+  ungroup() %>% 
+  filter(n > 1) %>%  # require for every permno to have before and after value for each event
   arrange(event_date, quarter_index, treated)
-
-# log_market_cap = mean(log_market_cap, win_e.g. = [-15;-3]) or 
-# log_market_cap = log(mean(market_cap), win_e.g. = [-15;-3])
 
 columns_for_summarise <- c("inst_percentage", "foreign_inst_percentage", "domestic_inst_percentage", 
                            "inst_breadth", "foreign_breadth", "domestic_breadth", 
                            "log_market_cap", "book_to_market", "leverage", "roa", "tobin_q", "analyst_coverage")
 
 did_regression <- did_regression_raw %>% 
-  mutate(log_market_cap = log(market_cap)) %>% 
   filter(quarter_index %in% c(-12:12)) %>% 
-  group_by(permno, event_date, treated, after, sic_code) %>% 
+  group_by(permno, event_date, year, treated, after, sic_code) %>% 
   summarise_at(columns_for_summarise, mean) %>% 
   ungroup() %>% 
   group_by(permno, event_date, treated, after) %>% 
   mutate(sic_code = last(sic_code)) %>% 
-  ungroup() %>% 
-  mutate(year = year(event_date))
+  ungroup()
 
-did_regression_temp1 <- did_regression %>% 
-  group_by(permno, event_date, treated) %>%
-  mutate(n = n_distinct(after)) %>%
-  ungroup() %>% 
-  filter(n > 1)
-
-did_regression_matched_temp1 <- did_regression_temp1 %>% 
+did_regression_matched_temp1 <- did_regression %>% 
   group_by(permno, event_date, treated) %>% 
   summarise_at(columns_for_summarise, mean) %>% 
   ungroup() %>% 
   mutate(n = row_number())
 
-propensity_match <- function(df) {
-  did_match <- matchit(treated ~ log_market_cap + book_to_market + analyst_coverage,
-                       method = "nearest", data = df, ratio = 2)
-  df <- match.data(did_match)
-  df
-}
-
-tk <- did_regression_matched_temp1 %>% filter(event_date == "2000-06-30")
-
-did_regression_matched <- matchit(treated ~ log_market_cap + book_to_market + analyst_coverage,
-                                  method = "nearest", data = did_regression_matched_temp1, ratio = 2)
-
-temp <- get_matches(did_regression_matched, did_regression_matched_temp1)
-
-temp <- did_regression_matched$match.matrix
-
 events <- did_regression_raw %>% select(event_date) %>% distinct() 
-afters <- did_regression_raw %>% select(after) %>% distinct()
-quarters_index <- did_regression_raw %>% select(quarter_index) %>% distinct() %>% 
-  arrange(quarter_index)
-
 
 filter1 <- function(df, events) {
   df %>% 
@@ -115,22 +90,29 @@ filter1 <- function(df, events) {
 propensity_match <- function(df) {
   did_match <- matchit(treated ~ log_market_cap + book_to_market + analyst_coverage,
           method = "nearest", data = df, ratio = 2)
-  # df <- match.data(did_match)
-  # df
+  df <- match.data(did_match)
+  df
 }
 
+# produces propensity scores for permno-event_date-treated combinations (based on means)
 
-list <- list(event_date = events$event_date, after = afters$after, quarter_index = quarters_index$quarter_index) %>% 
-  cross() %>%
-  map_df(set_names, c('event_date', 'after', 'quarter_index')) %>% 
-  mutate(n = row_number()) %>% 
-  split(.$n)
+did_regression_matched_temp2 <- map(events$event_date, ~filter1(did_regression_matched_temp1, .x)) %>%  
+  map_df(~propensity_match(.x))
 
-did_regression_matched <- map(events$event_date, ~filter1(did_regression_matched_temp1, .x)) %>%  
-  map_df(~propensity_match(.x))
-  
-temp <- tk %>% 
-  map_df(~propensity_match(.x))
+# now to join with before and after values
+
+did_regression_matched_raw <- did_regression_matched_temp2 %>% 
+  select(permno, event_date, treated) %>% 
+  left_join(did_regression_raw)
+
+did_regression_matched <- did_regression_matched_raw %>% 
+  filter(quarter_index %in% c(-12:12)) %>% 
+  group_by(permno, event_date, year, treated, after, sic_code) %>% 
+  summarise_at(columns_for_summarise, mean) %>% 
+  ungroup() %>% 
+  group_by(permno, event_date, treated, after) %>% 
+  mutate(sic_code = last(sic_code)) %>% 
+  ungroup()  
 
 did_regression_summary <- did_regression_matched %>% 
   select(-permno, -year, -sic_code) %>% 
@@ -141,16 +123,16 @@ stargazer(did_regression_summary, title = "DiD summary statistics", out = "DiD_s
 summary(did_regression)
   
 did_model1 <- felm(foreign_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = s)
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched)
 
 did_model2 <- felm(domestic_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = s)
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched)
 
 did_model3 <- felm(foreign_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = s)
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched)
 
 did_model4 <- felm(domestic_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = s)
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched)
 
 did_list <- list(did_model1, did_model2, did_model3, did_model4)
 
@@ -160,8 +142,7 @@ stargazer(did_list, title = "Difference-in-differences regression results (H2)",
                            c("Year fixed effects", rep("Yes", times = 4))),
           out = "DiD H2 results.html")
 
-data <- did_regression_raw %>% 
-  #filter(year(event_date) < 2007) %>% 
+parallel_trend1 <- did_regression_matched_raw %>% 
   mutate(treated = if_else(treated == 1, "treated", "control")) %>% 
   group_by(treated, quarter_index) %>% 
   summarise(foreign_inst_percentage = mean(foreign_inst_percentage),
@@ -170,15 +151,14 @@ data <- did_regression_raw %>%
             domestic_breadth = mean(domestic_breadth)) %>% 
   ungroup()
 
-ggplot(data, aes(quarter_index, foreign_inst_percentage, group = treated, color = treated)) + 
+ggplot(parallel_trend1, aes(quarter_index, foreign_inst_percentage, group = treated, color = treated)) + 
   geom_line() +
   geom_vline(xintercept=0) +
   theme_classic()
 
-ggsave("testi.png", last_plot())
+ggsave("parallel_trend.png", last_plot())
 
-data2 <- did_regression_raw %>% 
-  #filter(year(event_date) < 2007) %>% 
+parallel_trend2 <- did_regression_matched_raw %>% 
   mutate(treated = if_else(treated == 1, "treated", "control")) %>% 
   group_by(treated, quarter_index, event_date) %>% 
   summarise(foreign_inst_percentage = mean(foreign_inst_percentage),
@@ -187,34 +167,94 @@ data2 <- did_regression_raw %>%
             domestic_breadth = mean(domestic_breadth)) %>% 
   ungroup()
 
-ggplot(data2, aes(quarter_index, foreign_breadth, group = treated, color = treated)) + 
+ggplot(parallel_trend2, aes(quarter_index, foreign_breadth, group = treated, color = treated)) + 
   geom_line() +
   geom_vline(xintercept=0) +
   theme_classic() + facet_wrap(. ~ event_date)
 
-d <- baseline_regression_raw %>% 
+baseline_development <- baseline_regression_raw %>% 
   group_by(year) %>% 
   summarise(inst_percentage = mean(inst_percentage),
             foreign_inst_percentage = mean(foreign_inst_percentage),
             domestic_inst_percentage = mean(domestic_inst_percentage)) %>% 
   ungroup()
 
-ggplot(d, aes(year)) + 
+ggplot(baseline_development, aes(year)) + 
   geom_line(aes(y = inst_percentage, colour = "inst_percentage")) + 
   #geom_line(aes(y = foreign_inst_percentage, colour = "foreign_inst_percentage")) +
   geom_line(aes(y = domestic_inst_percentage, colour = "domestic_inst_percentage")) + 
   theme_classic()
 
 
-did_regression_h3 <- did_regression_raw %>% 
-  filter(year(event_date) < 2007) %>% 
-  mutate(log_market_cap = log(market_cap)) %>% 
+## H2 DiD without propensity score matching (all the rest)
+
+did_regression_summary <- did_regression %>% 
+  select(-permno, -year, -sic_code) %>% 
+  as.data.frame()
+
+stargazer(did_regression_summary, title = "DiD summary statistics", out = "DiD_summary.html")
+
+summary(did_regression)
+
+did_model1 <- felm(foreign_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression)
+
+did_model2 <- felm(domestic_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression)
+
+did_model3 <- felm(foreign_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression)
+
+did_model4 <- felm(domestic_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression)
+
+did_list <- list(did_model1, did_model2, did_model3, did_model4)
+
+stargazer(did_list, title = "Difference-in-differences regression results (H2)", 
+          omit.stat = c("ser"), 
+          add.lines = list(c("Industry fixed effects", rep("Yes", times = 4)), 
+                           c("Year fixed effects", rep("Yes", times = 4))),
+          out = "DiD H2 results.html")
+
+parallel_trend1 <- did_regression_raw %>% 
+  mutate(treated = if_else(treated == 1, "treated", "control")) %>% 
+  group_by(treated, quarter_index) %>% 
+  summarise(foreign_inst_percentage = mean(foreign_inst_percentage),
+            foreign_breadth = mean(foreign_breadth),
+            domestic_inst_percentage = mean(domestic_inst_percentage),
+            domestic_breadth = mean(domestic_breadth)) %>% 
+  ungroup()
+
+ggplot(parallel_trend1, aes(quarter_index, foreign_inst_percentage, group = treated, color = treated)) + 
+  geom_line() +
+  geom_vline(xintercept=0) +
+  theme_classic()
+
+ggsave("parallel_trend.png", last_plot())
+
+parallel_trend2 <- did_regression_raw %>% 
+  mutate(treated = if_else(treated == 1, "treated", "control")) %>% 
+  group_by(treated, quarter_index, event_date) %>% 
+  summarise(foreign_inst_percentage = mean(foreign_inst_percentage),
+            foreign_breadth = mean(foreign_breadth),
+            domestic_inst_percentage = mean(domestic_inst_percentage),
+            domestic_breadth = mean(domestic_breadth)) %>% 
+  ungroup()
+
+ggplot(parallel_trend2, aes(quarter_index, foreign_breadth, group = treated, color = treated)) + 
+  geom_line() +
+  geom_vline(xintercept=0) +
+  theme_classic() + facet_wrap(. ~ event_date)
+
+
+## DiD H3 results
+
+did_regression_h3 <- did_regression_matched_raw %>% 
   filter(quarter_index %in% c(-12:12)) %>% 
-  filter(inst_percentage < 0.10) %>% 
-  group_by(permno, event_date, treated, after, sic_code) %>% 
+  filter(analyst_coverage < 3) %>% 
+  group_by(permno, event_date, year, treated, after, sic_code) %>% 
   summarise_at(columns_for_summarise, mean) %>% 
-  ungroup() %>% 
-  mutate(year = year(event_date))
+  ungroup()
 
 did_model1 <- felm(foreign_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
                      leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_h3)
