@@ -52,18 +52,8 @@ stargazer(baseline_regression_summary, title = "Baseline summary statistics", ou
 
 ## difference-in-differences regressions (did)
 
-did_regression_raw <- read_rds("data/did_regression_raw.rds")
-
-did_match <- did_regression_raw %>% 
-  slice(1:1000) %>% 
-  matchit(treated ~ log_market_cap + book_to_market + analyst_coverage,
-                     method = "nearest", data = ., ratio = 2)
-
-as <- match.data(did_match)
-
-summary(did_match)
-
-summary(did_regression_raw)
+did_regression_raw <- read_rds("data/did_regression_raw.rds") %>% 
+  arrange(event_date, quarter_index, treated)
 
 # log_market_cap = mean(log_market_cap, win_e.g. = [-15;-3]) or 
 # log_market_cap = log(mean(market_cap), win_e.g. = [-15;-3])
@@ -73,11 +63,13 @@ columns_for_summarise <- c("inst_percentage", "foreign_inst_percentage", "domest
                            "log_market_cap", "book_to_market", "leverage", "roa", "tobin_q", "analyst_coverage")
 
 did_regression <- did_regression_raw %>% 
-  #filter(year(event_date) < 2007) %>% 
   mutate(log_market_cap = log(market_cap)) %>% 
   filter(quarter_index %in% c(-12:12)) %>% 
   group_by(permno, event_date, treated, after, sic_code) %>% 
   summarise_at(columns_for_summarise, mean) %>% 
+  ungroup() %>% 
+  group_by(permno, event_date, treated, after) %>% 
+  mutate(sic_code = last(sic_code)) %>% 
   ungroup() %>% 
   mutate(year = year(event_date))
 
@@ -87,29 +79,60 @@ did_regression_temp1 <- did_regression %>%
   ungroup() %>% 
   filter(n > 1)
 
-events <- did_regression_raw %>% select(event_date) %>% distinct()
-afters <- did_regression_raw %>% select(after) %>% distinct()
-quarters_index <- did_regression_raw %>% select(quarter_index) %>% distinct()
+did_regression_matched_temp1 <- did_regression_temp1 %>% 
+  group_by(permno, event_date, treated) %>% 
+  summarise_at(columns_for_summarise, mean) %>% 
+  ungroup() %>% 
+  mutate(n = row_number())
 
-
-f <- function(df, events, afters, quarters_index) {
-  df %>% 
-    filter(event_date == events & after == afters & quarter_index == quarters_index)
+propensity_match <- function(df) {
+  did_match <- matchit(treated ~ log_market_cap + book_to_market + analyst_coverage,
+                       method = "nearest", data = df, ratio = 2)
+  df <- match.data(did_match)
+  df
 }
 
-j <- function(df) {
+tk <- did_regression_matched_temp1 %>% filter(event_date == "2000-06-30")
+
+did_regression_matched <- matchit(treated ~ log_market_cap + book_to_market + analyst_coverage,
+                                  method = "nearest", data = did_regression_matched_temp1, ratio = 2)
+
+temp <- get_matches(did_regression_matched, did_regression_matched_temp1)
+
+temp <- did_regression_matched$match.matrix
+
+events <- did_regression_raw %>% select(event_date) %>% distinct() 
+afters <- did_regression_raw %>% select(after) %>% distinct()
+quarters_index <- did_regression_raw %>% select(quarter_index) %>% distinct() %>% 
+  arrange(quarter_index)
+
+
+filter1 <- function(df, events) {
+  df %>% 
+    filter(event_date == events)
+}
+
+propensity_match <- function(df) {
   did_match <- matchit(treated ~ log_market_cap + book_to_market + analyst_coverage,
           method = "nearest", data = df, ratio = 2)
-  as <- match.data(did_match)
-  as
+  # df <- match.data(did_match)
+  # df
 }
 
-s <- map(quarters_index$quarter_index, ~map(afters$after, ~map(events$event_date, 
-                                                               ~f(did_regression_raw, .x, .y, .z), .y = .x, .y. = .x), .z = .y)) #%>%
-  flatten() %>% 
-  map_df(~j(.x))
 
-did_regression_summary <- s %>% 
+list <- list(event_date = events$event_date, after = afters$after, quarter_index = quarters_index$quarter_index) %>% 
+  cross() %>%
+  map_df(set_names, c('event_date', 'after', 'quarter_index')) %>% 
+  mutate(n = row_number()) %>% 
+  split(.$n)
+
+did_regression_matched <- map(events$event_date, ~filter1(did_regression_matched_temp1, .x)) %>%  
+  map_df(~propensity_match(.x))
+  
+temp <- tk %>% 
+  map_df(~propensity_match(.x))
+
+did_regression_summary <- did_regression_matched %>% 
   select(-permno, -year, -sic_code) %>% 
   as.data.frame()
 
