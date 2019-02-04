@@ -50,6 +50,19 @@ baseline_regression_summary <- baseline_regression_raw %>%
 
 stargazer(baseline_regression_summary, title = "Baseline summary statistics", out = "Baseline_summary.html")
 
+baseline_development <- baseline_regression_raw %>% 
+  group_by(year) %>% 
+  summarise(inst_percentage = mean(inst_percentage),
+            foreign_inst_percentage = mean(foreign_inst_percentage),
+            domestic_inst_percentage = mean(domestic_inst_percentage)) %>% 
+  ungroup()
+
+ggplot(baseline_development, aes(year)) + 
+  geom_line(aes(y = inst_percentage, colour = "inst_percentage")) + 
+  geom_line(aes(y = foreign_inst_percentage, colour = "foreign_inst_percentage")) +
+  geom_line(aes(y = domestic_inst_percentage, colour = "domestic_inst_percentage")) + 
+  theme_classic()
+
 ## difference-in-differences regressions (did)
 
 did_regression_raw <- read_rds("data/did_regression_raw.rds") %>% 
@@ -172,18 +185,7 @@ ggplot(parallel_trend2, aes(quarter_index, foreign_breadth, group = treated, col
   geom_vline(xintercept=0) +
   theme_classic() + facet_wrap(. ~ event_date)
 
-baseline_development <- baseline_regression_raw %>% 
-  group_by(year) %>% 
-  summarise(inst_percentage = mean(inst_percentage),
-            foreign_inst_percentage = mean(foreign_inst_percentage),
-            domestic_inst_percentage = mean(domestic_inst_percentage)) %>% 
-  ungroup()
-
-ggplot(baseline_development, aes(year)) + 
-  geom_line(aes(y = inst_percentage, colour = "inst_percentage")) + 
-  #geom_line(aes(y = foreign_inst_percentage, colour = "foreign_inst_percentage")) +
-  geom_line(aes(y = domestic_inst_percentage, colour = "domestic_inst_percentage")) + 
-  theme_classic()
+ggsave("parallel_trend_facet.png", last_plot())
 
 
 ## H2 DiD without propensity score matching (all the rest)
@@ -192,7 +194,7 @@ did_regression_summary <- did_regression %>%
   select(-permno, -year, -sic_code) %>% 
   as.data.frame()
 
-stargazer(did_regression_summary, title = "DiD summary statistics", out = "DiD_summary.html")
+stargazer(did_regression_summary, title = "DiD summary statistics", out = "DiD_summary_no_prop.html")
 
 summary(did_regression)
 
@@ -214,7 +216,7 @@ stargazer(did_list, title = "Difference-in-differences regression results (H2)",
           omit.stat = c("ser"), 
           add.lines = list(c("Industry fixed effects", rep("Yes", times = 4)), 
                            c("Year fixed effects", rep("Yes", times = 4))),
-          out = "DiD H2 results.html")
+          out = "DiD H2 results_no_prop.html")
 
 parallel_trend1 <- did_regression_raw %>% 
   mutate(treated = if_else(treated == 1, "treated", "control")) %>% 
@@ -230,7 +232,7 @@ ggplot(parallel_trend1, aes(quarter_index, foreign_inst_percentage, group = trea
   geom_vline(xintercept=0) +
   theme_classic()
 
-ggsave("parallel_trend.png", last_plot())
+ggsave("parallel_trend_no_prop.png", last_plot())
 
 parallel_trend2 <- did_regression_raw %>% 
   mutate(treated = if_else(treated == 1, "treated", "control")) %>% 
@@ -245,6 +247,8 @@ ggplot(parallel_trend2, aes(quarter_index, foreign_breadth, group = treated, col
   geom_line() +
   geom_vline(xintercept=0) +
   theme_classic() + facet_wrap(. ~ event_date)
+
+ggsave("parallel_trend_facet_no_prop.png", last_plot())
 
 
 ## DiD H3 results
