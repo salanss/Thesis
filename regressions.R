@@ -121,7 +121,7 @@ did_regression_matched_raw <- did_regression_matched_temp2 %>%
   left_join(did_regression_raw)
 
 did_regression_matched <- did_regression_matched_raw %>% 
-  filter(quarter_index %in% c(-12:12)) %>% 
+  filter(quarter_index %in% c(-4:4)) %>% 
   group_by(permno, event_date, year, treated, after, sic_code) %>% 
   summarise_at(columns_for_summarise, mean) %>% 
   ungroup() %>% 
@@ -135,7 +135,7 @@ did_regression_summary <- did_regression_matched %>%
 
 stargazer(did_regression_summary, title = "DiD summary statistics", out = "DiD_summary.html")
 
-summary(did_regression)
+summary(did_regression_matched)
   
 did_model1 <- felm(foreign_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
                      leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched)
@@ -166,15 +166,15 @@ stargazer(did_list, title = "Difference-in-differences regression results (H2)",
 parallel_trend1 <- did_regression_matched_raw %>% 
   mutate(treated = if_else(treated == 1, "treated", "control")) %>% 
   group_by(treated, quarter_index) %>% 
-  summarise(foreign_inst_percentage = mean(foreign_inst_percentage),
-            foreign_shares_by_institutional_shares = mean(foreign_shares_by_institutional_shares),
-            foreign_breadth = mean(foreign_breadth),
-            foreign_breadth2 = mean(foreign_breadth2),
-            domestic_inst_percentage = mean(domestic_inst_percentage),
-            domestic_breadth = mean(domestic_breadth)) %>% 
+  summarise(foreign_inst_percentage = median(foreign_inst_percentage),
+            foreign_shares_by_institutional_shares = median(foreign_shares_by_institutional_shares),
+            foreign_breadth = median(foreign_breadth),
+            foreign_breadth2 = median(foreign_breadth2),
+            domestic_inst_percentage = median(domestic_inst_percentage),
+            domestic_breadth = median(domestic_breadth)) %>% 
   ungroup()
 
-ggplot(parallel_trend1, aes(quarter_index, foreign_shares_by_institutional_shares, group = treated, color = treated)) + 
+ggplot(parallel_trend1, aes(quarter_index, foreign_inst_percentage, group = treated, color = treated)) + 
   geom_line() +
   geom_vline(xintercept=0) +
   theme_classic()
@@ -213,30 +213,38 @@ summary(did_regression)
 did_model1 <- felm(foreign_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
                      leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression)
 
-did_model2 <- felm(domestic_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
+did_model2 <- felm(foreign_shares_by_institutional_shares ~ treated + after + treated * after + log_market_cap + book_to_market + 
                      leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression)
 
-did_model3 <- felm(foreign_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
+did_model3 <- felm(domestic_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
                      leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression)
 
-did_model4 <- felm(domestic_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
+did_model4 <- felm(foreign_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
                      leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression)
 
-did_list <- list(did_model1, did_model2, did_model3, did_model4)
+did_model5 <- felm(foreign_breadth2 ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression)
+
+did_model6 <- felm(domestic_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression)
+
+did_list <- list(did_model1, did_model2, did_model3, did_model4, did_model5, did_model6)
 
 stargazer(did_list, title = "Difference-in-differences regression results (H2)", 
           omit.stat = c("ser"), 
-          add.lines = list(c("Industry fixed effects", rep("Yes", times = 4)), 
-                           c("Year fixed effects", rep("Yes", times = 4))),
+          add.lines = list(c("Industry fixed effects", rep("Yes", times = 6)), 
+                           c("Year fixed effects", rep("Yes", times = 6))),
           out = "DiD H2 results_no_prop.html")
 
 parallel_trend1 <- did_regression_raw %>% 
   mutate(treated = if_else(treated == 1, "treated", "control")) %>% 
   group_by(treated, quarter_index) %>% 
   summarise(foreign_inst_percentage = mean(foreign_inst_percentage),
+            foreign_shares_by_institutional_shares = mean(foreign_shares_by_institutional_shares),
+            foreign_breadth2 = mean(foreign_breadth2),
             foreign_breadth = mean(foreign_breadth),
             domestic_inst_percentage = mean(domestic_inst_percentage),
-            domestic_breadth = mean(domestic_breadth)) %>% 
+            domestic_breadth = mean(domestic_breadth))  %>% 
   ungroup()
 
 ggplot(parallel_trend1, aes(quarter_index, foreign_inst_percentage, group = treated, color = treated)) + 
@@ -250,12 +258,14 @@ parallel_trend2 <- did_regression_raw %>%
   mutate(treated = if_else(treated == 1, "treated", "control")) %>% 
   group_by(treated, quarter_index, event_date) %>% 
   summarise(foreign_inst_percentage = mean(foreign_inst_percentage),
+            foreign_shares_by_institutional_shares = mean(foreign_shares_by_institutional_shares),
+            foreign_breadth2 = mean(foreign_breadth2),
             foreign_breadth = mean(foreign_breadth),
             domestic_inst_percentage = mean(domestic_inst_percentage),
             domestic_breadth = mean(domestic_breadth)) %>% 
   ungroup()
 
-ggplot(parallel_trend2, aes(quarter_index, foreign_breadth, group = treated, color = treated)) + 
+ggplot(parallel_trend2, aes(quarter_index, foreign_breadth2, group = treated, color = treated)) + 
   geom_line() +
   geom_vline(xintercept=0) +
   theme_classic() + facet_wrap(. ~ event_date)
