@@ -81,7 +81,7 @@ columns_for_summarise <- c("inst_percentage", "foreign_inst_percentage", "domest
                            "book_to_market", "leverage", "roa", "tobin_q", "analyst_coverage")
 
 did_regression <- did_regression_raw %>% 
-  filter(quarter_index %in% c(-12:12)) %>% 
+  filter(quarter_index %in% c(-4:4)) %>% 
   group_by(permno, event_date, year, treated, after, sic_code) %>% 
   summarise_at(columns_for_summarise, mean) %>% 
   ungroup() %>% 
