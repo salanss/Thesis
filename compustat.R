@@ -51,6 +51,7 @@ compustat_annual_final <- compustat_annual %>%
          book_to_market = book_equity / market_cap,
          leverage = (debt_in_current_liabilities + debt_long_term) / assets,
          roa = net_income / assets,
+         sales = sales,
          tobin_q = (assets + market_cap - book_equity) / assets) %>% 
   ungroup()
 
@@ -110,6 +111,7 @@ compustat_quarter_final <- compustat_quarter %>%
          book_to_market = book_equity / market_cap,
          leverage = if_else(assets <= 0, NA_real_, (debt_in_current_liabilities + debt_long_term) / assets),
          roa = if_else(assets <= 0, NA_real_, net_income / assets),
+         sales = if_else(sales <= 0, NA_real_, sales),
          tobin_q = if_else(assets <= 0, NA_real_, (assets + market_cap - book_equity) / assets))
 
 
