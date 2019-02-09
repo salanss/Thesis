@@ -13,7 +13,7 @@ baseline_regression_raw <- read_rds("data/baseline_regression_raw.rds")
 
 baseline_regression <- baseline_regression_raw %>% 
   gather(ia_measure_name, ia_measure, bid_ask_spread:mia) %>% 
-  gather(dep_measure_name, dep_measure, foreign_inst_percentage:domestic_breadth) %>% 
+  gather(dep_measure_name, dep_measure, foreign_inst_percentage:foreign_breadth2) %>% 
   filter_all(all_vars(!is.na(.))) %>% 
   group_by(dep_measure_name, ia_measure_name) %>% 
   nest()
@@ -25,22 +25,20 @@ rnm <- function(df, ia_meas, dep_meas) {
 
 model_function <- function(df, ia_meas, dep_meas) {
   f <- dep_measure ~ ia_measure + log_market_cap  + book_to_market + 
-    leverage + roa + tobin_q + log_sales|year + sic_code|0|year+sic_code
+    leverage + roa + tobin_q|year + sic_code|0|year+sic_code
   f[[2]] <- sym(dep_meas)
-  f[[3]][[2]][[2]][[2]][[2]][[2]][[2]][[2]][[2]][[2]] <- sym(ia_meas)
+  f[[3]][[2]][[2]][[2]][[2]][[2]][[2]][[2]][[2]] <- sym(ia_meas)
   felm(f, data = df)
 }
-
 
 baseline_names <- mutate(baseline_regression,
                          data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
                          model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
 
-stargazer(baseline_names$model, column.labels =c("Foreign ownership", "Foreign shares by institutional shares",
-                                                 "Foreign breadth", "Foreign breadth2", "Domestic ownership", 
-                                                 "Domestic breadth"),
+stargazer(baseline_names$model, column.labels =c("Foreign ownership", "Foreign ownership2",
+                                                 "Foreign breadth", "Foreign breadth2"),
           dep.var.labels.include = F,
-          column.separate = c(8, 8, 8, 8, 8, 8),
+          column.separate = c(8, 8, 8, 8),
           omit.stat = c("ser"),
           add.lines = list(c("Industry fixed effects", rep("Yes", times = 32)), 
                            c("Year fixed effects", rep("Yes", times = 32))),
@@ -56,20 +54,25 @@ baseline_development <- baseline_regression_raw %>%
   group_by(year) %>% 
   summarise(inst_percentage = mean(inst_percentage),
             foreign_inst_percentage = mean(foreign_inst_percentage),
+            foreign_inst_percentage2 = mean(foreign_inst_percentage2, na.rm = T),
+            foreign_breadth = mean(foreign_breadth),
+            foreign_breadth2 = mean(foreign_breadth2, na.rm = T),
             domestic_inst_percentage = mean(domestic_inst_percentage)) %>% 
   ungroup()
 
 ggplot(baseline_development, aes(year)) + 
-  geom_line(aes(y = inst_percentage, colour = "inst_percentage")) + 
+  #geom_line(aes(y = inst_percentage, colour = "inst_percentage")) + 
   geom_line(aes(y = foreign_inst_percentage, colour = "foreign_inst_percentage")) +
-  geom_line(aes(y = domestic_inst_percentage, colour = "domestic_inst_percentage")) + 
+  geom_line(aes(y = foreign_inst_percentage2, colour = "foreign_inst_percentage2")) +
+  geom_line(aes(y = foreign_breadth, colour = "foreign_breadth")) +
+  geom_line(aes(y = foreign_breadth2, colour = "foreign_breadth2")) +
+  #geom_line(aes(y = domestic_inst_percentage, colour = "domestic_inst_percentage")) + 
   theme_classic()
 
 ## difference-in-differences regressions (did)
 
 did_regression_raw <- read_rds("data/did_regression_raw.rds") %>% 
-  mutate(log_market_cap = log(market_cap),
-         year = year(event_date)) %>% 
+  mutate(year = year(event_date)) %>% 
   group_by(permno, event_date, treated) %>%
   mutate(n = n_distinct(after)) %>%
   ungroup() %>% 
@@ -77,9 +80,9 @@ did_regression_raw <- read_rds("data/did_regression_raw.rds") %>%
   arrange(event_date, quarter_index, treated)
 
 columns_for_summarise <- c("inst_percentage", "foreign_inst_percentage", "domestic_inst_percentage", 
-                           "foreign_shares_by_institutional_shares","inst_breadth", "foreign_breadth", 
-                           "foreign_breadth2", "domestic_breadth", "market_cap", "log_market_cap", 
-                           "book_to_market", "leverage", "roa", "tobin_q", "log_sales", "analyst_coverage")
+                           "foreign_inst_percentage2","inst_breadth", "foreign_breadth", 
+                           "foreign_breadth2", "domestic_breadth", "log_market_cap", 
+                           "book_to_market", "leverage", "roa", "tobin_q", "analyst_coverage")
 
 did_regression <- did_regression_raw %>% 
   filter(quarter_index %in% c(-12:12)) %>% 
@@ -90,8 +93,9 @@ did_regression <- did_regression_raw %>%
   mutate(sic_code = last(sic_code)) %>% 
   ungroup()
 
+
 did_regression_matched_temp1 <- did_regression %>% 
-  filter(after == 0) %>% # match only based on before values
+  filter(after == 0) %>% # match only based on before values during [-3;0] years
   group_by(permno, event_date, treated) %>% 
   summarise_at(columns_for_summarise, mean) %>% 
   ungroup() %>% 
@@ -106,7 +110,7 @@ filter1 <- function(df, events) {
 
 propensity_match <- function(df) {
   did_match <- matchit(treated ~ log_market_cap + book_to_market + analyst_coverage,
-          method = "nearest", data = df, ratio = 2)
+          method = "nearest", data = df, ratio = 3)
   df <- match.data(did_match)
   df
 }
@@ -119,19 +123,38 @@ did_regression_matched_temp2 <- map(events$event_date, ~filter1(did_regression_m
 # now to join with before and after values
 
 did_regression_matched_raw <- did_regression_matched_temp2 %>% 
+  as_tibble() %>% 
   select(permno, event_date, treated) %>% 
   left_join(did_regression_raw)
 
-did_regression_matched <- did_regression_matched_raw %>% 
+did_regression_matched1 <- did_regression_matched_raw %>% 
+  filter(quarter_index %in% c(-4:4)) %>% 
+  group_by(permno, event_date, year, treated, after, sic_code) %>% 
+  summarise_at(columns_for_summarise, mean) %>% 
+  ungroup() %>% 
+  group_by(permno, event_date, treated, after) %>% 
+  mutate(sic_code = last(sic_code)) %>% 
+  ungroup()
+
+did_regression_matched2 <- did_regression_matched_raw %>% 
+  filter(quarter_index %in% c(-8:8)) %>% 
+  group_by(permno, event_date, year, treated, after, sic_code) %>% 
+  summarise_at(columns_for_summarise, mean) %>% 
+  ungroup() %>% 
+  group_by(permno, event_date, treated, after) %>% 
+  mutate(sic_code = last(sic_code)) %>% 
+  ungroup()
+
+did_regression_matched3 <- did_regression_matched_raw %>% 
   filter(quarter_index %in% c(-12:12)) %>% 
   group_by(permno, event_date, year, treated, after, sic_code) %>% 
   summarise_at(columns_for_summarise, mean) %>% 
   ungroup() %>% 
   group_by(permno, event_date, treated, after) %>% 
   mutate(sic_code = last(sic_code)) %>% 
-  ungroup()  
+  ungroup()
 
-did_regression_summary <- did_regression_matched %>% 
+did_regression_summary <- did_regression_matched1 %>% 
   select(-permno, -year, -sic_code) %>% 
   as.data.frame()
 
@@ -140,46 +163,68 @@ stargazer(did_regression_summary, title = "DiD summary statistics", out = "DiD_s
 summary(did_regression_matched)
   
 did_model1 <- felm(foreign_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched)
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched1)
 
-did_model2 <- felm(foreign_shares_by_institutional_shares ~ treated + after + treated * after + log_market_cap + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched)
+did_model2 <- felm(foreign_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched2)
 
-did_model3 <- felm(domestic_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched)
+did_model3 <- felm(foreign_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched3)
 
-did_model4 <- felm(foreign_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched)
+did_model4 <- felm(foreign_inst_percentage2 ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched1)
 
-did_model5 <- felm(foreign_breadth2 ~ treated + after + treated * after + log_market_cap + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched)
+did_model5 <- felm(foreign_inst_percentage2 ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched2)
 
-did_model6 <- felm(domestic_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched)
+did_model6 <- felm(foreign_inst_percentage2 ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched3)
 
-did_list <- list(did_model1, did_model2, did_model3, did_model4, did_model5, did_model6)
+did_model7 <- felm(foreign_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched1)
 
-stargazer(did_list, title = "Difference-in-differences regression results (H2)", 
+did_model8 <- felm(foreign_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched2)
+
+did_model9 <- felm(foreign_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched3)
+
+did_model10 <- felm(foreign_breadth2 ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched1)
+
+did_model11 <- felm(foreign_breadth2 ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched2)
+
+did_model12 <- felm(foreign_breadth2 ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched3)
+
+did_list <- list(did_model1, did_model2, did_model3, did_model4, did_model5, did_model6, did_model7, did_model8,
+                 did_model9, did_model10, did_model11, did_model12)
+
+stargazer(did_list, title = "Difference-in-differences regression results with propensity score matching (H2)", 
+          dep.var.labels =c("Foreign ownership", "Foreign ownership2",
+                           "Foreign breadth", "Foreign breadth2"),
+          column.labels = rep(c("[-1;1] years", "[-2;2] years", "[-3;3] years"), times = 4),
           omit.stat = c("ser"), 
-          add.lines = list(c("Industry fixed effects", rep("Yes", times = 6)), 
-                           c("Year fixed effects", rep("Yes", times = 6))),
+          add.lines = list(c("Industry fixed effects", rep("Yes", times = 12)), 
+                           c("Year fixed effects", rep("Yes", times = 12))),
           out = "DiD H2 results.html")
 
 parallel_trend1 <- did_regression_matched_raw %>% 
   mutate(treated = if_else(treated == 1, "treated", "control")) %>% 
   group_by(treated, quarter_index) %>% 
-  summarise(foreign_inst_percentage = median(foreign_inst_percentage),
-            foreign_shares_by_institutional_shares = median(foreign_shares_by_institutional_shares),
-            foreign_breadth = median(foreign_breadth),
-            foreign_breadth2 = median(foreign_breadth2),
-            domestic_inst_percentage = median(domestic_inst_percentage),
-            domestic_breadth = median(domestic_breadth)) %>% 
-  ungroup()
+  summarise(`Foreign ownership` = mean(foreign_inst_percentage),
+            `Foreign ownership2` = mean(foreign_inst_percentage2),
+            `Foreign breadth` = mean(foreign_breadth),
+            `Foreign breadth2` = mean(foreign_breadth2)) %>% 
+  ungroup() %>% 
+  gather(measure_name, measure, `Foreign ownership`:`Foreign breadth2`)
 
-ggplot(parallel_trend1, aes(quarter_index, foreign_inst_percentage, group = treated, color = treated)) + 
+ggplot(parallel_trend1, aes(quarter_index, measure, group = treated, color = treated)) + 
   geom_line() +
   geom_vline(xintercept=0) +
-  theme_classic()
+  theme_classic() +
+  facet_wrap(. ~ measure_name, scales = "free_y")
 
 ggsave("parallel_trend.png", last_plot())
 
@@ -187,7 +232,7 @@ parallel_trend2 <- did_regression_matched_raw %>%
   mutate(treated = if_else(treated == 1, "treated", "control")) %>% 
   group_by(treated, quarter_index, event_date) %>% 
   summarise(foreign_inst_percentage = mean(foreign_inst_percentage),
-            foreign_shares_by_institutional_shares = mean(foreign_shares_by_institutional_shares),
+            foreign_inst_percentage2 = mean(foreign_inst_percentage2),
             foreign_breadth = mean(foreign_breadth),
             foreign_breadth2 = mean(foreign_breadth2),
             domestic_inst_percentage = mean(domestic_inst_percentage),
@@ -212,47 +257,90 @@ stargazer(did_regression_summary, title = "DiD summary statistics", out = "DiD_s
 
 summary(did_regression)
 
+did_regression1 <- did_regression_raw %>% 
+  filter(quarter_index %in% c(-4:4)) %>% 
+  group_by(permno, event_date, year, treated, after, sic_code) %>% 
+  summarise_at(columns_for_summarise, mean) %>% 
+  ungroup() %>% 
+  group_by(permno, event_date, treated, after) %>% 
+  mutate(sic_code = last(sic_code)) %>% 
+  ungroup()
+
+did_regression2 <- did_regression_raw %>% 
+  filter(quarter_index %in% c(-8:8)) %>% 
+  group_by(permno, event_date, year, treated, after, sic_code) %>% 
+  summarise_at(columns_for_summarise, mean) %>% 
+  ungroup() %>% 
+  group_by(permno, event_date, treated, after) %>% 
+  mutate(sic_code = last(sic_code)) %>% 
+  ungroup()
+
+did_regression3 <- did_regression
+
 did_model1 <- felm(foreign_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression)
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression1)
 
-did_model2 <- felm(foreign_shares_by_institutional_shares ~ treated + after + treated * after + log_market_cap + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression)
+did_model2 <- felm(foreign_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression2)
 
-did_model3 <- felm(domestic_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression)
+did_model3 <- felm(foreign_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression3)
 
-did_model4 <- felm(foreign_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression)
+did_model4 <- felm(foreign_inst_percentage2 ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression1)
 
-did_model5 <- felm(foreign_breadth2 ~ treated + after + treated * after + log_market_cap + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression)
+did_model5 <- felm(foreign_inst_percentage2 ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression2)
 
-did_model6 <- felm(domestic_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression)
+did_model6 <- felm(foreign_inst_percentage2 ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression3)
 
-did_list <- list(did_model1, did_model2, did_model3, did_model4, did_model5, did_model6)
+did_model7 <- felm(foreign_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression1)
 
-stargazer(did_list, title = "Difference-in-differences regression results (H2)", 
+did_model8 <- felm(foreign_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression2)
+
+did_model9 <- felm(foreign_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression3)
+
+did_model10 <- felm(foreign_breadth2 ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                      leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression1)
+
+did_model11 <- felm(foreign_breadth2 ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                      leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression2)
+
+did_model12 <- felm(foreign_breadth2 ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                      leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression3)
+
+did_list <- list(did_model1, did_model2, did_model3, did_model4, did_model5, did_model6, did_model7, did_model8,
+                 did_model9, did_model10, did_model11, did_model12)
+
+stargazer(did_list, title = "Difference-in-differences regression results without propensity score matching (H2)", 
+          dep.var.labels =c("Foreign ownership", "Foreign ownership2",
+                            "Foreign breadth", "Foreign breadth2"),
+          column.labels = rep(c("[-1;1] years", "[-2;2] years", "[-3;3] years"), times = 4),
           omit.stat = c("ser"), 
-          add.lines = list(c("Industry fixed effects", rep("Yes", times = 6)), 
-                           c("Year fixed effects", rep("Yes", times = 6))),
+          add.lines = list(c("Industry fixed effects", rep("Yes", times = 12)), 
+                           c("Year fixed effects", rep("Yes", times = 12))),
           out = "DiD H2 results_no_prop.html")
+
 
 parallel_trend1 <- did_regression_raw %>% 
   mutate(treated = if_else(treated == 1, "treated", "control")) %>% 
   group_by(treated, quarter_index) %>% 
-  summarise(foreign_inst_percentage = mean(foreign_inst_percentage),
-            foreign_shares_by_institutional_shares = mean(foreign_shares_by_institutional_shares),
-            foreign_breadth2 = mean(foreign_breadth2),
-            foreign_breadth = mean(foreign_breadth),
-            domestic_inst_percentage = mean(domestic_inst_percentage),
-            domestic_breadth = mean(domestic_breadth))  %>% 
-  ungroup()
+  summarise(`Foreign ownership` = mean(foreign_inst_percentage),
+            `Foreign ownership2` = mean(foreign_inst_percentage2),
+            `Foreign breadth` = mean(foreign_breadth),
+            `Foreign breadth2` = mean(foreign_breadth2)) %>% 
+  ungroup() %>% 
+  gather(measure_name, measure, `Foreign ownership`:`Foreign breadth2`)
 
-ggplot(parallel_trend1, aes(quarter_index, foreign_inst_percentage, group = treated, color = treated)) + 
+ggplot(parallel_trend1, aes(quarter_index, measure, group = treated, color = treated)) + 
   geom_line() +
   geom_vline(xintercept=0) +
-  theme_classic()
+  theme_classic() +
+  facet_wrap(. ~ measure_name, scales = "free_y")
 
 ggsave("parallel_trend_no_prop.png", last_plot())
 
