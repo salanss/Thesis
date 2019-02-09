@@ -12,7 +12,7 @@ baseline_regression_raw <- read_rds("data/baseline_regression_raw.rds")
 # gather ia_measures for single column, create nested data frames and apply functional programming for lm model ->
 
 baseline_regression <- baseline_regression_raw %>% 
-  gather(ia_measure_name, ia_measure, bid_ask_spread:mia) %>% 
+  gather(ia_measure_name, ia_measure, bid_ask_spread:vcv3) %>% 
   gather(dep_measure_name, dep_measure, foreign_inst_percentage:foreign_breadth2) %>% 
   filter_all(all_vars(!is.na(.))) %>% 
   group_by(dep_measure_name, ia_measure_name) %>% 
@@ -38,10 +38,10 @@ baseline_names <- mutate(baseline_regression,
 stargazer(baseline_names$model, column.labels =c("Foreign ownership", "Foreign ownership2",
                                                  "Foreign breadth", "Foreign breadth2"),
           dep.var.labels.include = F,
-          column.separate = c(8, 8, 8, 8),
+          column.separate = c(11, 11, 11, 11),
           omit.stat = c("ser"),
-          add.lines = list(c("Industry fixed effects", rep("Yes", times = 32)), 
-                           c("Year fixed effects", rep("Yes", times = 32))),
+          add.lines = list(c("Industry fixed effects", rep("Yes", times = 44)), 
+                           c("Year fixed effects", rep("Yes", times = 44))),
           title = "Baseline regression results (H1)", out = "Baseline_results.html")
 
 baseline_regression_summary <- baseline_regression_raw %>% 
