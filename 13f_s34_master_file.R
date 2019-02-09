@@ -88,6 +88,9 @@ df_temp6 <- read_rds("data/13f_crsp_merged_final.rds") %>%
   summarise(institutional_ownership_shares = sum(shareholdings_adjusted),
             foreign_institutional_ownership_shares = sum(shareholdings_adjusted[institutional_country != "UNITED STATES"]),
             domestic_institutional_ownership_shares = sum(shareholdings_adjusted[institutional_country == "UNITED STATES"]),
+            institutional_ownership_shares_unadj = sum(shareholdings_end_qtr),
+            foreign_institutional_ownership_shares_unadj = sum(shareholdings_end_qtr[institutional_country != "UNITED STATES"]),
+            domestic_institutional_ownership_shares_unadj = sum(shareholdings_end_qtr[institutional_country == "UNITED STATES"]),
             institutional_numbers = n_distinct(institutional),
             foreign_institutional_numbers = n_distinct(institutional[institutional_country != "UNITED STATES"]),
             domestic_institutional_numbers = n_distinct(institutional[institutional_country == "UNITED STATES"])) %>% 
