@@ -10,6 +10,7 @@ wrds <- dbConnect(Postgres(),
 res <- dbSendQuery(wrds, "select distinct table_schema
                    from information_schema.tables
                    where table_type ='VIEW'
+                   or table_type = 'FOREIGN TABLE'
                    order by table_schema")
 data_all <- dbFetch(res, n=-1)
 
@@ -27,18 +28,20 @@ tfn
 
 res <- dbSendQuery(wrds, "select column_name
                    from information_schema.columns
-                   where table_schema='crsp'
-                   and table_name='msf'
+                   where table_schema='crspa'
+                   and table_name='dsf'
                    order by column_name")
 data <- dbFetch(res, n=-1)
 dbClearResult(res)
 data
 
-res <- dbSendQuery(wrds, "select *
+res <- dbSendQuery(wrds, "select permno, date, prc, shrout, ret, vol
                           from crsp.dsf
-                          where date between '1980-01-01'
+                          where date between '1996-01-01'
                           and '2017-12-31'")
 data <- dbFetch(res, n=-1)
 dbClearResult(res)
 library(tidyverse)
 data <- as.tbl(data)
+
+as_tb
