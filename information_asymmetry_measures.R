@@ -1,5 +1,4 @@
 library(tidyverse)
-library(readr)
 library(lubridate)
 
 # PINs by Duarte and Young (2006 or 2009), PIN_DY, PIN_Adjusted and PSOS
@@ -73,11 +72,16 @@ mia <- mia_raw %>%
   summarise(mia = mean(mia_daily)) %>% 
   ungroup()
 
+vcv_raw <- read_rds("data/vcv.rds")
+
+vcv <- vcv_raw %>% 
+  mutate(permno = as.character(permno))
 
 information_asymmetry_measures <- pin_dy %>% 
   full_join(pin_eho, by = c("permno", "year")) %>% 
   full_join(pin_bhl, by = c("permno", "year")) %>% 
   full_join(pin_bh, by = c("permno", "year")) %>% 
-  full_join(mia, by = c("permno", "year"))
+  full_join(mia, by = c("permno", "year")) %>% 
+  full_join(vcv, by = c("permno", "year"))
 
 write_rds(information_asymmetry_measures, "data/information_asymmetry_measures.rds")
