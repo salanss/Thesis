@@ -29,6 +29,7 @@ thirteenf_crsp_not_merged <- crsp_quarter_stock %>%
   mutate(report_date = quarter_date,
          institutional_ownership_shares = 0,
          foreign_institutional_ownership_shares = 0,
+         foreign_institutional_ownership_shares_unadj = 0,
          domestic_institutional_ownership_shares = 0,
          institutional_numbers = 0,
          foreign_institutional_numbers = 0,
@@ -37,19 +38,21 @@ thirteenf_crsp_not_merged <- crsp_quarter_stock %>%
   left_join(thirteenf_institutionals_quarterly, by = "report_date")
 
 thirteenf_crsp <- bind_rows(thirteenf_crsp_merged, thirteenf_crsp_not_merged) %>% 
-  mutate(inst_ownership_percentage = case_when(shares_outstanding_adjusted < 0 ~ NA_real_,
+  mutate(inst_ownership_percentage = case_when(shares_outstanding_adjusted <= 0 ~ NA_real_,
                                                institutional_ownership_shares / shares_outstanding_adjusted > 1 ~ 1,
                                                TRUE ~ institutional_ownership_shares / shares_outstanding_adjusted),
-         foreign_ownership_percentage = case_when(shares_outstanding_adjusted < 0 ~ NA_real_,
+         foreign_ownership_percentage = case_when(shares_outstanding_adjusted <= 0 ~ NA_real_,
                                                   foreign_institutional_ownership_shares / shares_outstanding_adjusted > 1 ~ 1,
                                                   TRUE ~ foreign_institutional_ownership_shares / shares_outstanding_adjusted),
-         domestic_ownership_percentage = case_when(shares_outstanding_adjusted < 0 ~ NA_real_,
+         domestic_ownership_percentage = case_when(shares_outstanding_adjusted <= 0 ~ NA_real_,
                                                    domestic_institutional_ownership_shares / shares_outstanding_adjusted > 1 ~ 1,
                                                    TRUE ~ domestic_institutional_ownership_shares / shares_outstanding_adjusted),
-         foreign_ownership_percentage2 = foreign_institutional_ownership_shares_unadj / institutional_ownership_shares_unadj,
+         foreign_ownership_percentage2 = if_else(institutional_ownership_shares_unadj <= 0, NA_real_,
+                                                 foreign_institutional_ownership_shares_unadj / institutional_ownership_shares_unadj),
          inst_breadth = institutional_numbers / total_institutions,
          foreign_breadth = foreign_institutional_numbers / total_institutions,
-         foreign_breadth2 = foreign_institutional_numbers / institutional_numbers,
+         foreign_breadth2 = if_else(institutional_numbers <= 0, NA_real_, 
+                                    foreign_institutional_numbers / institutional_numbers),
          domestic_breadth = domestic_institutional_numbers / total_institutions) 
 
 thirteenf_crsp_compustat_temp <- thirteenf_crsp %>% 
@@ -63,14 +66,14 @@ thirteenf_crsp_compustat_temp <- thirteenf_crsp %>%
             inst_percentage = inst_ownership_percentage,
             foreign_inst_percentage = foreign_ownership_percentage,
             domestic_inst_percentage = domestic_ownership_percentage,
-            foreign_shares_by_institutional_shares = foreign_shares_by_institutional_shares,
+            foreign_inst_percentage2 = foreign_ownership_percentage2,
             inst_breadth = inst_breadth,
             foreign_breadth = foreign_breadth,
             foreign_breadth2 = foreign_breadth2,
             domestic_breadth = domestic_breadth,
             price = price_adjusted, # coalesce(price, price_close_calendar)
             market_cap = market_cap.x, 
-            log_market_cap = log(market_cap.x),
+            log_market_cap = if_else(market_cap.x <= 0, NA_real_, log(market_cap.x)),
             book_equity = book_equity,
             book_to_market = book_to_market,
             leverage = leverage,
@@ -82,45 +85,45 @@ thirteenf_crsp_compustat_temp <- thirteenf_crsp %>%
   arrange(report_date, permno)
 
 thirteenf_crsp_compustat <- thirteenf_crsp_compustat_temp %>% 
-  filter_all(all_vars(!is.na(.))) %>% # filter all NAs away, since going to be used in regression 
   mutate(inst_percentage = inst_percentage,
          foreign_inst_percentage = foreign_inst_percentage,
          domestic_inst_percentage = domestic_inst_percentage,
-         foreign_shares_by_institutional_shares = foreign_shares_by_institutional_shares,
+         foreign_inst_percentage2 = foreign_inst_percentage2,
          inst_breadth = inst_breadth,
          foreign_breadth = foreign_breadth,
          foreign_breadth2 = foreign_breadth2,
          domestic_breadth = domestic_breadth,
-         market_cap = Winsorize(market_cap, probs = c(0.01, 0.99)), # winsorize control variables to mitigate outliers
-         log_market_cap = Winsorize(log_market_cap, probs = c(0.01, 0.99)),
-         book_to_market = Winsorize(book_to_market, probs = c(0.01, 0.99)),
-         leverage = Winsorize(leverage, probs = c(0.01, 0.99)),
-         roa = Winsorize(roa, probs = c(0.01, 0.99)),
-         tobin_q = Winsorize(tobin_q, probs = c(0.01, 0.99)),
-         sales = Winsorize(sales, probs = c(0.01, 0.99)),
-         log_sales = Winsorize(log_sales, probs = c(0.01, 0.99)),
-         bid_ask_spread = bid_ask_spread)
+         market_cap = Winsorize(market_cap, probs = c(0.01, 0.99), na.rm = T), # winsorize control variables to mitigate outliers
+         log_market_cap = Winsorize(log_market_cap, probs = c(0.01, 0.99), na.rm = T),
+         book_to_market = Winsorize(book_to_market, probs = c(0.01, 0.99), na.rm = T),
+         leverage = Winsorize(leverage, probs = c(0.01, 0.99), na.rm = T),
+         roa = Winsorize(roa, probs = c(0.01, 0.99), na.rm = T),
+         tobin_q = Winsorize(tobin_q, probs = c(0.01, 0.99), na.rm = T),
+         sales = Winsorize(sales, probs = c(0.01, 0.99), na.rm = T),
+         log_sales = Winsorize(log_sales, probs = c(0.01, 0.99), na.rm = T),
+         bid_ask_spread = bid_ask_spread) %>% 
+  filter_at(vars(log_market_cap:tobin_q, sic_code), all_vars(!is.na(.))) # filter control variable NAs away, since going to be used in regression 
 
 thirteenf_crsp_compustat_ia <- thirteenf_crsp_compustat %>% 
   group_by(permno, year) %>% 
   summarise(sic_code = last(sic_code),
-            inst_percentage = mean(inst_percentage),
-            inst_breadth = mean(inst_breadth),
-            foreign_inst_percentage = mean(foreign_inst_percentage),
-            foreign_shares_by_institutional_shares = mean(foreign_shares_by_institutional_shares),
-            foreign_breadth = mean(foreign_breadth),
-            foreign_breadth2 = mean(foreign_breadth2),
-            domestic_inst_percentage = mean(domestic_inst_percentage),
-            domestic_breadth = mean(domestic_breadth),
-            market_cap = mean(market_cap),
-            log_market_cap = mean(log_market_cap),
-            book_to_market = mean(book_to_market),
-            leverage = mean(leverage),
-            roa = mean(roa),
-            tobin_q = mean(tobin_q),
-            sales = mean(sales),
-            log_sales = mean(log_sales),
-            bid_ask_spread = mean(bid_ask_spread)) %>% 
+            inst_percentage = mean(inst_percentage, na.rm = T),
+            inst_breadth = mean(inst_breadth, na.rm = T),
+            foreign_inst_percentage = mean(foreign_inst_percentage, na.rm = T),
+            foreign_inst_percentage2 = mean(foreign_inst_percentage2, na.rm = T),
+            foreign_breadth = mean(foreign_breadth, na.rm = T),
+            foreign_breadth2 = mean(foreign_breadth2, na.rm = T),
+            domestic_inst_percentage = mean(domestic_inst_percentage, na.rm = T),
+            domestic_breadth = mean(domestic_breadth, na.rm = T),
+            market_cap = mean(market_cap, na.rm = T),
+            log_market_cap = mean(log_market_cap, na.rm = T),
+            book_to_market = mean(book_to_market, na.rm = T),
+            leverage = mean(leverage, na.rm = T),
+            roa = mean(roa, na.rm = T),
+            tobin_q = mean(tobin_q, na.rm = T),
+            sales = mean(sales, na.rm = T),
+            log_sales = mean(log_sales, na.rm = T),
+            bid_ask_spread = mean(bid_ask_spread, na.rm = T)) %>% 
   ungroup() %>% 
   inner_join(information_asymmetry_measures, by = c("permno", "year")) %>% 
   distinct()
@@ -152,9 +155,9 @@ events <- read_rds("data/closures.rds") %>%
   distinct()
 
 columns_for_summarise <- c("inst_percentage", "foreign_inst_percentage", "domestic_inst_percentage", 
-                           "foreign_shares_by_institutional_shares","inst_breadth", "foreign_breadth", 
+                           "foreign_inst_percentage2","inst_breadth", "foreign_breadth", 
                            "foreign_breadth2", "domestic_breadth", "market_cap", "log_market_cap", 
-                           "book_to_market", "leverage", "roa", "sales", "log_sales", "tobin_q")
+                           "book_to_market", "leverage", "roa", "tobin_q")
 
 
 quarter_index <- c(1:12)
@@ -192,7 +195,7 @@ filter1 <- function (df_measures, df_events){
 }
 
 summarise1 <- function (df) {
-  df %>% 
+  df %>%
     group_by(permno, event_date, quarter_index) %>% 
     summarise_at(columns_for_summarise, last) %>%
     ungroup()
