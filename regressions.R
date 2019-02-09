@@ -25,11 +25,12 @@ rnm <- function(df, ia_meas, dep_meas) {
 
 model_function <- function(df, ia_meas, dep_meas) {
   f <- dep_measure ~ ia_measure + log_market_cap  + book_to_market + 
-    leverage + roa + tobin_q|year + sic_code|0|year+sic_code
+    leverage + roa + tobin_q + log_sales|year + sic_code|0|year+sic_code
   f[[2]] <- sym(dep_meas)
-  f[[3]][[2]][[2]][[2]][[2]][[2]][[2]][[2]][[2]] <- sym(ia_meas)
+  f[[3]][[2]][[2]][[2]][[2]][[2]][[2]][[2]][[2]][[2]] <- sym(ia_meas)
   felm(f, data = df)
 }
+
 
 baseline_names <- mutate(baseline_regression,
                          data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
@@ -78,10 +79,10 @@ did_regression_raw <- read_rds("data/did_regression_raw.rds") %>%
 columns_for_summarise <- c("inst_percentage", "foreign_inst_percentage", "domestic_inst_percentage", 
                            "foreign_shares_by_institutional_shares","inst_breadth", "foreign_breadth", 
                            "foreign_breadth2", "domestic_breadth", "market_cap", "log_market_cap", 
-                           "book_to_market", "leverage", "roa", "tobin_q", "analyst_coverage")
+                           "book_to_market", "leverage", "roa", "tobin_q", "log_sales", "analyst_coverage")
 
 did_regression <- did_regression_raw %>% 
-  filter(quarter_index %in% c(-4:4)) %>% 
+  filter(quarter_index %in% c(-12:12)) %>% 
   group_by(permno, event_date, year, treated, after, sic_code) %>% 
   summarise_at(columns_for_summarise, mean) %>% 
   ungroup() %>% 
@@ -90,6 +91,7 @@ did_regression <- did_regression_raw %>%
   ungroup()
 
 did_regression_matched_temp1 <- did_regression %>% 
+  filter(after == 0) %>% # match only based on before values
   group_by(permno, event_date, treated) %>% 
   summarise_at(columns_for_summarise, mean) %>% 
   ungroup() %>% 
@@ -121,7 +123,7 @@ did_regression_matched_raw <- did_regression_matched_temp2 %>%
   left_join(did_regression_raw)
 
 did_regression_matched <- did_regression_matched_raw %>% 
-  filter(quarter_index %in% c(-4:4)) %>% 
+  filter(quarter_index %in% c(-12:12)) %>% 
   group_by(permno, event_date, year, treated, after, sic_code) %>% 
   summarise_at(columns_for_summarise, mean) %>% 
   ungroup() %>% 
@@ -192,7 +194,7 @@ parallel_trend2 <- did_regression_matched_raw %>%
             domestic_breadth = mean(domestic_breadth)) %>% 
   ungroup()
 
-ggplot(parallel_trend2, aes(quarter_index, foreign_shares_by_institutional_shares, group = treated, color = treated)) + 
+ggplot(parallel_trend2, aes(quarter_index, foreign_inst_percentage, group = treated, color = treated)) + 
   geom_line() +
   geom_vline(xintercept=0) +
   theme_classic() + facet_wrap(. ~ event_date)
