@@ -16,6 +16,7 @@ data_all <- dbFetch(res, n=-1)
 dbClearResult(res)
 data_all
 
+
 res <- dbSendQuery(wrds, "select distinct table_name
                    from information_schema.columns
                    where table_schema='crsp'
@@ -34,10 +35,10 @@ dbClearResult(res)
 data
 
 res <- dbSendQuery(wrds, "select *
-                          from crsp.msf
+                          from crsp.dsf
                           where date between '1980-01-01'
                           and '2017-12-31'")
-data <- system.time(dbFetch(res, n=-1))
+data <- dbFetch(res, n=-1)
 dbClearResult(res)
 library(tidyverse)
 data <- as.tbl(data)
