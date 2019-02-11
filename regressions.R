@@ -9,6 +9,17 @@ library(MatchIt)
 
 baseline_regression_raw <- read_rds("data/baseline_regression_raw.rds")
 
+cor_raw <- baseline_regression_raw %>% select(-permno, -year, -sic_code, -inst_percentage,
+                                          -inst_breadth, -market_cap, -sales, -log_sales)
+
+cor_matrix_raw <- round(cor(cor_raw, use = "complete.obs"), 2)
+
+cor_matrix_raw[upper.tri(cor_matrix_raw)] <- ""
+
+cor_matrix <- cor_matrix_raw
+
+stargazer(cor_matrix, title = "correlation matrix", out = "correlation_matrix.html")
+
 # gather ia_measures for single column, create nested data frames and apply functional programming for lm model ->
 
 baseline_regression <- baseline_regression_raw %>% 
@@ -78,6 +89,17 @@ did_regression_raw <- read_rds("data/did_regression_raw.rds") %>%
   ungroup() %>% 
   filter(n > 1) %>%  # require for every permno to have before and after value for each event
   arrange(event_date, quarter_index, treated)
+
+cor_raw <- did_regression_raw %>% select(-permno, -year, -sic_code, -inst_percentage, -event_date, -cusip,
+                                              -inst_breadth, -market_cap, -quarter_index, -n)
+
+cor_matrix_raw <- round(cor(cor_raw, use = "complete.obs"), 2)
+
+cor_matrix_raw[upper.tri(cor_matrix_raw)] <- ""
+
+cor_matrix <- cor_matrix_raw
+
+stargazer(cor_matrix, title = "correlation matrix", out = "correlation_matrix_did.html")
 
 columns_for_summarise <- c("inst_percentage", "foreign_inst_percentage", "domestic_inst_percentage", 
                            "foreign_inst_percentage2","inst_breadth", "foreign_breadth", 
