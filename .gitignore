@@ -5,3 +5,6 @@
 data
 *.html
 *.png
+*.csl
+*.log
+*.bib
