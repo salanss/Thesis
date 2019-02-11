@@ -84,7 +84,12 @@ thirteenf_crsp_compustat_temp <- thirteenf_crsp %>%
             bid_ask_spread = bid_ask_spread) %>% 
   arrange(report_date, permno)
 
+volatility_quarter <- read_rds("data/volatility_quarter.rds") %>% 
+  select(-volatility_unadj) %>% 
+  mutate(permno = as.character(permno))
+
 thirteenf_crsp_compustat <- thirteenf_crsp_compustat_temp %>% 
+  left_join(volatility_quarter, by = c("permno", "report_date" = "quarter_date")) %>% 
   mutate(inst_percentage = inst_percentage,
          foreign_inst_percentage = foreign_inst_percentage,
          domestic_inst_percentage = domestic_inst_percentage,
@@ -101,10 +106,16 @@ thirteenf_crsp_compustat <- thirteenf_crsp_compustat_temp %>%
          tobin_q = Winsorize(tobin_q, probs = c(0.01, 0.99), na.rm = T),
          sales = Winsorize(sales, probs = c(0.01, 0.99), na.rm = T),
          log_sales = Winsorize(log_sales, probs = c(0.01, 0.99), na.rm = T),
+         volatility = Winsorize(volatility_adj, probs = c(0.01, 0.99), na.rm = T),
          bid_ask_spread = bid_ask_spread) %>% 
   filter_at(vars(log_market_cap:tobin_q, sic_code), all_vars(!is.na(.))) # filter control variable NAs away, since going to be used in regression 
 
+volatility_annual <- read_rds("data/volatility.rds") %>% 
+  select(-volatility_unadj) %>% 
+  mutate(permno = as.character(permno))
+
 thirteenf_crsp_compustat_ia <- thirteenf_crsp_compustat %>% 
+  select(-volatility, -volatility_adj) %>% 
   group_by(permno, year) %>% 
   summarise(sic_code = last(sic_code),
             inst_percentage = mean(inst_percentage, na.rm = T),
@@ -126,6 +137,8 @@ thirteenf_crsp_compustat_ia <- thirteenf_crsp_compustat %>%
             bid_ask_spread = mean(bid_ask_spread, na.rm = T)) %>% 
   ungroup() %>% 
   inner_join(information_asymmetry_measures, by = c("permno", "year")) %>% 
+  left_join(volatility_annual) %>% 
+  mutate(volatility = Winsorize(volatility_adj, probs = c(0.01, 0.99), na.rm = T)) %>% 
   distinct()
 
 write_rds(thirteenf_crsp_compustat_ia, "data/baseline_regression_raw.rds")
