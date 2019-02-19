@@ -4,6 +4,7 @@ output:
   pdf_document:
     toc: true
     latex_engine: xelatex
+  toc-title: "Table of Contents"
 mainfont: Times New Roman
 bibliography: Bibliography.bib
 csl: journal-of-financial-economics.csl
@@ -33,7 +34,7 @@ Foreign investors are generally thought to be less informed of local stock marke
 
 Compared to large literature of describing information advantages of domestic and foreign investors, the relationship of foreign ownership and information asymmetry is less studied. Jiang and Kim (2004) find evidence of inverse relation between foreign ownership and information asymmetry in Japanese markets by focusing on the relation between the level of foreign shareholdings and a measurable consequence of information asymmetry of which they use the timing and magnitude of intertemporal return-earnings associations. Furthermore, they provide evidence that foreign investors tend to avoid stocks with high cross-corporate holdings. However, Choi et al. (2013) report that high foreign ownership is associated with high information asymmetry using a bid-ask spread as a proxy for information asymmetry. In contrast, He et al. (2013) use a well-known measure of the probability of informed trading (PIN) and price non-synchronicity as proxies for information asymmetry when examining the connection between foreign ownership and information asymmetry with a cross-sectional dataset of firms in 40 markets in 2002. They find, as well, that firms with large foreign ownership typically have more informative stock prices (i.e. low information asymmetry) but they rather strongly, given that they limit their conclusion only to a cross-sectional regression results, assume that large foreign ownership causes low information asymmetry. 
 
-I contribute to the existing literature by examining the relationship of foreign ownership and information asymmetry not just with a panel regression but also with a difference-in-differences research setting of brokerage closures (Kelly and Ljungqvist, 2012) which cause an exogenous shock to the analyst coverage of a firm’s stock. Kelly and Ljungvist (2012) and Derrien and Kecskes (2013) argue that an exogenous decrease in analyst coverage causes an increase in information asymmetry of the covered firm. As a result, the research setting of brokerage closures enables me to assess the causal effect between information asymmetry and foreign ownership. Previous studies of information asymmetry and foreign ownership (Jiang and Kim, 2004; Choi et al., 2013; He et al., 2013) do not examine causality profoundly, which makes this thesis a first attempt, to the best of my knowledge, to study the causal effect of information asymmetry on foreign ownership. In addition, I test the general relationship of these two with panel regressions by using various proxies for information asymmetry such as PIN by various researchers (Easley et al., 2010; Brown, Hillegeist and Lo, 2004; Brown and Hillegeist, 2007; Duarte and Young, 2009), MIA (Johnson and So, 2017), C2 (Llorente et al., 2002) and VCV (Lof and van Bommel, 2018).
+I contribute to the existing literature by examining the relationship of foreign ownership and information asymmetry not just with a panel regression but also with a difference-in-differences research setting of brokerage closures (Kelly and Ljungqvist, 2012) which cause an exogenous shock to the analyst coverage of a firm’s stock. Kelly and Ljungvist (2012) and Derrien and Kecskes (2013) argue that an exogenous decrease in analyst coverage causes an increase in information asymmetry of the covered firm. As a result, the research setting of brokerage closures enables me to assess the causal effect between information asymmetry and foreign ownership. Previous studies of information asymmetry and foreign ownership (Jiang and Kim, 2004; Choi et al., 2013; He et al., 2013) do not examine causality profoundly, which makes this thesis a first attempt, to the best of my knowledge, to study the causal effect of information asymmetry on foreign ownership. In addition, I test the general relationship of these two with panel regressions by using various proxies for information asymmetry such as PIN by various researchers (Easley et al., 2010; Brown, Hillegeist and Lo, 2004; Brown and Hillegeist, 2007; Duarte and Young, 2009), MIA (Johnson and So, 2017) and VCV (Lof and van Bommel, 2018).
 
 
 # 3 Hypotheses
@@ -79,5 +80,39 @@ For the quasi-natural experiment, I limit the time period of the original sample
 To construct the sample of treated firms, I filter out firms that are not covered by analysts employed in the brokerage houses listed in Appendix A of @kelly2012testing. Following @derrien2013real, I require for the treated firms to be covered by an analyst at least one year before the disappearance dates to filter out firms that are not actively covered by the analysts. Furthermore, following @kelly2012testing and @derrien2013real, I only retain firms for which the analyst has not “stopped” his estimate before the corresponding broker disappearance date to eliminate the potential endogeneity problem. For instance, if an analyst terminates the coverage of firms unrelated to the brokerage closure before the disappearance date (e.g. anticipating changes in corporate policies), the decision is endogenous. I collect the data for stopped estimates from IBES stop file. Since the brokerage closure dates listed by @kelly2012testing and corresponding disappearance dates do not coincide completely, I follow @derrien2013real, @he2013dark and @lof2018asymmetric to construct a three-month gap before and after the event date. As a result, I estimate the dependent variables and explanatory variables for each stock in a given quarter by subtracting (adding) three months from the event date and finding the previous (next) available quarter value for before and after measures, respectively. Moreover, I define the variable *ANALYST_COVERAGE* as the number of distinct analysts covering a firm in a given quarter.
 
 
+
+
+
+# 5 Methodology
+
+To empirically examine the first hypothesis of the thesis, I use a panel regression model for the baseline sample. A difference-in-differences regression model is employed to test the second and third hypotheses. 
+
+## 5.1 The panel regression model
+
+I test the relation of foreign ownership and information asymmetry by using the following panel regression model of firm-year observations:
+
+\begin{equation}
+\scriptsize
+\begin{aligned}
+FOREIGN\_OWNERSHIP_{i,t} &= \beta_0 + \beta_{1}INFORMATION\_ASYMMETRY_{i,t} + \beta_{2}LOG\_MARKET\_CAP_{i,t}\\
+&+ \beta_{3}BM\_RATIO_{i,t} + \beta_{4}LEVERAGE_{i,t} + \beta_{5}ROA_{i,t}\\ &+ \sum_{t=1}^T YEAR_t + \sum_{n=1}^N INDUSTRY_n + \epsilon_{i,t}
+\end{aligned}
+\end{equation}
+
+Foreign_ownership is measured by either of the two variables: Foreign_holdings (defined as shares of a firm held by foreign institution, as a percentage of the firm’s shares outstanding at the end of each year) and Foreign_breadth (defined as the number of distinct foreign institutions holding shares in the firm, as a percentage of the total number of institutions in the 13F database at the end of each year – Chen et al., 2002; Lof and van Bommel, 2018). Information_asymmetry is, similarly, measured by one of the various proxy variables: PIN¬BHL, PINBH, PINEHO, PINDY, Adjusted_PIN, MIA, C2, and VCV. Due to each combination of list variables Foreign_ownership and Information_asymmetry, I have results from 14 different regressions. LogMktCap is the logarithm of market capitalization at the end of each year. BM_ratio is the book value of equity divided by the market value at the end of each year. Leverage is the total debt divided by total assets at the end of each year. I also include year and industry fixed effects.
+
+## 5.2 The difference-in-differences regression model
+
+I examine the effect of an exogenous increase in information asymmetry on foreign ownership of a firm by using the following difference-in-differences regression of firm-quarter observations:
+
+\begin{equation}
+\scriptsize
+\begin{aligned}
+FOREIGN\_OWNERSHIP_{i,t} &= \beta_0 + \beta_{1}TREATED_{i} + \beta_{2}AFTER_{t} + \beta_{3}AFTER\times TREATED_{i,t}\\ &+ \beta_{4}LOG\_MARKET\_CAP_{i,t} + \beta_{5}BM\_RATIO_{i,t} + \beta_{6}LEVERAGE_{i,t}\\ &+ \beta_{7}ROA_{i,t} + \sum_{t=1}^T YEAR_t + \sum_{n=1}^N INDUSTRY_n + \epsilon_{i,t}
+\end{aligned}
+\end{equation}
+
+
+Similarly, as in the panel regression model, Foreign_ownership is a list of variables Foreign_holdings and Foreign_breadth. Treated is a dummy variable indicating observations of firms that are in the treatment group. Post is defined as a dummy variable for observations that occur after each brokerage closure event. The variable of interest is the interaction term of these two variables or the difference-in-differences estimator which captures the effect of treatment. Moreover, I include year and industry fixed effects.
 
 # References
