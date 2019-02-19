@@ -9,14 +9,44 @@ library(MatchIt)
 
 baseline_regression_raw <- read_rds("data/baseline_regression_raw.rds")
 
-cor_raw <- baseline_regression_raw %>% select(-permno, -year, -sic_code, -inst_percentage,
-                                          -inst_breadth, -market_cap, -sales, -log_sales)
+cor_raw <- baseline_regression_raw %>% select(-permno, -sic_code, -inst_percentage,
+                                          -inst_breadth, -market_cap, -sales, -log_sales) %>% 
+  mutate(year = as.integer(year))
 
-cor_matrix_raw <- round(cor(cor_raw, use = "complete.obs"), 2)
+years <- cor_raw %>% transmute(year = as.integer(year)) %>% distinct() %>% flatten_chr()
 
-cor_matrix_raw[upper.tri(cor_matrix_raw)] <- ""
+filter1 <- function (df, years){
+  df %>% 
+    filter(year == years) %>% 
+    select(-year)
+}
 
-cor_matrix <- cor_matrix_raw
+cor_dfs_raw <- map(years, ~filter1(cor_raw, .x))
+
+map_na_function <- function(df){
+  df %>% 
+  map(~.x) %>% 
+    discard(~all(is.na(.x))) %>%
+    map_df(~.x)
+}
+
+cor_dfs <- map(cor_dfs_raw, ~map_na_function(.x))
+
+cor_matrices <- map(cor_dfs_raw, ~cor(.x, use = "pairwise.complete.obs"))
+
+arr <- array(unlist(cor_matrices), c(dim(cor_matrices[[1]]), length(cor_matrices)))
+
+cor_matrices_mean <- round(rowMeans(x = arr, dims = 2, na.rm = T), 2)
+
+cols <- cor_raw %>% select(-year) %>% colnames()
+
+rownames(cor_matrices_mean) <- cols
+
+colnames(cor_matrices_mean) <- cols
+
+cor_matrices_mean[upper.tri(cor_matrices_mean)] <- ""
+
+cor_matrix <- cor_matrices_mean
 
 stargazer(cor_matrix, title = "correlation matrix", out = "correlation_matrix.html")
 
@@ -35,10 +65,10 @@ rnm <- function(df, ia_meas, dep_meas) {
 }
 
 model_function <- function(df, ia_meas, dep_meas) {
-  f <- dep_measure ~ ia_measure + log_market_cap  + book_to_market + 
-    leverage + roa + tobin_q|year + sic_code|0|year+sic_code
+  f <- dep_measure ~ ia_measure + book_to_market + leverage + 
+    roa |year + sic_code|0|year + sic_code
   f[[2]] <- sym(dep_meas)
-  f[[3]][[2]][[2]][[2]][[2]][[2]][[2]][[2]][[2]] <- sym(ia_meas)
+  f[[3]][[2]][[2]][[2]][[2]][[2]][[2]] <- sym(ia_meas)
   felm(f, data = df)
 }
 
@@ -121,7 +151,8 @@ did_regression_matched_temp1 <- did_regression %>%
   group_by(permno, event_date, treated) %>% 
   summarise_at(columns_for_summarise, mean) %>% 
   ungroup() %>% 
-  mutate(n = row_number())
+  mutate(n = row_number()) %>% 
+  mutate(log_market_quintile = ntile(log_market_cap, 5))
 
 events <- did_regression_raw %>% select(event_date) %>% distinct() 
 
@@ -132,7 +163,7 @@ filter1 <- function(df, events) {
 
 propensity_match <- function(df) {
   did_match <- matchit(treated ~ log_market_cap + book_to_market + analyst_coverage,
-          method = "nearest", data = df, ratio = 3)
+          method = "nearest", distance = "logit", data = df, ratio = 3)
   df <- match.data(did_match)
   df
 }
@@ -182,42 +213,42 @@ did_regression_summary <- did_regression_matched1 %>%
 
 stargazer(did_regression_summary, title = "DiD summary statistics", out = "DiD_summary.html")
 
-summary(did_regression_matched)
+summary(did_regression_matched1)
   
-did_model1 <- felm(foreign_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
+did_model1 <- felm(foreign_inst_percentage ~ treated + after + treated * after + book_to_market + 
                      leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched1)
 
-did_model2 <- felm(foreign_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
+did_model2 <- felm(foreign_inst_percentage ~ treated + after + treated * after + book_to_market + 
                      leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched2)
 
-did_model3 <- felm(foreign_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
+did_model3 <- felm(foreign_inst_percentage ~ treated + after + treated * after + book_to_market + 
                      leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched3)
 
-did_model4 <- felm(foreign_inst_percentage2 ~ treated + after + treated * after + log_market_cap + book_to_market + 
+did_model4 <- felm(foreign_inst_percentage2 ~ treated + after + treated * after + book_to_market + 
                      leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched1)
 
-did_model5 <- felm(foreign_inst_percentage2 ~ treated + after + treated * after + log_market_cap + book_to_market + 
+did_model5 <- felm(foreign_inst_percentage2 ~ treated + after + treated * after + book_to_market + 
                      leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched2)
 
-did_model6 <- felm(foreign_inst_percentage2 ~ treated + after + treated * after + log_market_cap + book_to_market + 
+did_model6 <- felm(foreign_inst_percentage2 ~ treated + after + treated * after + book_to_market + 
                      leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched3)
 
-did_model7 <- felm(foreign_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
+did_model7 <- felm(foreign_breadth ~ treated + after + treated * after + book_to_market + 
                      leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched1)
 
-did_model8 <- felm(foreign_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
+did_model8 <- felm(foreign_breadth ~ treated + after + treated * after + book_to_market + 
                      leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched2)
 
-did_model9 <- felm(foreign_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
+did_model9 <- felm(foreign_breadth ~ treated + after + treated * after + book_to_market + 
                      leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched3)
 
-did_model10 <- felm(foreign_breadth2 ~ treated + after + treated * after + log_market_cap + book_to_market + 
+did_model10 <- felm(foreign_breadth2 ~ treated + after + treated * after + book_to_market + 
                      leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched1)
 
-did_model11 <- felm(foreign_breadth2 ~ treated + after + treated * after + log_market_cap + book_to_market + 
+did_model11 <- felm(foreign_breadth2 ~ treated + after + treated * after + book_to_market + 
                      leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched2)
 
-did_model12 <- felm(foreign_breadth2 ~ treated + after + treated * after + log_market_cap + book_to_market + 
+did_model12 <- felm(foreign_breadth2 ~ treated + after + treated * after + book_to_market + 
                      leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched3)
 
 did_list <- list(did_model1, did_model2, did_model3, did_model4, did_model5, did_model6, did_model7, did_model8,
@@ -397,19 +428,46 @@ did_regression_h3 <- did_regression_matched_raw %>%
 did_model1 <- felm(foreign_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
                      leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_h3)
 
-did_model2 <- felm(domestic_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
+did_model2 <- felm(foreign_inst_percentage2 ~ treated + after + treated * after + log_market_cap + book_to_market + 
                      leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_h3)
 
 did_model3 <- felm(foreign_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
                      leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_h3)
 
-did_model4 <- felm(domestic_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
+did_model4 <- felm(foreign_breadth2 ~ treated + after + treated * after + log_market_cap + book_to_market + 
                      leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_h3)
 
 did_list <- list(did_model1, did_model2, did_model3, did_model4)
 
-stargazer(did_list, title = "Difference-in-differences regression results (H3)", 
+stargazer(did_list, title = "Difference-in-differences regression results (H3) Analyst coverage < 3", 
           omit.stat = c("ser"), 
           add.lines = list(c("Industry fixed effects", rep("Yes", times = 4)), 
                            c("Year fixed effects", rep("Yes", times = 4))),
-          out = "DiD H3 results.html")
+          out = "DiD H3 results_low_analyst_coverage.html")
+
+did_regression_h3_2 <- did_regression_matched_raw %>% 
+  filter(quarter_index %in% c(-12:12)) %>% 
+  filter(inst_percentage < 0.30) %>% 
+  group_by(permno, event_date, year, treated, after, sic_code) %>% 
+  summarise_at(columns_for_summarise, mean) %>% 
+  ungroup()
+
+did_model1 <- felm(foreign_inst_percentage ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_h3_2)
+
+did_model2 <- felm(foreign_inst_percentage2 ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_h3_2)
+
+did_model3 <- felm(foreign_breadth ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_h3_2)
+
+did_model4 <- felm(foreign_breadth2 ~ treated + after + treated * after + log_market_cap + book_to_market + 
+                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_h3_2)
+
+did_list <- list(did_model1, did_model2, did_model3, did_model4)
+
+stargazer(did_list, title = "Difference-in-differences regression results (H3) Inst. ownership < 0.30", 
+          omit.stat = c("ser"), 
+          add.lines = list(c("Industry fixed effects", rep("Yes", times = 4)), 
+                           c("Year fixed effects", rep("Yes", times = 4))),
+          out = "DiD H3 results_low_institutional_ownership.html")
