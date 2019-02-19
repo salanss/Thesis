@@ -20,7 +20,7 @@ data_all
 
 res <- dbSendQuery(wrds, "select distinct table_name
                    from information_schema.columns
-                   where table_schema='crsp'
+                   where table_schema='tfn'
                    order by table_name")
 tfn <- dbFetch(res, n=-1)
 dbClearResult(res)
@@ -28,16 +28,16 @@ tfn
 
 res <- dbSendQuery(wrds, "select column_name
                    from information_schema.columns
-                   where table_schema='crspa'
-                   and table_name='dsf'
+                   where table_schema='tfn'
+                   and table_name='s34'
                    order by column_name")
 data <- dbFetch(res, n=-1)
 dbClearResult(res)
 data
 
-res <- dbSendQuery(wrds, "select permno, date, prc, shrout, ret, vol
-                          from crsp.dsf
-                          where date between '1996-01-01'
+res <- dbSendQuery(wrds, "select *
+                          from tfn.s34
+                          where fdate between '1996-01-01'
                           and '2017-12-31'")
 data <- dbFetch(res, n=-1)
 dbClearResult(res)
