@@ -274,6 +274,7 @@ parallel_trend1 <- did_regression_matched_raw %>%
   gather(measure_name, measure, `Foreign ownership`:`Foreign breadth2`)
 
 ggplot(parallel_trend1, aes(quarter_index, measure, group = treated, color = treated)) + 
+  scale_colour_grey() + 
   geom_line() +
   geom_vline(xintercept=0) +
   theme_classic() +
