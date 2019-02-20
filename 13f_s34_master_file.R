@@ -47,7 +47,7 @@ df_institutions <- read_rds("data/13f_institutions.rds") %>%
   distinct() 
 
 df <- read_feather("data/13f_holdings.feather") %>% 
-  filter(file_date >= ymd(19971231)) %>% 
+  filter(file_date >= ymd(19970630)) %>% 
   distinct()
 
 df_temp1 <- df %>% 
@@ -61,6 +61,7 @@ df_temp2 <- read_feather("data/13f_masterfile_merged.feather") %>%
             file_date = file_date,
             institutional = mgrno,
             institutional_country = country,
+            investor_type = investor_type,
             shareholdings_end_qtr = shareholdings)
 
 ## crsp link
@@ -90,19 +91,30 @@ write_rds(df_temp5, "data/13f_crsp_merged_final.rds")
 df_temp6 <- read_rds("data/13f_crsp_merged_final.rds") %>% 
   group_by(permno, report_date) %>% 
   summarise(institutional_ownership_shares = sum(shareholdings_adjusted),
+            institutional_shares_nonquasi = sum(shareholdings_adjusted[investor_type != "QIX"]),
+            institutional_shares_dedicated = sum(shareholdings_adjusted[investor_type == "DED"]),
             foreign_institutional_ownership_shares = sum(shareholdings_adjusted[institutional_country != "UNITED STATES"]),
+            foreign_shares_nonquasi = sum(shareholdings_adjusted[institutional_country != "UNITED STATES" & investor_type != "QIX"]),
+            foreign_shares_dedicated = sum(shareholdings_adjusted[institutional_country != "UNITED STATES" & investor_type == "DED"]),
             domestic_institutional_ownership_shares = sum(shareholdings_adjusted[institutional_country == "UNITED STATES"]),
-            institutional_ownership_shares_unadj = sum(shareholdings_end_qtr),
-            foreign_institutional_ownership_shares_unadj = sum(shareholdings_end_qtr[institutional_country != "UNITED STATES"]),
-            domestic_institutional_ownership_shares_unadj = sum(shareholdings_end_qtr[institutional_country == "UNITED STATES"]),
+            domestic_shares_nonquasi = sum(shareholdings_adjusted[institutional_country == "UNITED STATES" & investor_type != "QIX"]),
+            domestic_shares_dedicated = sum(shareholdings_adjusted[institutional_country == "UNITED STATES" & investor_type == "DED"]),
             institutional_numbers = n_distinct(institutional),
+            institutional_numbers_nonquasi = n_distinct(institutional[investor_type != "QIX"]),
+            institutional_numbers_dedicated = n_distinct(institutional[investor_type == "DED"]),
             foreign_institutional_numbers = n_distinct(institutional[institutional_country != "UNITED STATES"]),
-            domestic_institutional_numbers = n_distinct(institutional[institutional_country == "UNITED STATES"])) %>% 
+            foreign_numbers_nonquasi = n_distinct(institutional[institutional_country != "UNITED STATES" & investor_type != "QIX"]),
+            foreign_numbers_dedicated = n_distinct(institutional[institutional_country != "UNITED STATES" & investor_type == "DED"]),
+            domestic_institutional_numbers = n_distinct(institutional[institutional_country == "UNITED STATES"]),
+            domestic_numbers_nonquasi = n_distinct(institutional[institutional_country == "UNITED STATES" & investor_type != "QIX"]),
+            domestic_numbers_dedicated = n_distinct(institutional[institutional_country == "UNITED STATES" & investor_type == "DED"])) %>% 
   ungroup()
 
 df_temp7 <- read_rds("data/13f_crsp_merged_final.rds") %>% 
   group_by(report_date) %>% 
-  summarise(institutional_numbers = n_distinct(institutional)) %>% 
+  summarise(institutional_numbers = n_distinct(institutional),
+            institutional_numbers_nonquasi = n_distinct(institutional[investor_type != "QIX"]),
+            institutional_numbers_dedicated = n_distinct(institutional[investor_type == "DED"])) %>% 
   ungroup()
 
 # think whether to calculate ownership with market prices (values) (CRSP), since lot of NA values in shares outstanding 
