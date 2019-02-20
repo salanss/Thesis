@@ -9,3 +9,6 @@ data
 *.log
 *.bib
 *.pdf
+results
+*.bcf
+*.xml
