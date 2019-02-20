@@ -12,10 +12,14 @@ geometry: [top=2.5cm, bottom=2.5cm, right=2.5cm, left=3cm]
 header-includes:
 - \usepackage{setspace}
 - \onehalfspacing
+- \usepackage{dcolumn}
+- \usepackage{rotating}
 ---
 
-```{r include=FALSE}
-source('regressions.R')
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE)
 ```
 
 \newpage
@@ -106,6 +110,7 @@ I test the relation of foreign ownership and information asymmetry by using the 
 \begin{aligned}
 FOREIGN\_OWNERSHIP_{i,t} &= \beta_0 + \beta_{1}INFORMATION\_ASYMMETRY_{i,t} + \beta_{2}LOG\_MARKET\_CAP_{i,t}\\
 &+ \beta_{3}BM\_RATIO_{i,t} + \beta_{4}LEVERAGE_{i,t} + \beta_{5}ROA_{i,t}\\ &+ \sum_{t=1}^T YEAR_t + \sum_{n=1}^N INDUSTRY_n + \epsilon_{i,t}
+\label{eq:baseline}
 \end{aligned}
 \end{equation}
 
@@ -126,6 +131,20 @@ FOREIGN\_OWNERSHIP_{i,t} &= \beta_0 + \beta_{1}TREATED_{i} + \beta_{2}AFTER_{t} 
 Similarly, as in the panel regression model, Foreign_ownership is a list of variables Foreign_holdings and Foreign_breadth. Treated is a dummy variable indicating observations of firms that are in the treatment group. Post is defined as a dummy variable for observations that occur after each brokerage closure event. The variable of interest is the interaction term of these two variables or the difference-in-differences estimator which captures the effect of treatment. Moreover, I include year and industry fixed effects.
 
 # 6 Results
+
+## 6.1 Baseline results
+
+In this section, I report the results of the baseline OLS regression results `\@ref(eq:baseline)`.
+
+```{r, results='asis'}
+library(tidyverse)
+library(stargazer)
+cor_matrix <- read_rds("results/cor_matrix.rds")
+stargazer(cor_matrix, header=FALSE, title = "Correlation matrix",
+          float.env = "sidewaystable", align = T, no.space = T, font.size = "scriptsize",
+          column.sep.width = "1pt", type='latex')
+```
+
 
 \newpage
 # References
