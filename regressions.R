@@ -48,7 +48,9 @@ cor_matrices_mean[upper.tri(cor_matrices_mean)] <- ""
 
 cor_matrix <- cor_matrices_mean
 
-stargazer(cor_matrix, title = "correlation matrix", out = "correlation_matrix.html")
+write_rds(cor_matrix, "results/cor_matrix.rds")
+
+stargazer(cor_matrix, title = "correlation matrix", out = "correlation_matrix.html", float.env = "sidewaystable")
 
 # gather ia_measures for single column, create nested data frames and apply functional programming for lm model ->
 
@@ -76,6 +78,8 @@ baseline_names <- mutate(baseline_regression,
                          data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
                          model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
 
+write_rds(baseline_names, "results/baseline_names.rds")
+
 # stargazer(baseline_names$model, column.labels =c("Foreign ownership", "Foreign ownership2",
 #                                                  "Foreign breadth", "Foreign breadth2"),
 #           dep.var.labels.include = F,
@@ -89,6 +93,8 @@ baseline_regression_summary <- baseline_regression_raw %>%
   select(-permno, -year, -sic_code) %>% 
   as.data.frame()
 
+write_rds(baseline_regression_summary, "results/baseline_regression_summary.rds")
+
 # stargazer(baseline_regression_summary, title = "Baseline summary statistics", out = "Baseline_summary.html")
 
 baseline_development <- baseline_regression_raw %>% 
@@ -100,6 +106,8 @@ baseline_development <- baseline_regression_raw %>%
             foreign_breadth2 = mean(foreign_breadth2, na.rm = T),
             domestic_inst_percentage = mean(domestic_inst_percentage)) %>% 
   ungroup()
+
+write_rds(baseline_development, "results/baseline_development.rds")
 
 # ggplot(baseline_development, aes(year)) + 
 #   #geom_line(aes(y = inst_percentage, colour = "inst_percentage")) + 
@@ -119,15 +127,6 @@ did_regression_raw <- read_rds("data/did_regression_raw.rds") %>%
   ungroup() %>% 
   filter(n > 1) %>%  # require for every permno to have before and after value for each event
   arrange(event_date, quarter_index, treated)
-
-cor_raw <- did_regression_raw %>% select(-permno, -year, -sic_code, -inst_percentage, -event_date, -cusip,
-                                              -inst_breadth, -market_cap, -quarter_index, -n)
-
-cor_matrix_raw <- round(cor(cor_raw, use = "complete.obs"), 2)
-
-cor_matrix_raw[upper.tri(cor_matrix_raw)] <- ""
-
-cor_matrix <- cor_matrix_raw
 
 # stargazer(cor_matrix, title = "correlation matrix", out = "correlation_matrix_did.html")
 
@@ -211,6 +210,8 @@ did_regression_summary <- did_regression_matched1 %>%
   select(-permno, -year, -sic_code) %>% 
   as.data.frame()
 
+write_rds(did_regression_summary, "results/did_regression_summary.rds")
+
 # stargazer(did_regression_summary, title = "DiD summary statistics", out = "DiD_summary.html")
   
 did_model1 <- felm(foreign_inst_percentage ~ treated + after + treated * after + book_to_market + 
@@ -252,6 +253,8 @@ did_model12 <- felm(foreign_breadth2 ~ treated + after + treated * after + book_
 did_list <- list(did_model1, did_model2, did_model3, did_model4, did_model5, did_model6, did_model7, did_model8,
                  did_model9, did_model10, did_model11, did_model12)
 
+write_rds(did_list, "results/did_list.rds")
+
 # stargazer(did_list, title = "Difference-in-differences regression results with propensity score matching (H2)", 
 #           dep.var.labels =c("Foreign ownership", "Foreign ownership2",
 #                            "Foreign breadth", "Foreign breadth2"),
@@ -270,6 +273,8 @@ parallel_trend1 <- did_regression_matched_raw %>%
             `Foreign breadth2` = mean(foreign_breadth2)) %>% 
   ungroup() %>% 
   gather(measure_name, measure, `Foreign ownership`:`Foreign breadth2`)
+
+write_rds(parallel_trend1, "results/parallel_trend1.rds")
 
 # ggplot(parallel_trend1, aes(quarter_index, measure, group = treated, color = treated)) + 
 #   scale_colour_grey() + 
@@ -291,6 +296,8 @@ parallel_trend2 <- did_regression_matched_raw %>%
             domestic_breadth = mean(domestic_breadth)) %>% 
   ungroup()
 
+write_rds(parallel_trend2, "results/parallel_trend2.rds")
+
 # ggplot(parallel_trend2, aes(quarter_index, foreign_inst_percentage, group = treated, color = treated)) + 
 #   geom_line() +
 #   geom_vline(xintercept=0) +
@@ -301,9 +308,11 @@ parallel_trend2 <- did_regression_matched_raw %>%
 
 ## H2 DiD without propensity score matching (all the rest)
 
-did_regression_summary <- did_regression %>% 
+did_regression_summary_no_prop <- did_regression %>% 
   select(-permno, -year, -sic_code) %>% 
   as.data.frame()
+
+write_rds(did_regression_summary_no_prop, "results/did_regression_summary_no_prop.rds")
 
 # stargazer(did_regression_summary, title = "DiD summary statistics", out = "DiD_summary_no_prop.html")
 
@@ -363,8 +372,10 @@ did_model11 <- felm(foreign_breadth2 ~ treated + after + treated * after + log_m
 did_model12 <- felm(foreign_breadth2 ~ treated + after + treated * after + log_market_cap + book_to_market + 
                       leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression3)
 
-did_list <- list(did_model1, did_model2, did_model3, did_model4, did_model5, did_model6, did_model7, did_model8,
+did_list_no_prop <- list(did_model1, did_model2, did_model3, did_model4, did_model5, did_model6, did_model7, did_model8,
                  did_model9, did_model10, did_model11, did_model12)
+
+write_rds(did_list_no_prop, "results/did_list_no_prop.rds")
 
 # stargazer(did_list, title = "Difference-in-differences regression results without propensity score matching (H2)", 
 #           dep.var.labels =c("Foreign ownership", "Foreign ownership2",
