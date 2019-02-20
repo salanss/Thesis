@@ -25,7 +25,7 @@ thirteenf_crsp_merged <- thirteenf_merged %>%
 
 thirteenf_crsp_not_merged <- crsp_quarter_stock %>% 
   anti_join(thirteenf_merged, by = c("permno")) %>% 
-  filter(quarter_date >= ymd(19971231)) %>% 
+  filter(quarter_date >= ymd(19970630)) %>% 
   mutate(report_date = quarter_date,
          institutional_ownership_shares = 0,
          foreign_institutional_ownership_shares = 0,
