@@ -39,13 +39,10 @@ thirteenf_crsp_not_merged <- crsp_quarter_stock %>%
 
 thirteenf_crsp <- bind_rows(thirteenf_crsp_merged, thirteenf_crsp_not_merged) %>% 
   mutate(inst_ownership_percentage = case_when(shares_outstanding_adjusted <= 0 ~ NA_real_,
-                                               institutional_ownership_shares / shares_outstanding_adjusted > 1 ~ 1,
                                                TRUE ~ institutional_ownership_shares / shares_outstanding_adjusted),
          foreign_ownership_percentage = case_when(shares_outstanding_adjusted <= 0 ~ NA_real_,
-                                                  foreign_institutional_ownership_shares / shares_outstanding_adjusted > 1 ~ 1,
                                                   TRUE ~ foreign_institutional_ownership_shares / shares_outstanding_adjusted),
          domestic_ownership_percentage = case_when(shares_outstanding_adjusted <= 0 ~ NA_real_,
-                                                   domestic_institutional_ownership_shares / shares_outstanding_adjusted > 1 ~ 1,
                                                    TRUE ~ domestic_institutional_ownership_shares / shares_outstanding_adjusted),
          foreign_ownership_percentage2 = if_else(institutional_ownership_shares_unadj <= 0, NA_real_,
                                                  foreign_institutional_ownership_shares_unadj / institutional_ownership_shares_unadj),
@@ -79,29 +76,24 @@ thirteenf_crsp_compustat_temp <- thirteenf_crsp %>%
             leverage = leverage,
             roa = roa,
             tobin_q = tobin_q,
-            sales = sales,
-            log_sales = log(sales),
             bid_ask_spread = bid_ask_spread) %>% 
   arrange(report_date, permno)
 
 thirteenf_crsp_compustat <- thirteenf_crsp_compustat_temp %>% 
-  mutate(inst_percentage = inst_percentage,
-         foreign_inst_percentage = foreign_inst_percentage,
-         domestic_inst_percentage = domestic_inst_percentage,
-         foreign_inst_percentage2 = foreign_inst_percentage2,
-         inst_breadth = inst_breadth,
-         foreign_breadth = foreign_breadth,
-         foreign_breadth2 = foreign_breadth2,
-         domestic_breadth = domestic_breadth,
+  mutate(inst_percentage = Winsorize(inst_percentage, probs = c(0.01, 0.99), na.rm = T),
+         foreign_inst_percentage = Winsorize(foreign_inst_percentage, probs = c(0.01, 0.99), na.rm = T),
+         domestic_inst_percentage = Winsorize(domestic_inst_percentage, probs = c(0.01, 0.99), na.rm = T),
+         foreign_inst_percentage2 = Winsorize(foreign_inst_percentage2, probs = c(0.01, 0.99), na.rm = T),
+         inst_breadth = Winsorize(inst_breadth, probs = c(0.01, 0.99), na.rm = T),
+         foreign_breadth = Winsorize(foreign_breadth, probs = c(0.01, 0.99), na.rm = T),
+         foreign_breadth2 = Winsorize(foreign_breadth2, probs = c(0.01, 0.99), na.rm = T),
+         domestic_breadth = Winsorize(domestic_breadth, probs = c(0.01, 0.99), na.rm = T),
          market_cap = Winsorize(market_cap, probs = c(0.01, 0.99), na.rm = T), # winsorize control variables to mitigate outliers
          log_market_cap = Winsorize(log_market_cap, probs = c(0.01, 0.99), na.rm = T),
          book_to_market = Winsorize(book_to_market, probs = c(0.01, 0.99), na.rm = T),
          leverage = Winsorize(leverage, probs = c(0.01, 0.99), na.rm = T),
          roa = Winsorize(roa, probs = c(0.01, 0.99), na.rm = T),
          tobin_q = Winsorize(tobin_q, probs = c(0.01, 0.99), na.rm = T),
-         sales = Winsorize(sales, probs = c(0.01, 0.99), na.rm = T),
-         log_sales = Winsorize(log_sales, probs = c(0.01, 0.99), na.rm = T),
-         volatility = Winsorize(volatility_adj, probs = c(0.01, 0.99), na.rm = T),
          bid_ask_spread = bid_ask_spread) %>% 
   filter_at(vars(log_market_cap:tobin_q, sic_code), all_vars(!is.na(.))) # filter control variable NAs away, since going to be used in regression 
 
