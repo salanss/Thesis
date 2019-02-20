@@ -76,20 +76,20 @@ baseline_names <- mutate(baseline_regression,
                          data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
                          model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
 
-stargazer(baseline_names$model, column.labels =c("Foreign ownership", "Foreign ownership2",
-                                                 "Foreign breadth", "Foreign breadth2"),
-          dep.var.labels.include = F,
-          column.separate = c(11, 11, 11, 11),
-          omit.stat = c("ser"),
-          add.lines = list(c("Industry fixed effects", rep("Yes", times = 44)), 
-                           c("Year fixed effects", rep("Yes", times = 44))),
-          title = "Baseline regression results (H1)", out = "Baseline_results.html")
+# stargazer(baseline_names$model, column.labels =c("Foreign ownership", "Foreign ownership2",
+#                                                  "Foreign breadth", "Foreign breadth2"),
+#           dep.var.labels.include = F,
+#           column.separate = c(11, 11, 11, 11),
+#           omit.stat = c("ser"),
+#           add.lines = list(c("Industry fixed effects", rep("Yes", times = 44)), 
+#                            c("Year fixed effects", rep("Yes", times = 44))),
+#           title = "Baseline regression results (H1)", out = "Baseline_results.html")
 
 baseline_regression_summary <- baseline_regression_raw %>% 
   select(-permno, -year, -sic_code) %>% 
   as.data.frame()
 
-stargazer(baseline_regression_summary, title = "Baseline summary statistics", out = "Baseline_summary.html")
+# stargazer(baseline_regression_summary, title = "Baseline summary statistics", out = "Baseline_summary.html")
 
 baseline_development <- baseline_regression_raw %>% 
   group_by(year) %>% 
@@ -101,14 +101,14 @@ baseline_development <- baseline_regression_raw %>%
             domestic_inst_percentage = mean(domestic_inst_percentage)) %>% 
   ungroup()
 
-ggplot(baseline_development, aes(year)) + 
-  #geom_line(aes(y = inst_percentage, colour = "inst_percentage")) + 
-  geom_line(aes(y = foreign_inst_percentage, colour = "foreign_inst_percentage")) +
-  geom_line(aes(y = foreign_inst_percentage2, colour = "foreign_inst_percentage2")) +
-  geom_line(aes(y = foreign_breadth, colour = "foreign_breadth")) +
-  geom_line(aes(y = foreign_breadth2, colour = "foreign_breadth2")) +
-  #geom_line(aes(y = domestic_inst_percentage, colour = "domestic_inst_percentage")) + 
-  theme_classic()
+# ggplot(baseline_development, aes(year)) + 
+#   #geom_line(aes(y = inst_percentage, colour = "inst_percentage")) + 
+#   geom_line(aes(y = foreign_inst_percentage, colour = "foreign_inst_percentage")) +
+#   geom_line(aes(y = foreign_inst_percentage2, colour = "foreign_inst_percentage2")) +
+#   geom_line(aes(y = foreign_breadth, colour = "foreign_breadth")) +
+#   geom_line(aes(y = foreign_breadth2, colour = "foreign_breadth2")) +
+#   #geom_line(aes(y = domestic_inst_percentage, colour = "domestic_inst_percentage")) + 
+#   theme_classic()
 
 ## difference-in-differences regressions (did)
 
@@ -129,7 +129,7 @@ cor_matrix_raw[upper.tri(cor_matrix_raw)] <- ""
 
 cor_matrix <- cor_matrix_raw
 
-stargazer(cor_matrix, title = "correlation matrix", out = "correlation_matrix_did.html")
+# stargazer(cor_matrix, title = "correlation matrix", out = "correlation_matrix_did.html")
 
 columns_for_summarise <- c("inst_percentage", "foreign_inst_percentage", "domestic_inst_percentage", 
                            "foreign_inst_percentage2","inst_breadth", "foreign_breadth", 
@@ -211,9 +211,7 @@ did_regression_summary <- did_regression_matched1 %>%
   select(-permno, -year, -sic_code) %>% 
   as.data.frame()
 
-stargazer(did_regression_summary, title = "DiD summary statistics", out = "DiD_summary.html")
-
-summary(did_regression_matched1)
+# stargazer(did_regression_summary, title = "DiD summary statistics", out = "DiD_summary.html")
   
 did_model1 <- felm(foreign_inst_percentage ~ treated + after + treated * after + book_to_market + 
                      leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched1)
@@ -254,14 +252,14 @@ did_model12 <- felm(foreign_breadth2 ~ treated + after + treated * after + book_
 did_list <- list(did_model1, did_model2, did_model3, did_model4, did_model5, did_model6, did_model7, did_model8,
                  did_model9, did_model10, did_model11, did_model12)
 
-stargazer(did_list, title = "Difference-in-differences regression results with propensity score matching (H2)", 
-          dep.var.labels =c("Foreign ownership", "Foreign ownership2",
-                           "Foreign breadth", "Foreign breadth2"),
-          column.labels = rep(c("[-1;1] years", "[-2;2] years", "[-3;3] years"), times = 4),
-          omit.stat = c("ser"), 
-          add.lines = list(c("Industry fixed effects", rep("Yes", times = 12)), 
-                           c("Year fixed effects", rep("Yes", times = 12))),
-          out = "DiD H2 results.html")
+# stargazer(did_list, title = "Difference-in-differences regression results with propensity score matching (H2)", 
+#           dep.var.labels =c("Foreign ownership", "Foreign ownership2",
+#                            "Foreign breadth", "Foreign breadth2"),
+#           column.labels = rep(c("[-1;1] years", "[-2;2] years", "[-3;3] years"), times = 4),
+#           omit.stat = c("ser"), 
+#           add.lines = list(c("Industry fixed effects", rep("Yes", times = 12)), 
+#                            c("Year fixed effects", rep("Yes", times = 12))),
+#           out = "DiD H2 results.html")
 
 parallel_trend1 <- did_regression_matched_raw %>% 
   mutate(treated = if_else(treated == 1, "treated", "control")) %>% 
@@ -273,14 +271,14 @@ parallel_trend1 <- did_regression_matched_raw %>%
   ungroup() %>% 
   gather(measure_name, measure, `Foreign ownership`:`Foreign breadth2`)
 
-ggplot(parallel_trend1, aes(quarter_index, measure, group = treated, color = treated)) + 
-  scale_colour_grey() + 
-  geom_line() +
-  geom_vline(xintercept=0) +
-  theme_classic() +
-  facet_wrap(. ~ measure_name, scales = "free_y")
-
-ggsave("parallel_trend.png", last_plot())
+# ggplot(parallel_trend1, aes(quarter_index, measure, group = treated, color = treated)) + 
+#   scale_colour_grey() + 
+#   geom_line() +
+#   geom_vline(xintercept=0) +
+#   theme_classic() +
+#   facet_wrap(. ~ measure_name, scales = "free_y")
+# 
+# ggsave("parallel_trend.png", last_plot())
 
 parallel_trend2 <- did_regression_matched_raw %>% 
   mutate(treated = if_else(treated == 1, "treated", "control")) %>% 
@@ -293,12 +291,12 @@ parallel_trend2 <- did_regression_matched_raw %>%
             domestic_breadth = mean(domestic_breadth)) %>% 
   ungroup()
 
-ggplot(parallel_trend2, aes(quarter_index, foreign_inst_percentage, group = treated, color = treated)) + 
-  geom_line() +
-  geom_vline(xintercept=0) +
-  theme_classic() + facet_wrap(. ~ event_date)
-
-ggsave("parallel_trend_facet.png", last_plot())
+# ggplot(parallel_trend2, aes(quarter_index, foreign_inst_percentage, group = treated, color = treated)) + 
+#   geom_line() +
+#   geom_vline(xintercept=0) +
+#   theme_classic() + facet_wrap(. ~ event_date)
+# 
+# ggsave("parallel_trend_facet.png", last_plot())
 
 
 ## H2 DiD without propensity score matching (all the rest)
@@ -307,9 +305,7 @@ did_regression_summary <- did_regression %>%
   select(-permno, -year, -sic_code) %>% 
   as.data.frame()
 
-stargazer(did_regression_summary, title = "DiD summary statistics", out = "DiD_summary_no_prop.html")
-
-summary(did_regression)
+# stargazer(did_regression_summary, title = "DiD summary statistics", out = "DiD_summary_no_prop.html")
 
 did_regression1 <- did_regression_raw %>% 
   filter(quarter_index %in% c(-4:4)) %>% 
@@ -370,14 +366,14 @@ did_model12 <- felm(foreign_breadth2 ~ treated + after + treated * after + log_m
 did_list <- list(did_model1, did_model2, did_model3, did_model4, did_model5, did_model6, did_model7, did_model8,
                  did_model9, did_model10, did_model11, did_model12)
 
-stargazer(did_list, title = "Difference-in-differences regression results without propensity score matching (H2)", 
-          dep.var.labels =c("Foreign ownership", "Foreign ownership2",
-                            "Foreign breadth", "Foreign breadth2"),
-          column.labels = rep(c("[-1;1] years", "[-2;2] years", "[-3;3] years"), times = 4),
-          omit.stat = c("ser"), 
-          add.lines = list(c("Industry fixed effects", rep("Yes", times = 12)), 
-                           c("Year fixed effects", rep("Yes", times = 12))),
-          out = "DiD H2 results_no_prop.html")
+# stargazer(did_list, title = "Difference-in-differences regression results without propensity score matching (H2)", 
+#           dep.var.labels =c("Foreign ownership", "Foreign ownership2",
+#                             "Foreign breadth", "Foreign breadth2"),
+#           column.labels = rep(c("[-1;1] years", "[-2;2] years", "[-3;3] years"), times = 4),
+#           omit.stat = c("ser"), 
+#           add.lines = list(c("Industry fixed effects", rep("Yes", times = 12)), 
+#                            c("Year fixed effects", rep("Yes", times = 12))),
+#           out = "DiD H2 results_no_prop.html")
 
 
 parallel_trend1 <- did_regression_raw %>% 
@@ -390,13 +386,13 @@ parallel_trend1 <- did_regression_raw %>%
   ungroup() %>% 
   gather(measure_name, measure, `Foreign ownership`:`Foreign breadth2`)
 
-ggplot(parallel_trend1, aes(quarter_index, measure, group = treated, color = treated)) + 
-  geom_line() +
-  geom_vline(xintercept=0) +
-  theme_classic() +
-  facet_wrap(. ~ measure_name, scales = "free_y")
-
-ggsave("parallel_trend_no_prop.png", last_plot())
+# ggplot(parallel_trend1, aes(quarter_index, measure, group = treated, color = treated)) + 
+#   geom_line() +
+#   geom_vline(xintercept=0) +
+#   theme_classic() +
+#   facet_wrap(. ~ measure_name, scales = "free_y")
+# 
+# ggsave("parallel_trend_no_prop.png", last_plot())
 
 parallel_trend2 <- did_regression_raw %>% 
   mutate(treated = if_else(treated == 1, "treated", "control")) %>% 
@@ -409,12 +405,12 @@ parallel_trend2 <- did_regression_raw %>%
             domestic_breadth = mean(domestic_breadth)) %>% 
   ungroup()
 
-ggplot(parallel_trend2, aes(quarter_index, foreign_breadth2, group = treated, color = treated)) + 
-  geom_line() +
-  geom_vline(xintercept=0) +
-  theme_classic() + facet_wrap(. ~ event_date)
-
-ggsave("parallel_trend_facet_no_prop.png", last_plot())
+# ggplot(parallel_trend2, aes(quarter_index, foreign_breadth2, group = treated, color = treated)) + 
+#   geom_line() +
+#   geom_vline(xintercept=0) +
+#   theme_classic() + facet_wrap(. ~ event_date)
+# 
+# ggsave("parallel_trend_facet_no_prop.png", last_plot())
 
 
 ## DiD H3 results
@@ -440,11 +436,11 @@ did_model4 <- felm(foreign_breadth2 ~ treated + after + treated * after + log_ma
 
 did_list <- list(did_model1, did_model2, did_model3, did_model4)
 
-stargazer(did_list, title = "Difference-in-differences regression results (H3) Analyst coverage < 3", 
-          omit.stat = c("ser"), 
-          add.lines = list(c("Industry fixed effects", rep("Yes", times = 4)), 
-                           c("Year fixed effects", rep("Yes", times = 4))),
-          out = "DiD H3 results_low_analyst_coverage.html")
+# stargazer(did_list, title = "Difference-in-differences regression results (H3) Analyst coverage < 3", 
+#           omit.stat = c("ser"), 
+#           add.lines = list(c("Industry fixed effects", rep("Yes", times = 4)), 
+#                            c("Year fixed effects", rep("Yes", times = 4))),
+#           out = "DiD H3 results_low_analyst_coverage.html")
 
 did_regression_h3_2 <- did_regression_matched_raw %>% 
   filter(quarter_index %in% c(-12:12)) %>% 
@@ -467,8 +463,8 @@ did_model4 <- felm(foreign_breadth2 ~ treated + after + treated * after + log_ma
 
 did_list <- list(did_model1, did_model2, did_model3, did_model4)
 
-stargazer(did_list, title = "Difference-in-differences regression results (H3) Inst. ownership < 0.30", 
-          omit.stat = c("ser"), 
-          add.lines = list(c("Industry fixed effects", rep("Yes", times = 4)), 
-                           c("Year fixed effects", rep("Yes", times = 4))),
-          out = "DiD H3 results_low_institutional_ownership.html")
+# stargazer(did_list, title = "Difference-in-differences regression results (H3) Inst. ownership < 0.30", 
+#           omit.stat = c("ser"), 
+#           add.lines = list(c("Industry fixed effects", rep("Yes", times = 4)), 
+#                            c("Year fixed effects", rep("Yes", times = 4))),
+#           out = "DiD H3 results_low_institutional_ownership.html")
