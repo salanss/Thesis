@@ -14,6 +14,20 @@ header-includes:
 - \doublespacing
 - \usepackage{dcolumn}
 - \usepackage{rotating}
+- \usepackage{booktabs}
+- \usepackage{longtable}
+- \usepackage{array}
+- \usepackage{multirow}
+- \usepackage{wrapfig}
+- \usepackage{float}
+- \usepackage{colortbl}
+- \usepackage{pdflscape}
+- \usepackage{tabu}
+- \usepackage{threeparttable}
+- \usepackage{threeparttablex}
+- \usepackage[normalem]{ulem}
+- \usepackage{makecell}
+- \usepackage{xcolor}
 ---
 
 ```{r global_options, include=FALSE}
@@ -105,25 +119,22 @@ To empirically examine the first hypothesis of the thesis, I use a panel regress
 
 I test the relation of foreign ownership and information asymmetry by using the following panel regression model of firm-year observations:
 
-\begin{equation}
-\scriptsize
+\begin{equation}\label{eq_baseline}
 \begin{aligned}
-FOREIGN\_OWNERSHIP_{i,t} &= \beta_0 + \beta_{1}INFORMATION\_ASYMMETRY_{i,t} + \beta_{2}LOG\_MARKET\_CAP_{i,t}\\
-&+ \beta_{3}BM\_RATIO_{i,t} + \beta_{4}LEVERAGE_{i,t} + \beta_{5}ROA_{i,t}\\ &+ \sum_{t=1}^T YEAR_t + \sum_{n=1}^N INDUSTRY_n + \epsilon_{i,t}
-\label{eq:baseline}
+FOREIGN\_OWNERSHIP_{i,t} &= \beta_0 + \beta_{1}INFORMATION\_ASYMMETRY_{i,t} + \beta_{3}BM\_RATIO_{i,t}\\ &+ \beta_{4}LEVERAGE_{i,t} + \beta_{5}ROA_{i,t}\\ &+ \sum_{t=1}^T YEAR_t + \sum_{n=1}^N INDUSTRY_n + \epsilon_{i,t}
 \end{aligned}
 \end{equation}
 
-Foreign_ownership is measured by either of the two variables: Foreign_holdings (defined as shares of a firm held by foreign institution, as a percentage of the firm’s shares outstanding at the end of each year) and Foreign_breadth (defined as the number of distinct foreign institutions holding shares in the firm, as a percentage of the total number of institutions in the 13F database at the end of each year [@chen2002breadth; @lof2018asymmetric]). Information_asymmetry is, similarly, measured by one of the various proxy variables: PIN¬BHL, PINBH, PINEHO, PINDY, Adjusted_PIN, MIA, C2, and VCV. Due to each combination of list variables Foreign_ownership and Information_asymmetry, I have results from 14 different regressions. LogMktCap is the logarithm of market capitalization at the end of each year. BM_ratio is the book value of equity divided by the market value at the end of each year. Leverage is the total debt divided by total assets at the end of each year. I also include year and industry fixed effects.
+Foreign_ownership is measured by either of the two variables: Foreign_holdings (defined as shares of a firm held by foreign institution, as a percentage of the firm’s shares outstanding at the end of each year) and Foreign_breadth (defined as the number of distinct foreign institutions holding shares in the firm, as a percentage of the total number of institutions in the 13F database at the end of each year [@chen2002breadth; @lof2018asymmetric]). Information_asymmetry is, similarly, measured by one of the various proxy variables: PIN_BHL, PINBH, PINEHO, PINDY, Adjusted_PIN, MIA, C2, and VCV. Due to each combination of list variables Foreign_ownership and Information_asymmetry, I have results from 14 different regressions. LogMktCap is the logarithm of market capitalization at the end of each year. BM_ratio is the book value of equity divided by the market value at the end of each year. Leverage is the total debt divided by total assets at the end of each year. I also include year and industry fixed effects.
 
 ## 5.2 The difference-in-differences regression model
 
 I examine the effect of an exogenous increase in information asymmetry on foreign ownership of a firm by using the following difference-in-differences regression of firm-quarter observations:
 
 \begin{equation}
-\scriptsize
+\label{eq_didh2}
 \begin{aligned}
-FOREIGN\_OWNERSHIP_{i,t} &= \beta_0 + \beta_{1}TREATED_{i} + \beta_{2}AFTER_{t} + \beta_{3}AFTER\times TREATED_{i,t}\\ &+ \beta_{4}LOG\_MARKET\_CAP_{i,t} + \beta_{5}BM\_RATIO_{i,t} + \beta_{6}LEVERAGE_{i,t}\\ &+ \beta_{7}ROA_{i,t} + \sum_{t=1}^T YEAR_t + \sum_{n=1}^N INDUSTRY_n + \epsilon_{i,t}
+FOREIGN\_OWNERSHIP_{i,t} &= \beta_0 + \beta_{1}TREATED_{i} + \beta_{2}AFTER_{t} + \beta_{3}AFTER\times TREATED_{i,t}\\ &+ \beta_{5}BM\_RATIO_{i,t} + \beta_{6}LEVERAGE_{i,t} + \beta_{7}ROA_{i,t}\\ &+ \sum_{t=1}^T YEAR_t + \sum_{n=1}^N INDUSTRY_n + \epsilon_{i,t}
 \end{aligned}
 \end{equation}
 
@@ -132,19 +143,31 @@ Similarly, as in the panel regression model, Foreign_ownership is a list of vari
 
 # 6 Results
 
-## 6.1 Baseline results
+In this section, I report the empirical results of the effect of information asymmetry on foreign ownership. First in Section 6.1, I present the results of the general relation between foreign ownership and information asymmetry with the baseline panel regression setting (Hypothesis 1). Second in Section 6.2, I study the causal effect of the exogenous increase in information asymmetry on foreign ownership by difference-in-differences panel regression setting (Hypothesis 2). Then, I examine the second hypothesis more in-depth by a subset analysis of the different institutional investor types. Finally, in Section 6.3 I test the causal effect in cases of low analyst coverage and low institutional ownership (Hypothesis 3).
 
-In this section, I report the results of the baseline OLS regression results `\@ref(eq:baseline)`.
+## 6.1 Baseline setting results
+
+In this section, I report the results of the baseline setting. First, I examine the relation between the variables used in baseline setting by a correlation matrix. Table I reports the results of annual firm-level correlations between the variables used in baseline panel regression model (Equation \ref{eq_baseline}). Each value is a time-series average of within-year correlations (Pearson). The total sample time period extends from 1997 to 2017. However, this holds true for all variables except *PIN~DY~* (1997-2004), *PIN~DY~ADJ~* (1997-2004), *PSOS~DY~* (1997-2004),
+*PIN~EHO~* (1997-2001), *PIN~BHL~* (1997-2010), *PIN~BH~* (1997-2010), MIA (1997-2015).
+
+Variable *FOR_OWN* is negatively correlated with all information asymmetry measures, which is consistent with the first hypothesis. The negative relation is the strongest with the different probability of informed trading measures and the least strong with *MIA*. Moreover, the correlations of *FOR_OWN* with the control variables of different firm characteristics is intuitive and in line with the existing literature. Foreign investors tend to own firms with larger market capitalization, greater profitability and smaller book-to-market ratios (i.e. value stocks). However, foreign ownership has a positive relation with leverage, implying a preference of more in-debt firms. The relation between foreign ownership and total institutional ownership is positive, indicating that foreign investors have similar stockholdings with institutional investors in general. Accordingly, *FOR_BREADTH* has similar but stronger correlations with other variables as *FOR_OWN*. 
 
 ```{r, results='asis'}
 library(tidyverse)
 library(stargazer)
+library(kableExtra)
 cor_matrix <- read_rds("results/cor_matrix.rds")
-stargazer(cor_matrix, header=FALSE, title = "Correlation matrix",
-          float.env = "sidewaystable", align = T, no.space = T, font.size = "tiny",
-          column.sep.width = "0pt", type='latex')
+kable(cor_matrix, "latex", caption = "Correlations between sample variables", 
+      booktabs = T, align = "c") %>% 
+  kable_styling(latex_options = c("scale_down")) %>% 
+  landscape()
+# stargazer(cor_matrix, header=FALSE, title = "Correlation matrix",
+#           float.env = "sidewaystable", align = T, no.space = T, font.size = "tiny",
+#           column.sep.width = "1pt",  type='latex')
 ```
 
+
+Information asymmetry measures are strongly positively correlated with each other, which is consistent and implies that they capture similar explanatory characteristics. Only *PSOS~DY~* has a negative correlation with another information asymmetry measure *MIA* and largely explained by the fact that it is a measure of illiquidity unrelated to asymmetric information [@duarte2009pin]. All control variables except *LOG_MKT_CAP* have relatively weak correlations with the information asymmetry measures, which enables me to use them as explanatory in a regression model with a low risk of multicollinearity. As a result, I choose to exclude *LOG_MKT_CAP* from subsequent regression models due to a potential risk of multicollinearity. 
 
 \newpage
 # References
