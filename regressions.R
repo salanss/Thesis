@@ -7,10 +7,14 @@ library(MatchIt)
 
 # baseline regressions
 
-baseline_regression_raw <- read_rds("data/baseline_regression_raw.rds")
+baseline_regression_raw <- read_rds("data/baseline_regression_raw.rds") %>% 
+  select(permno, year, sic_code, INST_OWN = inst_percentage, INST_BREADTH = inst_breadth, 
+         FOR_OWN = foreign_inst_percentage, FOR_BREADTH = foreign_breadth, LOG_MKT_CAP = log_market_cap,
+         BM_RATIO = book_to_market, LEVERAGE = leverage, ROA = roa, BA_SPREAD = bid_ask_spread,
+         PIN_DY = pin_dy, PIN_DY_ADJ = pin_dy_adj, PSOS_DY = psos_dy, PIN_EHO = pin_eho,
+         PIN_BHL = pin_bhl, PIN_BH = pin_bh, MIA = mia, VCV_USD = vcv1, VCV_MKT = vcv2, VCV_TO = vcv3)
 
-cor_raw <- baseline_regression_raw %>% select(-permno, -sic_code, -inst_percentage,
-                                          -inst_breadth, -market_cap, -sales, -log_sales) %>% 
+cor_raw <- baseline_regression_raw %>% select(-permno, -sic_code) %>% 
   mutate(year = as.integer(year))
 
 years <- cor_raw %>% transmute(year = as.integer(year)) %>% distinct() %>% flatten_chr()
