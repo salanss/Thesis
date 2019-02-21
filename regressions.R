@@ -8,8 +8,8 @@ library(MatchIt)
 # baseline regressions
 
 baseline_regression_raw <- read_rds("data/baseline_regression_raw.rds") %>% 
-  select(permno, year, sic_code, INST_OWN = inst_percentage, INST_BREADTH = inst_breadth, 
-         FOR_OWN = foreign_inst_percentage, FOR_BREADTH = foreign_breadth, LOG_MKT_CAP = log_market_cap,
+  select(permno, year, sic_code, FOR_OWN = foreign_inst_percentage, FOR_BREADTH = foreign_breadth, 
+         INST_OWN = inst_percentage, INST_BREADTH = inst_breadth, LOG_MKT_CAP = log_market_cap,
          BM_RATIO = book_to_market, LEVERAGE = leverage, ROA = roa, BA_SPREAD = bid_ask_spread,
          PIN_DY = pin_dy, PIN_DY_ADJ = pin_dy_adj, PSOS_DY = psos_dy, PIN_EHO = pin_eho,
          PIN_BHL = pin_bhl, PIN_BH = pin_bh, MIA = mia, VCV_USD = vcv1, VCV_MKT = vcv2, VCV_TO = vcv3)
@@ -54,7 +54,11 @@ cor_matrix <- cor_matrices_mean
 
 write_rds(cor_matrix, "results/cor_matrix.rds")
 
-stargazer(cor_matrix, title = "correlation matrix", out = "correlation_matrix.html", float.env = "sidewaystable")
+# resizebox.stargazer(
+#   stargazer(cor_matrix, header=FALSE, title = "Correlation matrix",
+#             float.env = "sidewaystable", align = T, no.space = T, font.size = "tiny",
+#             column.sep.width = "1pt", type = "html", out = "correlation_matrix.html"),
+#   tab.width = "\\linewidth")
 
 # gather ia_measures for single column, create nested data frames and apply functional programming for lm model ->
 
