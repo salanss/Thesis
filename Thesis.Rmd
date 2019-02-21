@@ -8,10 +8,10 @@ bibliography: Bibliography.bib
 csl: journal-of-financial-economics.csl
 link-citations: yes
 fontsize: 12pt
-geometry: [top=2.5cm, bottom=2.5cm, right=2.5cm, left=3cm]
+geometry: [top=3cm, bottom=2.5cm, right=2.5cm, left=3cm]
 header-includes:
 - \usepackage{setspace}
-- \onehalfspacing
+- \doublespacing
 - \usepackage{dcolumn}
 - \usepackage{rotating}
 ---
@@ -141,8 +141,8 @@ library(tidyverse)
 library(stargazer)
 cor_matrix <- read_rds("results/cor_matrix.rds")
 stargazer(cor_matrix, header=FALSE, title = "Correlation matrix",
-          float.env = "sidewaystable", align = T, no.space = T, font.size = "scriptsize",
-          column.sep.width = "1pt", type='latex')
+          float.env = "sidewaystable", align = T, no.space = T, font.size = "tiny",
+          column.sep.width = "0pt", type='latex')
 ```
 
 
