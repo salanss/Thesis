@@ -14,6 +14,8 @@ baseline_regression_raw <- read_rds("data/baseline_regression_raw.rds") %>%
          PIN_DY = pin_dy, PIN_DY_ADJ = pin_dy_adj, PSOS_DY = psos_dy, PIN_EHO = pin_eho,
          PIN_BHL = pin_bhl, PIN_BH = pin_bh, MIA = mia, VCV_USD = vcv1, VCV_MKT = vcv2, VCV_TO = vcv3)
 
+write_rds(baseline_regression_raw, "results/baseline_regression_raw.rds")
+
 cor_raw <- baseline_regression_raw %>% select(-permno, -sic_code) %>% 
   mutate(year = as.integer(year))
 
@@ -63,11 +65,12 @@ write_rds(cor_matrix, "results/cor_matrix.rds")
 # gather ia_measures for single column, create nested data frames and apply functional programming for lm model ->
 
 baseline_regression <- baseline_regression_raw %>% 
-  gather(ia_measure_name, ia_measure, bid_ask_spread:vcv3) %>% 
-  gather(dep_measure_name, dep_measure, foreign_inst_percentage:foreign_breadth2) %>% 
+  gather(ia_measure_name, ia_measure, BA_SPREAD:VCV_TO) %>% 
+  gather(dep_measure_name, dep_measure, FOR_OWN:INST_BREADTH) %>% 
   filter_all(all_vars(!is.na(.))) %>% 
   group_by(dep_measure_name, ia_measure_name) %>% 
   nest()
+
 
 rnm <- function(df, ia_meas, dep_meas) {
   rnm_list <- set_names(c("ia_measure", "dep_measure"), syms(c(ia_meas, dep_meas)))
@@ -75,8 +78,8 @@ rnm <- function(df, ia_meas, dep_meas) {
 }
 
 model_function <- function(df, ia_meas, dep_meas) {
-  f <- dep_measure ~ ia_measure + book_to_market + leverage + 
-    roa |year + sic_code|0|year + sic_code
+  f <- dep_measure ~ ia_measure + BM_RATIO + LEVERAGE + 
+    ROA |year + sic_code|0|year + sic_code
   f[[2]] <- sym(dep_meas)
   f[[3]][[2]][[2]][[2]][[2]][[2]][[2]] <- sym(ia_meas)
   felm(f, data = df)
@@ -86,7 +89,7 @@ baseline_names <- mutate(baseline_regression,
                          data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
                          model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
 
-write_rds(baseline_names, "results/baseline_names.rds")
+# write_rds(baseline_names, "results/baseline_names.rds")
 
 # stargazer(baseline_names$model, column.labels =c("Foreign ownership", "Foreign ownership2",
 #                                                  "Foreign breadth", "Foreign breadth2"),
@@ -96,6 +99,18 @@ write_rds(baseline_names, "results/baseline_names.rds")
 #           add.lines = list(c("Industry fixed effects", rep("Yes", times = 44)), 
 #                            c("Year fixed effects", rep("Yes", times = 44))),
 #           title = "Baseline regression results (H1)", out = "Baseline_results.html")
+
+stargazer(baseline_names$model, 
+          header = F,
+          column.labels =c("FOR OWN", "FOR BREADTH", "INST OWN", "INST BREADTH"),
+          dep.var.labels.include = F,
+          column.separate = c(11, 11, 11, 11),
+          omit.stat = c("ser", "rsq"),
+          float.env = "sidewaystable",
+          font.size = "tiny",
+          add.lines = list(c("Industry fixed effects", rep("Yes", times = 44)),
+                           c("Year fixed effects", rep("Yes", times = 44))),
+          title = "Baseline regression results (H1)", type = "latex")
 
 baseline_regression_summary <- baseline_regression_raw %>% 
   select(-permno, -year, -sic_code) %>% 
