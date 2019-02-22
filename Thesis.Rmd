@@ -147,7 +147,7 @@ In this section, I report the empirical results of the effect of information asy
 
 ## 6.1 Baseline setting results
 
-In this section, I report the results of the baseline setting. First, I examine the relation between the variables used in baseline setting by a correlation matrix. Table I reports the results of annual firm-level correlations between the variables used in baseline panel regression model (Equation \ref{eq_baseline}). Each value is a time-series average of within-year correlations (Pearson). The total sample time period extends from 1997 to 2017. However, this holds true for all variables except *PIN~DY~* (1997-2004), *PIN~DY~ADJ~* (1997-2004), *PSOS~DY~* (1997-2004),
+In this section, I report the results of the baseline setting. First, I examine the relation between the variables used in baseline setting by a correlation matrix. Table I reports the results of annual firm-level correlations between the variables used in baseline panel regression model (Equation \ref{eq_baseline}). Each value is a time-series average of within-year correlations (Pearson). The total sample time period extends from 1997 to 2017. However, this holds true for all variables except *PIN~DY~* (1997-2004), *PIN~DY_ADJ~* (1997-2004), *PSOS~DY~* (1997-2004),
 *PIN~EHO~* (1997-2001), *PIN~BHL~* (1997-2010), *PIN~BH~* (1997-2010), MIA (1997-2015).
 
 Variable *FOR_OWN* is negatively correlated with all information asymmetry measures, which is consistent with the first hypothesis. The negative relation is the strongest with the different probability of informed trading measures and the least strong with *MIA*. Moreover, the correlations of *FOR_OWN* with the control variables of different firm characteristics is intuitive and in line with the existing literature. Foreign investors tend to own firms with larger market capitalization, greater profitability and smaller book-to-market ratios (i.e. value stocks). However, foreign ownership has a positive relation with leverage, implying a preference of more in-debt firms. The relation between foreign ownership and total institutional ownership is positive, indicating that foreign investors have similar stockholdings with institutional investors in general. Accordingly, *FOR_BREADTH* has similar but stronger correlations with other variables as *FOR_OWN*. 
@@ -169,5 +169,119 @@ kable(cor_matrix, "latex", caption = "Correlations between sample variables",
 
 Information asymmetry measures are strongly positively correlated with each other, which is consistent and implies that they capture similar explanatory characteristics. Only *PSOS~DY~* has a negative correlation with another information asymmetry measure *MIA* and largely explained by the fact that it is a measure of illiquidity unrelated to asymmetric information [@duarte2009pin]. All control variables except *LOG_MKT_CAP* have relatively weak correlations with the information asymmetry measures, which enables me to use them as explanatory in a regression model with a low risk of multicollinearity. As a result, I choose to exclude *LOG_MKT_CAP* from subsequent regression models due to a potential risk of multicollinearity. 
 
+\begin{landscape}
+```{r, results='asis'}
+## baseline regression table h1 FOR_OWN
+library(tidyverse)
+library(stargazer)
+library(lfe)
+library(kableExtra)
+baseline_regression_raw <- read_rds("results/baseline_regression_raw.rds")
+
+baseline_regression <- baseline_regression_raw %>% 
+  gather(ia_measure_name, ia_measure, BA_SPREAD:VCV_TO) %>% 
+  gather(dep_measure_name, dep_measure, FOR_OWN) %>% 
+  filter_all(all_vars(!is.na(.))) %>% 
+  group_by(dep_measure_name, ia_measure_name) %>% 
+  nest()
+
+baseline_regression2 <- baseline_regression_raw %>% 
+  gather(ia_measure_name, ia_measure, BA_SPREAD:VCV_TO) %>% 
+  gather(dep_measure_name, dep_measure, FOR_BREADTH) %>% 
+  filter_all(all_vars(!is.na(.))) %>% 
+  group_by(dep_measure_name, ia_measure_name) %>% 
+  nest()
+
+rnm <- function(df, ia_meas, dep_meas) {
+  rnm_list <- set_names(c("ia_measure", "dep_measure"), syms(c(ia_meas, dep_meas)))
+  rename(df, !!!rnm_list)
+}
+
+model_function <- function(df, ia_meas, dep_meas) {
+  f <- dep_measure ~ ia_measure + BM_RATIO + LEVERAGE + 
+    ROA |year + sic_code|0|year + sic_code
+  f[[2]] <- sym(dep_meas)
+  f[[3]][[2]][[2]][[2]][[2]][[2]][[2]] <- sym(ia_meas)
+  felm(f, data = df)
+}
+
+baseline_names <- mutate(baseline_regression,
+                         data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
+                         model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
+
+baseline_names2 <- mutate(baseline_regression2,
+                         data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
+                         model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
+
+
+stargazer(baseline_names$model, 
+          header = F,
+          column.labels =c("FOR OWN"),
+          dep.var.labels.include = F,
+          column.separate = c(11),
+          omit.stat = c("ser", "rsq"),
+          #float.env = "sidewaystable",
+          font.size = "tiny",
+          no.space = T, 
+          add.lines = list(c("Industry fixed effects", rep("Yes", times = 11)),
+                           c("Year fixed effects", rep("Yes", times = 11))),
+          title = "Panel regression analysis of foreign ownership", type = "latex")
+```
+\end{landscape}
+
+\begin{landscape}
+```{r, results='asis'}
+## baseline regression table h1 FOR_BREADTH
+library(tidyverse)
+library(stargazer)
+library(lfe)
+library(kableExtra)
+baseline_regression_raw <- read_rds("results/baseline_regression_raw.rds")
+baseline_regression2 <- baseline_regression_raw %>% 
+  gather(ia_measure_name, ia_measure, BA_SPREAD:VCV_TO) %>% 
+  gather(dep_measure_name, dep_measure, FOR_BREADTH) %>% 
+  filter_all(all_vars(!is.na(.))) %>% 
+  group_by(dep_measure_name, ia_measure_name) %>% 
+  nest()
+
+rnm <- function(df, ia_meas, dep_meas) {
+  rnm_list <- set_names(c("ia_measure", "dep_measure"), syms(c(ia_meas, dep_meas)))
+  rename(df, !!!rnm_list)
+}
+
+model_function <- function(df, ia_meas, dep_meas) {
+  f <- dep_measure ~ ia_measure + BM_RATIO + LEVERAGE + 
+    ROA |year + sic_code|0|year + sic_code
+  f[[2]] <- sym(dep_meas)
+  f[[3]][[2]][[2]][[2]][[2]][[2]][[2]] <- sym(ia_meas)
+  felm(f, data = df)
+}
+
+baseline_names <- mutate(baseline_regression,
+                         data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
+                         model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
+
+baseline_names2 <- mutate(baseline_regression2,
+                         data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
+                         model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
+
+stargazer(baseline_names2$model, 
+          header = F,
+          column.labels =c("FOR BREADTH"),
+          dep.var.labels.include = F,
+          column.separate = c(11),
+          omit.stat = c("ser", "rsq"),
+          #float.env = "sidewaystable",
+          font.size = "tiny",
+          no.space = T,
+          add.lines = list(c("Industry fixed effects", rep("Yes", times = 11)),
+                           c("Year fixed effects", rep("Yes", times = 11))),
+          title = "Panel regression analysis of foreign breadth", type = "latex")
+```
+\end{landscape}
+
+
 \newpage
 # References
+
+
