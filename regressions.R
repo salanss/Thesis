@@ -66,11 +66,17 @@ write_rds(cor_matrix, "results/cor_matrix.rds")
 
 baseline_regression <- baseline_regression_raw %>% 
   gather(ia_measure_name, ia_measure, BA_SPREAD:VCV_TO) %>% 
-  gather(dep_measure_name, dep_measure, FOR_OWN:INST_BREADTH) %>% 
+  gather(dep_measure_name, dep_measure, FOR_OWN) %>% 
   filter_all(all_vars(!is.na(.))) %>% 
   group_by(dep_measure_name, ia_measure_name) %>% 
   nest()
 
+baseline_regression2 <- baseline_regression_raw %>% 
+  gather(ia_measure_name, ia_measure, BA_SPREAD:VCV_TO) %>% 
+  gather(dep_measure_name, dep_measure, FOR_BREADTH) %>% 
+  filter_all(all_vars(!is.na(.))) %>% 
+  group_by(dep_measure_name, ia_measure_name) %>% 
+  nest()
 
 rnm <- function(df, ia_meas, dep_meas) {
   rnm_list <- set_names(c("ia_measure", "dep_measure"), syms(c(ia_meas, dep_meas)))
@@ -89,6 +95,10 @@ baseline_names <- mutate(baseline_regression,
                          data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
                          model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
 
+baseline_names2 <- mutate(baseline_regression2,
+                          data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
+                          model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
+
 # write_rds(baseline_names, "results/baseline_names.rds")
 
 # stargazer(baseline_names$model, column.labels =c("Foreign ownership", "Foreign ownership2",
@@ -102,15 +112,63 @@ baseline_names <- mutate(baseline_regression,
 
 stargazer(baseline_names$model, 
           header = F,
-          column.labels =c("FOR OWN", "FOR BREADTH", "INST OWN", "INST BREADTH"),
+          label = "table_h1_for_breadth",
+          notes.label = "",
+          notes.append = F,
+          notes = "",
+          column.labels =c("FOR\\_OWN"),
           dep.var.labels.include = F,
-          column.separate = c(11, 11, 11, 11),
           omit.stat = c("ser", "rsq"),
-          float.env = "sidewaystable",
+          #float.env = "sidewaystable",
           font.size = "tiny",
-          add.lines = list(c("Industry fixed effects", rep("Yes", times = 44)),
-                           c("Year fixed effects", rep("Yes", times = 44))),
-          title = "Baseline regression results (H1)", type = "latex")
+          no.space = T,
+          add.lines = list(c("Industry fixed effects", rep("Yes", times = 11)),
+                           c("Year fixed effects", rep("Yes", times = 11))),
+          title = "Panel regression analysis of foreign breadth", type = "latex")
+
+star1 <- stargazer(baseline_names$model,
+                             header = F,
+                             column.labels =c("FOR\\_OWN"),
+                             label = "table_h1",
+                             dep.var.labels.include = F,
+                             notes.label = "",
+                             notes.append = F,
+                             notes = "",
+                             column.separate = c(11),
+                             omit.stat = c("ser", "rsq"),
+                             font.size = "tiny",
+                             no.space = T,
+                             add.lines = list(c("Industry fixed effects", rep("Yes", times = 11)),
+                                              c("Year fixed effects", rep("Yes", times = 11))),
+                             title = "Panel regression analysis of foreign ownership
+                                      and foreign breadth", 
+                             type = "latex")
+
+star2 <- stargazer(baseline_names2$model,
+                             header = F,
+                             #label = "table_h1_for_breadth",
+                             notes.label = "",
+                             notes.append = F,
+                             notes = "",
+                             column.labels =c("FOR BREADTH"),
+                             dep.var.labels.include = F,
+                             omit.stat = c("ser", "rsq"),
+                             font.size = "tiny",
+                             no.space = T,
+                             add.lines = list(c("Industry fixed effects", rep("Yes", times = 11)),
+                                              c("Year fixed effects", rep("Yes", times = 11))),
+                             type = "latex")
+                             #title = "Panel regression analysis of foreign breadth", type = "latex")
+
+star_out <- star_panel(star1, star2,
+           panel.names = c("Foreign ownership", "Foreign breadth"))
+
+star_tex_write(star_out, file = "my_tex_file.tex", headers = TRUE)
+
+
+star_tex_write(star_out, file = "my_tex_file.tex", headers = TRUE)
+
+
 
 baseline_regression_summary <- baseline_regression_raw %>% 
   select(-permno, -year, -sic_code) %>% 
