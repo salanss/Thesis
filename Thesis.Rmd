@@ -9,7 +9,7 @@ bibliography: Bibliography.bib
 csl: journal-of-financial-economics.csl
 link-citations: yes
 fontsize: 12pt
-geometry: [top=3cm, bottom=2.5cm, right=2.5cm, left=3cm]
+geometry: [top=2.5cm, bottom=2.5cm, right=2.5cm, left=2.5cm]
 header-includes:
 - \usepackage{setspace}
 - \doublespacing
@@ -35,6 +35,40 @@ header-includes:
 knitr::opts_chunk$set(echo = FALSE, 
                       warning = FALSE, 
                       message = FALSE)
+
+longtable.stargazer = function(..., float = T, longtable.float = F, 
+  longtable.head = T, filename = NULL){
+  # Capturing stargazer to hack it
+  require(stargazer)
+  res = capture.output(
+    stargazer(..., float = float)
+  )
+  # Changing tabulare environment for longtable
+    res = gsub("tabular", "longtable", res)
+  # removing floating environment
+  if(float == T & longtable.float == F){
+    res[grep("table", res)[1]] = res[grep("longtable", res)[1]]
+    # Removing extra longtable commands
+    res = res[-grep("longtable", res)[2]]
+    res = res[-length(res)]
+  }
+  # Adding page headings
+  if(longtable.head == T){
+    res = c(res[1:which(res == "\\hline \\\\[-1.8ex] ")[1] - 1], "\\endhead", res[which(res == "\\hline \\\\[-1.8ex] ")[1]:length(res)])
+  }
+  # Exporting
+  cat(res, sep = "\n")
+  # Exporting
+  if(!is.null(filename)){
+    cat(res, file = filename, sep = "\n")
+    # Message
+    cat(paste("\nLaTeX output printed to", filename, "\n", sep = " ", 
+      collapse = ""))
+  }else{
+    cat(res, sep = "\n")
+  }
+}
+
 ```
 \pagenumbering{roman}
 \setcounter{page}{3}
@@ -176,130 +210,240 @@ Information asymmetry measures are strongly positively correlated with each othe
 
 I extend the analysis of the correlation matrix by examining the effect of information asymmetry on foreign ownership in a panel regression setting The dependent variable in every regression model FOR_OWN is the annual average of the foreign ownership for each stock. Different information asymmetry measures are used separately as explanatory variables. The control variables are different measures of firm characteristics. I also include industry and year fixed effects. Table \ref{table_h1_for_own} reports the results.
 
-\begin{landscape}
 ```{r, results='asis'}
-## baseline regression table h1 FOR_OWN
-library(tidyverse)
-library(stargazer)
-library(lfe)
-library(kableExtra)
-baseline_regression_raw <- read_rds("results/baseline_regression_raw.rds")
+## baseline regression table h1 panel a: FOR_OWN and panel b:FOR_breadth
+## code chunk produces tex file which is used in output
+# library(tidyverse)
+# library(stargazer)
+# library(lfe)
+# library(kableExtra)
+# library(starpolishr)
+# baseline_regression_raw <- read_rds("results/baseline_regression_raw.rds")
+# 
+# baseline_regression <- baseline_regression_raw %>% 
+#   gather(ia_measure_name, ia_measure, BA_SPREAD:VCV_TO) %>% 
+#   gather(dep_measure_name, dep_measure, FOR_OWN) %>% 
+#   filter_all(all_vars(!is.na(.))) %>% 
+#   group_by(dep_measure_name, ia_measure_name) %>% 
+#   nest()
+# 
+# baseline_regression2 <- baseline_regression_raw %>% 
+#   gather(ia_measure_name, ia_measure, BA_SPREAD:VCV_TO) %>% 
+#   gather(dep_measure_name, dep_measure, FOR_BREADTH) %>% 
+#   filter_all(all_vars(!is.na(.))) %>% 
+#   group_by(dep_measure_name, ia_measure_name) %>% 
+#   nest()
+# 
+# rnm <- function(df, ia_meas, dep_meas) {
+#   rnm_list <- set_names(c("ia_measure", "dep_measure"), syms(c(ia_meas, dep_meas)))
+#   rename(df, !!!rnm_list)
+# }
+# 
+# model_function <- function(df, ia_meas, dep_meas) {
+#   f <- dep_measure ~ ia_measure + BM_RATIO + LEVERAGE + 
+#     ROA |year + sic_code|0|year + sic_code
+#   f[[2]] <- sym(dep_meas)
+#   f[[3]][[2]][[2]][[2]][[2]][[2]][[2]] <- sym(ia_meas)
+#   felm(f, data = df)
+# }
+# 
+# baseline_names <- mutate(baseline_regression,
+#                          data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
+#                          model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
+# 
+# baseline_names2 <- mutate(baseline_regression2,
+#                          data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
+#                          model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
+# 
+# 
+#  star1 <- longtable.stargazer(baseline_names$model,
+#            header = F,
+#            #column.labels =c("FOR\\_OWN"),
+#            label = "table_h1",
+#            dep.var.labels.include = F,
+#            notes.label = "",
+#            notes.append = F,
+#            notes = "",
+#            column.separate = c(11),
+#            omit.stat = c("ser", "rsq"),
+#            font.size = "tiny",
+#            no.space = T,
+#            add.lines = list(c("Industry fixed effects", rep("Yes", times = 11)),
+#                             c("Year fixed effects", rep("Yes", times = 11))),
+#            title = "Panel regression analysis of foreign ownership", type = "latex")
+# 
+#  star2 <- longtable.stargazer(baseline_names2$model,
+#            header = F,
+#            #label = "table_h1_for_breadth",
+#            notes.label = "",
+#            notes.append = F,
+#            notes = "",
+#            column.labels =c("FOR BREADTH"),
+#            dep.var.labels.include = F,
+#            omit.stat = c("ser", "rsq"),
+#            font.size = "tiny",
+#            no.space = T,
+#            add.lines = list(c("Industry fixed effects", rep("Yes", times = 11)),
+#                             c("Year fixed effects", rep("Yes", times = 11))),
+#            title = "Panel regression analysis of foreign breadth", type = "latex")
+# 
+# a <- star_panel(star1, star2,
+#                         panel.names = c("Foreign ownership", "Foreign breadth"))
 
-baseline_regression <- baseline_regression_raw %>% 
-  gather(ia_measure_name, ia_measure, BA_SPREAD:VCV_TO) %>% 
-  gather(dep_measure_name, dep_measure, FOR_OWN) %>% 
-  filter_all(all_vars(!is.na(.))) %>% 
-  group_by(dep_measure_name, ia_measure_name) %>% 
-  nest()
 
-baseline_regression2 <- baseline_regression_raw %>% 
-  gather(ia_measure_name, ia_measure, BA_SPREAD:VCV_TO) %>% 
-  gather(dep_measure_name, dep_measure, FOR_BREADTH) %>% 
-  filter_all(all_vars(!is.na(.))) %>% 
-  group_by(dep_measure_name, ia_measure_name) %>% 
-  nest()
-
-rnm <- function(df, ia_meas, dep_meas) {
-  rnm_list <- set_names(c("ia_measure", "dep_measure"), syms(c(ia_meas, dep_meas)))
-  rename(df, !!!rnm_list)
-}
-
-model_function <- function(df, ia_meas, dep_meas) {
-  f <- dep_measure ~ ia_measure + BM_RATIO + LEVERAGE + 
-    ROA |year + sic_code|0|year + sic_code
-  f[[2]] <- sym(dep_meas)
-  f[[3]][[2]][[2]][[2]][[2]][[2]][[2]] <- sym(ia_meas)
-  felm(f, data = df)
-}
-
-baseline_names <- mutate(baseline_regression,
-                         data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
-                         model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
-
-baseline_names2 <- mutate(baseline_regression2,
-                         data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
-                         model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
-
-
-stargazer(baseline_names$model, 
-          header = F,
-          column.labels =c("FOR\\_OWN"),
-          label = "table_h1_for_own",
-          dep.var.labels.include = F,
-          notes.label = "",
-          notes.append = F,
-          notes = "",
-          column.separate = c(11),
-          omit.stat = c("ser", "rsq"),
-          #float.env = "sidewaystable",
-          font.size = "tiny",
-          no.space = T, 
-          add.lines = list(c("Industry fixed effects", rep("Yes", times = 11)),
-                           c("Year fixed effects", rep("Yes", times = 11))),
-          title = "Panel regression analysis of foreign ownership", 
-          type = "latex")
 ```
-\end{landscape}
 
-Similar to the findings of correlations in Table ref{table_cor_matrix}, the empirical results of the panel regression models in Table \ref{table_h1_for_own} support Hypothesis 1 and the findings by @jiang2004foreign, @baik2013liability and @batten2015foreign of the negative relation between foreign ownership and asymmetric information. The regression coefficients of information asymmetry measures are negative and statistically significant at the 1% level in all regression models. Based on column (3), a 1% increase in information asymmetry (PIN~DY_ADJ~) leads to a decrease of about 0.10% in foreign ownership *ceteris paribus*. Based on all models, a 1% increase in information asymmetry results, on average, in a decrease of about 0.05% in foreign ownership *ceteris paribus*. Overall, the negative relation is stronger with the probability of informed trading measures than with bid-ask spread, multimarket information asymmetry or volume coefficient of variation.
+Similar to the findings of correlations in Table ref{table_cor_matrix}, the empirical results of the panel regression models in Table \ref{table_h1_for_own} support Hypothesis 1 and the findings by @jiang2004foreign, @baik2013liability and @batten2015foreign of the negative relation between foreign ownership and asymmetric information. The regression coefficients of information asymmetry measures are negative and statistically significant at the 1% level in all regression models. Based on column (3), a 1% increase in information asymmetry (PIN~DY_ADJ~) leads to a decrease of about 0.10% in foreign ownership *ceteris paribus*. Based on all models, a 1% increase in information asymmetry results, on average, in a decrease of about 0.05% in foreign ownership *ceteris paribus*. Overall, the negative relation is stronger with the probability of informed trading measures than with bid-ask spread, multimarket information asymmetry or volume coefficient of variation. Based on the results of adjusted R^2^, models with different probability of informed trading measures and MIA have the best explanatory power.
 
 The control variables are mainly statistically significant and in line with the existing literature. BM_RATIO is negative and statistically significant at the 1% level in all regression models except in the model with MIA as the explanatory variable. This implies that foreign investors are driven way of the stocks with relatively high book-to-market ratio (i.e. value stocks). Book-to-market ratio is used as a measure of risk in many asset pricing models [e.g. @fama1993common ; @carhart1997persistence ; @pastor2003liquidity], which, in addition to my results, support the findings of @ko2007characteristics; @lin2003foreign that foreign investors avoid riskier firms with high book-to-market ratios. Moreover, the regression coefficients of ROA are positive and statistically significant at the 1% level in all models, implying that foreign investors prefer firms with positive probability. Based on column(1), an increase of 1% in return on assets results in an increase of about 0.09% in foreign ownership *ceteris paribus*. The regression coefficients of leverage are mainly positive. LEVERAGE is positive and statistically significant in six out of eleven models, positive and statistically insignificant in four out of eleven models and negative and statistically significant once. Hence, an increase in leverage is mostly associated with an increase in foreign ownership. The results mostly contradicts the findings of foreign investors' preference on low debt ratio firms by @kang1997there and @dahlquist2001direct.
 
-\begin{landscape}
 ```{r, results='asis'}
 ## baseline regression table h1 FOR_BREADTH
-library(tidyverse)
-library(stargazer)
-library(lfe)
-library(kableExtra)
-baseline_regression_raw <- read_rds("results/baseline_regression_raw.rds")
-baseline_regression2 <- baseline_regression_raw %>% 
-  gather(ia_measure_name, ia_measure, BA_SPREAD:VCV_TO) %>% 
-  gather(dep_measure_name, dep_measure, FOR_BREADTH) %>% 
-  filter_all(all_vars(!is.na(.))) %>% 
-  group_by(dep_measure_name, ia_measure_name) %>% 
-  nest()
-
-rnm <- function(df, ia_meas, dep_meas) {
-  rnm_list <- set_names(c("ia_measure", "dep_measure"), syms(c(ia_meas, dep_meas)))
-  rename(df, !!!rnm_list)
-}
-
-model_function <- function(df, ia_meas, dep_meas) {
-  f <- dep_measure ~ ia_measure + BM_RATIO + LEVERAGE + 
-    ROA |year + sic_code|0|year + sic_code
-  f[[2]] <- sym(dep_meas)
-  f[[3]][[2]][[2]][[2]][[2]][[2]][[2]] <- sym(ia_meas)
-  felm(f, data = df)
-}
-
-baseline_names <- mutate(baseline_regression,
-                         data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
-                         model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
-
-baseline_names2 <- mutate(baseline_regression2,
-                         data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
-                         model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
-
-stargazer(baseline_names2$model, 
-          header = F,
-          label = "table_h1_for_breadth",
-          notes.label = "",
-          notes.append = F,
-          notes = "",
-          column.labels =c("FOR BREADTH"),
-          dep.var.labels.include = F,
-          omit.stat = c("ser", "rsq"),
-          #float.env = "sidewaystable",
-          font.size = "tiny",
-          no.space = T,
-          add.lines = list(c("Industry fixed effects", rep("Yes", times = 11)),
-                           c("Year fixed effects", rep("Yes", times = 11))),
-          title = "Panel regression analysis of foreign breadth", type = "latex")
+# library(tidyverse)
+# library(stargazer)
+# library(lfe)
+# library(kableExtra)
+# library(starpolishr)
+# baseline_regression_raw <- read_rds("results/baseline_regression_raw.rds")
+# baseline_regression2 <- baseline_regression_raw %>% 
+#   gather(ia_measure_name, ia_measure, BA_SPREAD:VCV_TO) %>% 
+#   gather(dep_measure_name, dep_measure, FOR_BREADTH) %>% 
+#   filter_all(all_vars(!is.na(.))) %>% 
+#   group_by(dep_measure_name, ia_measure_name) %>% 
+#   nest()
+# 
+# rnm <- function(df, ia_meas, dep_meas) {
+#   rnm_list <- set_names(c("ia_measure", "dep_measure"), syms(c(ia_meas, dep_meas)))
+#   rename(df, !!!rnm_list)
+# }
+# 
+# model_function <- function(df, ia_meas, dep_meas) {
+#   f <- dep_measure ~ ia_measure + BM_RATIO + LEVERAGE + 
+#     ROA |year + sic_code|0|year + sic_code
+#   f[[2]] <- sym(dep_meas)
+#   f[[3]][[2]][[2]][[2]][[2]][[2]][[2]] <- sym(ia_meas)
+#   felm(f, data = df)
+# }
+# 
+# baseline_names <- mutate(baseline_regression,
+#                          data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
+#                          model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
+# 
+# baseline_names2 <- mutate(baseline_regression2,
+#                          data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
+#                          model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
+# 
+# stargazer(baseline_names2$model, 
+#           header = F,
+#           label = "table_h1_for_breadth",
+#           notes.label = "",
+#           notes.append = F,
+#           notes = "",
+#           column.labels =c("FOR BREADTH"),
+#           dep.var.labels.include = F,
+#           omit.stat = c("ser", "rsq"),
+#           #float.env = "sidewaystable",
+#           font.size = "tiny",
+#           no.space = T,
+#           add.lines = list(c("Industry fixed effects", rep("Yes", times = 11)),
+#                            c("Year fixed effects", rep("Yes", times = 11))),
+#           title = "Panel regression analysis of foreign breadth", type = "latex")
 ```
-\end{landscape}
 
 \newpage
+
+\begin{landscape}
+\begin{table}[!htbp] \centering 
+  \caption{Panel regression analysis of foreign ownership
+                                      and foreign breadth} 
+  \label{table_h1} 
+\tiny 
+\begin{tabular}{@{\extracolsep{5pt}}lccccccccccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{11}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-12} 
+ & \multicolumn{11}{c}{FOR\_OWN} \\ 
+\\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) & (9) & (10) & (11)\\ 
+\hline \\[-1.8ex] 
+\\[-2.0ex] \multicolumn{12}{@{} l}{Panel A: Foreign ownership}
+ \\
+ \\[-1.5ex]
+ BA\_SPREAD & $-$0.011$^{***}$ &  &  &  &  &  &  &  &  &  &  \\ 
+  & (0.003) &  &  &  &  &  &  &  &  &  &  \\ 
+  PIN\_DY &  & $-$0.075$^{***}$ &  &  &  &  &  &  &  &  &  \\ 
+  &  & (0.013) &  &  &  &  &  &  &  &  &  \\ 
+  PIN\_DY\_ADJ &  &  & $-$0.100$^{***}$ &  &  &  &  &  &  &  &  \\ 
+  &  &  & (0.016) &  &  &  &  &  &  &  &  \\ 
+  PSOS\_DY &  &  &  & $-$0.043$^{***}$ &  &  &  &  &  &  &  \\ 
+  &  &  &  & (0.010) &  &  &  &  &  &  &  \\ 
+  PIN\_EHO &  &  &  &  & $-$0.093$^{***}$ &  &  &  &  &  &  \\ 
+  &  &  &  &  & (0.014) &  &  &  &  &  &  \\ 
+  PIN\_BHL &  &  &  &  &  & $-$0.078$^{***}$ &  &  &  &  &  \\ 
+  &  &  &  &  &  & (0.017) &  &  &  &  &  \\ 
+  PIN\_BH &  &  &  &  &  &  & $-$0.080$^{***}$ &  &  &  &  \\ 
+  &  &  &  &  &  &  & (0.013) &  &  &  &  \\ 
+  MIA &  &  &  &  &  &  &  & $-$0.035$^{***}$ &  &  &  \\ 
+  &  &  &  &  &  &  &  & (0.008) &  &  &  \\ 
+  VCV\_USD &  &  &  &  &  &  &  &  & $-$0.009$^{***}$ &  &  \\ 
+  &  &  &  &  &  &  &  &  & (0.001) &  &  \\ 
+  VCV\_MKT &  &  &  &  &  &  &  &  &  & $-$0.009$^{***}$ &  \\ 
+  &  &  &  &  &  &  &  &  &  & (0.001) &  \\ 
+  VCV\_TO &  &  &  &  &  &  &  &  &  &  & $-$0.010$^{***}$ \\ 
+  &  &  &  &  &  &  &  &  &  &  & (0.001) \\ 
+  BM\_RATIO & $-$0.008$^{***}$ & $-$0.003$^{***}$ & $-$0.003$^{***}$ & $-$0.005$^{***}$ & $-$0.003$^{***}$ & $-$0.005$^{***}$ & $-$0.003$^{***}$ & $-$0.001 & $-$0.006$^{***}$ & $-$0.006$^{***}$ & $-$0.006$^{***}$ \\ 
+  & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) \\ 
+  LEVERAGE & 0.010$^{***}$ & 0.0005 & 0.001 & 0.001 & $-$0.001 & 0.006$^{***}$ & 0.007$^{***}$ & 0.007 & 0.007$^{**}$ & 0.007$^{**}$ & 0.007$^{**}$ \\ 
+  & (0.003) & (0.001) & (0.001) & (0.002) & (0.001) & (0.002) & (0.002) & (0.005) & (0.003) & (0.003) & (0.003) \\ 
+  ROA & 0.089$^{***}$ & 0.071$^{***}$ & 0.073$^{***}$ & 0.071$^{***}$ & 0.054$^{***}$ & 0.070$^{***}$ & 0.070$^{***}$ & 0.084$^{***}$ & 0.078$^{***}$ & 0.078$^{***}$ & 0.082$^{***}$ \\ 
+  & (0.011) & (0.011) & (0.012) & (0.011) & (0.012) & (0.009) & (0.009) & (0.011) & (0.009) & (0.009) & (0.009) \\ 
+\\[-1.83ex] 
+ \hline \\[-1.83ex]
+ & \multicolumn{11}{c}{FOR\_BREADTH} \\ 
+\\[-1.83ex] & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) & (9) & (10) & (11)\\ 
+\hline \\[-1.83ex] 
+\\[-2.0ex] \multicolumn{12}{@{} l}{Panel B: Foreign breadth}
+ \\
+ \\[-1.5ex]
+ BA\_SPREAD & $-$0.002$^{**}$ &  &  &  &  &  &  &  &  &  &  \\ 
+  & (0.001) &  &  &  &  &  &  &  &  &  &  \\ 
+  PIN\_DY &  & $-$0.015$^{***}$ &  &  &  &  &  &  &  &  &  \\ 
+  &  & (0.003) &  &  &  &  &  &  &  &  &  \\ 
+  PIN\_DY\_ADJ &  &  & $-$0.022$^{***}$ &  &  &  &  &  &  &  &  \\ 
+  &  &  & (0.004) &  &  &  &  &  &  &  &  \\ 
+  PSOS\_DY &  &  &  & $-$0.007$^{***}$ &  &  &  &  &  &  &  \\ 
+  &  &  &  & (0.002) &  &  &  &  &  &  &  \\ 
+  PIN\_EHO &  &  &  &  & $-$0.019$^{***}$ &  &  &  &  &  &  \\ 
+  &  &  &  &  & (0.002) &  &  &  &  &  &  \\ 
+  PIN\_BHL &  &  &  &  &  & $-$0.013$^{***}$ &  &  &  &  &  \\ 
+  &  &  &  &  &  & (0.002) &  &  &  &  &  \\ 
+  PIN\_BH &  &  &  &  &  &  & $-$0.014$^{***}$ &  &  &  &  \\ 
+  &  &  &  &  &  &  & (0.002) &  &  &  &  \\ 
+  MIA &  &  &  &  &  &  &  & $-$0.033$^{***}$ &  &  &  \\ 
+  &  &  &  &  &  &  &  & (0.003) &  &  &  \\ 
+  VCV\_USD &  &  &  &  &  &  &  &  & $-$0.002$^{***}$ &  &  \\ 
+  &  &  &  &  &  &  &  &  & (0.0002) &  &  \\ 
+  VCV\_MKT &  &  &  &  &  &  &  &  &  & $-$0.002$^{***}$ &  \\ 
+  &  &  &  &  &  &  &  &  &  & (0.0002) &  \\ 
+  VCV\_TO &  &  &  &  &  &  &  &  &  &  & $-$0.002$^{***}$ \\ 
+  &  &  &  &  &  &  &  &  &  &  & (0.0002) \\ 
+  BM\_RATIO & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.0004$^{***}$ & $-$0.001$^{**}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ \\ 
+  & (0.0001) & (0.0002) & (0.0002) & (0.0002) & (0.0001) & (0.0001) & (0.0001) & (0.0003) & (0.0001) & (0.0001) & (0.0001) \\ 
+  LEVERAGE & 0.002$^{***}$ & 0.0005 & 0.001 & 0.001 & 0.00002 & 0.001$^{***}$ & 0.001$^{***}$ & 0.003$^{***}$ & 0.002$^{***}$ & 0.002$^{***}$ & 0.002$^{***}$ \\ 
+  & (0.0005) & (0.0004) & (0.0004) & (0.0005) & (0.0003) & (0.0002) & (0.0003) & (0.001) & (0.0005) & (0.0005) & (0.0005) \\ 
+  ROA & 0.011$^{***}$ & 0.012$^{***}$ & 0.012$^{***}$ & 0.012$^{***}$ & 0.007$^{***}$ & 0.006$^{***}$ & 0.007$^{***}$ & 0.020$^{***}$ & 0.009$^{***}$ & 0.009$^{***}$ & 0.010$^{***}$ \\ 
+  & (0.002) & (0.002) & (0.002) & (0.002) & (0.002) & (0.001) & (0.001) & (0.004) & (0.002) & (0.002) & (0.002) \\ 
+ \hline \\[-1.8ex] 
+Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
+Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
+Observations & 104,935 & 14,489 & 14,489 & 14,489 & 9,088 & 75,585 & 75,688 & 20,429 & 92,272 & 92,272 & 92,272 \\ 
+Adjusted R$^{2}$ & 0.150 & 0.336 & 0.330 & 0.299 & 0.351 & 0.190 & 0.199 & 0.258 & 0.171 & 0.171 & 0.171 \\ 
+\hline 
+\hline \\[-1.8ex] 
+\multicolumn{12}{r}{} \\ 
+\end{tabular} 
+\end{table}  
+\end{landscape}
 
 \ref{table_h1_for_breadth} is blaa
 
