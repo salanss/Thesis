@@ -3,6 +3,7 @@ output:
   pdf_document:
     toc: true
     latex_engine: xelatex
+    keep_tex: true
 mainfont: Times New Roman
 bibliography: Bibliography.bib
 csl: journal-of-financial-economics.csl
@@ -35,9 +36,12 @@ knitr::opts_chunk$set(echo = FALSE,
                       warning = FALSE, 
                       message = FALSE)
 ```
+\pagenumbering{roman}
+\setcounter{page}{3}
 \newpage
 \listoftables
 \newpage
+\pagenumbering{arabic}
 
 # 1 Introduction
 
@@ -148,7 +152,7 @@ In this section, I report the empirical results of the effect of information asy
 
 ## 6.1 Baseline setting results
 
-In this section, I report the results of the baseline setting. First, I examine the relation between the variables used in baseline setting by a correlation matrix. Table I reports the results of annual firm-level correlations between the variables used in baseline panel regression model (Equation \ref{eq_baseline}). Each value is a time-series average of within-year correlations (Pearson). The total sample time period extends from 1997 to 2017. However, this holds true for all variables except *PIN~DY~* (1997-2004), *PIN~DY_ADJ~* (1997-2004), *PSOS~DY~* (1997-2004),
+In this section, I report the results of the baseline setting. First, I examine the relation between the variables used in baseline setting by a correlation matrix. Table \ref{table_cor_matrix} reports the results of annual firm-level correlations between the variables used in baseline panel regression model (Equation \ref{eq_baseline}). Each value is a time-series average of within-year correlations (Pearson). The total sample time period extends from 1997 to 2017. However, this holds true for all variables except *PIN~DY~* (1997-2004), *PIN~DY_ADJ~* (1997-2004), *PSOS~DY~* (1997-2004),
 *PIN~EHO~* (1997-2001), *PIN~BHL~* (1997-2010), *PIN~BH~* (1997-2010), MIA (1997-2015).
 
 Variable *FOR_OWN* is negatively correlated with all information asymmetry measures, which is consistent with the first hypothesis. The negative relation is the strongest with the different probability of informed trading measures and the least strong with *MIA*. Moreover, the correlations of *FOR_OWN* with the control variables of different firm characteristics is intuitive and in line with the existing literature. Foreign investors tend to own firms with larger market capitalization, greater profitability and smaller book-to-market ratios (i.e. value stocks). However, foreign ownership has a positive relation with leverage, implying a preference of more in-debt firms. The relation between foreign ownership and total institutional ownership is positive, indicating that foreign investors have similar stockholdings with institutional investors in general. Accordingly, *FOR_BREADTH* has similar but stronger correlations with other variables as *FOR_OWN*. 
@@ -158,7 +162,7 @@ library(tidyverse)
 library(stargazer)
 library(kableExtra)
 cor_matrix <- read_rds("results/cor_matrix.rds")
-kable(cor_matrix, "latex", caption = "Correlations between sample variables", 
+kable(cor_matrix, "latex", caption = "Correlations between sample variables \\label{table_cor_matrix}", 
       booktabs = T, align = "c") %>% 
   kable_styling(latex_options = c("scale_down")) %>% 
   landscape()
@@ -169,6 +173,8 @@ kable(cor_matrix, "latex", caption = "Correlations between sample variables",
 
 
 Information asymmetry measures are strongly positively correlated with each other, which is consistent and implies that they capture similar explanatory characteristics. Only *PSOS~DY~* has a negative correlation with another information asymmetry measure *MIA* and largely explained by the fact that it is a measure of illiquidity unrelated to asymmetric information [@duarte2009pin]. All control variables except *LOG_MKT_CAP* have relatively weak correlations with the information asymmetry measures, which enables me to use them as explanatory in a regression model with a low risk of multicollinearity. As a result, I choose to exclude *LOG_MKT_CAP* from subsequent regression models due to a potential risk of multicollinearity. 
+
+I extend the analysis of the correlation matrix by examining the effect of information asymmetry on foreign ownership in a panel regression setting The dependent variable in every regression model FOR_OWN is the annual average of the foreign ownership for each stock. Different information asymmetry measures are used separately as explanatory variables. The control variables are different measures of firm characteristics. I also include industry and year fixed effects. Table \ref{table_h1_for_own} reports the results.
 
 \begin{landscape}
 ```{r, results='asis'}
@@ -217,8 +223,12 @@ baseline_names2 <- mutate(baseline_regression2,
 
 stargazer(baseline_names$model, 
           header = F,
-          column.labels =c("FOR OWN"),
+          column.labels =c("FOR\\_OWN"),
+          label = "table_h1_for_own",
           dep.var.labels.include = F,
+          notes.label = "",
+          notes.append = F,
+          notes = "",
           column.separate = c(11),
           omit.stat = c("ser", "rsq"),
           #float.env = "sidewaystable",
@@ -226,9 +236,14 @@ stargazer(baseline_names$model,
           no.space = T, 
           add.lines = list(c("Industry fixed effects", rep("Yes", times = 11)),
                            c("Year fixed effects", rep("Yes", times = 11))),
-          title = "Panel regression analysis of foreign ownership", type = "latex")
+          title = "Panel regression analysis of foreign ownership", 
+          type = "latex")
 ```
 \end{landscape}
+
+Similar to the findings of correlations in Table ref{table_cor_matrix}, the empirical results of the panel regression models in Table \ref{table_h1_for_own} support Hypothesis 1 and the findings by @jiang2004foreign, @baik2013liability and @batten2015foreign of the negative relation between foreign ownership and asymmetric information. The regression coefficients of information asymmetry measures are negative and statistically significant at the 1% level in all regression models. Based on column (3), a 1% increase in information asymmetry (PIN~DY_ADJ~) leads to a decrease of about 0.10% in foreign ownership *ceteris paribus*. Based on all models, a 1% increase in information asymmetry results, on average, in a decrease of about 0.05% in foreign ownership *ceteris paribus*. Overall, the negative relation is stronger with the probability of informed trading measures than with bid-ask spread, multimarket information asymmetry or volume coefficient of variation.
+
+The control variables are mainly statistically significant and in line with the existing literature. BM_RATIO is negative and statistically significant at the 1% level in all regression models except in the model with MIA as the explanatory variable. This implies that foreign investors are driven way of the stocks with relatively high book-to-market ratio (i.e. value stocks). Book-to-market ratio is used as a measure of risk in many asset pricing models [e.g. @fama1993common ; @carhart1997persistence ; @pastor2003liquidity], which, in addition to my results, support the findings of @ko2007characteristics; @lin2003foreign that foreign investors avoid riskier firms with high book-to-market ratios. Moreover, the regression coefficients of ROA are positive and statistically significant at the 1% level in all models, implying that foreign investors prefer firms with positive probability. Based on column(1), an increase of 1% in return on assets results in an increase of about 0.09% in foreign ownership *ceteris paribus*. The regression coefficients of leverage are mainly positive. LEVERAGE is positive and statistically significant in six out of eleven models, positive and statistically insignificant in four out of eleven models and negative and statistically significant once. Hence, an increase in leverage is mostly associated with an increase in foreign ownership. The results mostly contradicts the findings of foreign investors' preference on low debt ratio firms by @kang1997there and @dahlquist2001direct.
 
 \begin{landscape}
 ```{r, results='asis'}
@@ -268,9 +283,12 @@ baseline_names2 <- mutate(baseline_regression2,
 
 stargazer(baseline_names2$model, 
           header = F,
+          label = "table_h1_for_breadth",
+          notes.label = "",
+          notes.append = F,
+          notes = "",
           column.labels =c("FOR BREADTH"),
           dep.var.labels.include = F,
-          column.separate = c(11),
           omit.stat = c("ser", "rsq"),
           #float.env = "sidewaystable",
           font.size = "tiny",
@@ -281,8 +299,10 @@ stargazer(baseline_names2$model,
 ```
 \end{landscape}
 
+\newpage
+
+\ref{table_h1_for_breadth} is blaa
 
 \newpage
-# References
 
 
