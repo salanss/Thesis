@@ -12,3 +12,4 @@ data
 results
 *.bcf
 *.xml
+*.tex
