@@ -9,8 +9,7 @@ bibliography: Bibliography.bib
 csl: journal-of-financial-economics.csl
 link-citations: yes
 fontsize: 12pt
-geometry: [top=2.5cm, bottom=2.5cm, right=2.5cm, left=2.5cm]
-landscape geometry: [top=2.5cm, bottom=2.5cm, right=2.5cm, left=0.2cm]
+geometry: [top=3cm, bottom=2.5cm, right=2.5cm, left=3cm]
 header-includes:
 - \usepackage{setspace}
 - \doublespacing
@@ -33,6 +32,8 @@ header-includes:
 - \usepackage{caption}
 - \usepackage{tabularx}
 - \usepackage{hhline}
+- \usepackage{fixltx2e}
+- \usepackage{hyperref}
 ---
 
 \captionsetup{labelfont=bf}
@@ -198,22 +199,29 @@ In this section, I report the results of the baseline setting. First, I examine 
 
 Variable *FOR_OWN* is negatively correlated with all information asymmetry measures, which is consistent with the first hypothesis. The negative relation is the strongest with the different probability of informed trading measures and the least strong with *MIA*. Moreover, the correlations of *FOR_OWN* with the control variables of different firm characteristics is intuitive and in line with the existing literature. Foreign investors tend to own firms with larger market capitalization, greater profitability and smaller book-to-market ratios (i.e. value stocks). However, foreign ownership has a positive relation with leverage, implying a preference of more in-debt firms. The relation between foreign ownership and total institutional ownership is positive, indicating that foreign investors have similar stockholdings with institutional investors in general. Accordingly, *FOR_BREADTH* has similar but stronger correlations with other variables as *FOR_OWN*. 
 
+Information asymmetry measures are strongly positively correlated with each other, which is consistent and implies that they capture similar explanatory characteristics. Only *PSOS~DY~* has a negative correlation with another information asymmetry measure *MIA* and largely explained by the fact that it is a measure of illiquidity unrelated to asymmetric information [@duarte2009pin]. All control variables except *LOG_MKT_CAP* have relatively weak correlations with the information asymmetry measures, which enables me to use them as explanatory in a regression model with a low risk of multicollinearity. As a result, I choose to exclude *LOG_MKT_CAP* from subsequent regression models due to a potential risk of multicollinearity. 
+
+\begingroup
+\renewcommand\arraystretch{2.5}
+\renewcommand\captionsetup{justification=raggedright,
+                           width=\linewidth}
 ```{r, results='asis'}
 library(tidyverse)
 library(stargazer)
 library(kableExtra)
 library(huxtable)
 cor_matrix <- read_rds("results/cor_matrix.rds")
-kable(cor_matrix, "latex", linesep = "\\\\[10pt]", caption = "\\textbf{Correlations between sample   variables}\\label{table_cor_matrix}",
+kable(cor_matrix, "latex", linesep = "", caption = "\\textbf{Correlations between sample variables}\\newline\\scriptsize This table reports the correlations between different institutional ownership, information asymmetry and accounting related control variables of the baseline sample. Each correlation estimate is the annual average of the within-year of (Pearson) correlations. \\textit{FOR\\_OWN} and \\textit{INST\\_OWN} are the annual averages of the firm's shares held by (foreign) institutions at the end of each quarter of the year divided by the firm's total shares outstanding at the end of each quarter. \\textit{FOR\\_BREADTH} and \\textit{INST\\_BREADTH} are the annual averages of the number of the firm's distinct (foreign) institutional shareholders at the end of each quarter divided by the total number of distinct institutional shareholders in 13F database at the end of each quarter (Chen et al., 2002; Lof and Bommel, 2018). The annual firm-levels of information asymmetry are estimated by various researchers. \\textit{PIN\\textsubscript{BHL}} is estimated by Brown et al (2004). \\textit{PIN\\textsubscript{BH}} is estimated by Brown and Hillegeist (2007). \\textit{PIN\\textsubscript{EHO}} is estimated by Easley et al. (2010). \\textit{PIN\\textsubscript{DY}}, \\textit{PIN\\textsubscript{DY\\_ADJ}} and the illiquidity measure \\textit{PSOS\\textsubscript{DY}} are estimated by Duarte and Young (2009). \\textit{MIA} is the annual average of the firm-day observations estimated by Johnson and So (2017). \\textit{VCV\\textsubscript{USD}}, \\textit{VCV\\textsubscript{MKT}} and \\textit{VCV\\textsubscript{TO}} are the fractions of the annual standard deviation of daily firm-level trading volumes and the annual average of daily firm-level trading volumes Lof and Bommel (2018). Trading volumes for \\textit{VCV\\textsubscript{USD}}, \\textit{VCV\\textsubscript{MKT}} and \\textit{VCV\\textsubscript{TO}} are calculated in US dollars, as a fraction of total market volume on the same day and as a daily turnover, respectively. The accounting related variables are \\textit{LOG\\_MKT\\_CAP} (the annual average of the firm-quarter observations of logarithm of market capitalization) \\textit{BM\\_RATIO} (the annual average of the firm-quarter observations of book equity divided by market capitalization), \\textit{LEVERAGE} (the annual average of the firm-quarter observations of debt divided by total assets) and \\textit{ROA} (the annual average of the firm-quarter observations of net income divided by total assets. Sample: 1997-2017. Sources: CRSP, COMPUSTAT, 13F and the cited authors' websites. \\label{table_cor_matrix}",
       booktabs = T, align = "c") %>%
-  kable_styling(latex_options = c("scale_down")) %>%
+  kable_styling(latex_options = c("scale_down", "hold_position"), position = "left") %>%
   landscape()
 ```
+\endgroup
 
-
-Information asymmetry measures are strongly positively correlated with each other, which is consistent and implies that they capture similar explanatory characteristics. Only *PSOS~DY~* has a negative correlation with another information asymmetry measure *MIA* and largely explained by the fact that it is a measure of illiquidity unrelated to asymmetric information [@duarte2009pin]. All control variables except *LOG_MKT_CAP* have relatively weak correlations with the information asymmetry measures, which enables me to use them as explanatory in a regression model with a low risk of multicollinearity. As a result, I choose to exclude *LOG_MKT_CAP* from subsequent regression models due to a potential risk of multicollinearity. 
 
 I extend the analysis of the correlation matrix by examining the effect of information asymmetry on foreign ownership in a panel regression setting The dependent variable in every regression model FOR_OWN is the annual average of the foreign ownership for each stock. Different information asymmetry measures are used separately as explanatory variables. The control variables are different measures of firm characteristics. I also include industry and year fixed effects. Table \ref{table_h1} reports the results.
+
+Similar to the findings of correlations in Table ref{table_cor_matrix}, the empirical results of the panel regression models in Table \ref{table_h1} support Hypothesis 1 and the findings by @jiang2004foreign, @baik2013liability and @batten2015foreign of the negative relation between foreign ownership and asymmetric information. The regression coefficients of information asymmetry measures are negative and statistically significant at the 1% level in all regression models. Based on column (3), a 1% increase in information asymmetry (PIN~DY_ADJ~) leads to a decrease of about 0.10% in foreign ownership *ceteris paribus*. Based on all models, a 1% increase in information asymmetry results, on average, in a decrease of about 0.05% in foreign ownership *ceteris paribus*. Overall, the negative relation is stronger with the probability of informed trading measures than with bid-ask spread, multimarket information asymmetry or volume coefficient of variation. Based on the results of adjusted R^2^, models with different probability of informed trading measures and MIA have the best explanatory power.
 
 ```{r, results='asis'}
 ## baseline regression table h1 panel a: FOR_OWN and panel b:FOR_breadth
@@ -298,30 +306,21 @@ I extend the analysis of the correlation matrix by examining the effect of infor
 
 ```
 
-Similar to the findings of correlations in Table ref{table_cor_matrix}, the empirical results of the panel regression models in Table \ref{table_h1} support Hypothesis 1 and the findings by @jiang2004foreign, @baik2013liability and @batten2015foreign of the negative relation between foreign ownership and asymmetric information. The regression coefficients of information asymmetry measures are negative and statistically significant at the 1% level in all regression models. Based on column (3), a 1% increase in information asymmetry (PIN~DY_ADJ~) leads to a decrease of about 0.10% in foreign ownership *ceteris paribus*. Based on all models, a 1% increase in information asymmetry results, on average, in a decrease of about 0.05% in foreign ownership *ceteris paribus*. Overall, the negative relation is stronger with the probability of informed trading measures than with bid-ask spread, multimarket information asymmetry or volume coefficient of variation. Based on the results of adjusted R^2^, models with different probability of informed trading measures and MIA have the best explanatory power.
-
-The control variables are mainly statistically significant and in line with the existing literature. BM_RATIO is negative and statistically significant at the 1% level in all regression models except in the model with MIA as the explanatory variable. This implies that foreign investors are driven way of the stocks with relatively high book-to-market ratio (i.e. value stocks). Book-to-market ratio is used as a measure of risk in many asset pricing models [e.g. @fama1993common ; @carhart1997persistence ; @pastor2003liquidity], which, in addition to my results, support the findings of @ko2007characteristics; @lin2003foreign that foreign investors avoid riskier firms with high book-to-market ratios. Moreover, the regression coefficients of ROA are positive and statistically significant at the 1% level in all models, implying that foreign investors prefer firms with positive probability. Based on column(1), an increase of 1% in return on assets results in an increase of about 0.09% in foreign ownership *ceteris paribus*. The regression coefficients of leverage are mainly positive. LEVERAGE is positive and statistically significant in six out of eleven models, positive and statistically insignificant in four out of eleven models and negative and statistically significant once. Hence, an increase in leverage is mostly associated with an increase in foreign ownership. The results mostly contradicts the findings of foreign investors' preference on low debt ratio firms by @kang1997there and @dahlquist2001direct.
-
-This table reports the results of the annual firm-level panel regression models. In Panel A, the dependent variable (*FOR_OWN*) is an annual average of the firm's shares held by foreign institutions at the end of each quarter of the year divided by the firm's total shares outstanding at the end of each quarter of the year. In Panel B, the dependent variable (*FOR_BREADTH*) is an annual average of the number of the firm's distinct foreign institutional shareholders at the end of each quarter of the year divided by the total number of distinct institutional shareholders in 13F database at the end of each quarter of the year [@chen2002breadth; @lof2018asymmetric]. The explanatory variables of interest are the various annual firm-level estimates of information asymmetry. *PIN~BHL~* is estimated by @brown2004conference. *PIN~BH~* is estimated by @brown2007disclosure. *PIN~EHO~* is estimated by @easley2010factoring. *PIN~DY~*, *PIN~DY_ADJ~* and the illiquidity measure *PSOS~DY~* are estimated by @duarte2009pin. *MIA* is the annual average of the firm-day observations estimated by @johnson2017simple. *VCV~USD~*, *VCV~MKT~* and *VCV~TO~* are the fractions of the annual standard deviation of daily firm-level trading volumes and the annual average of daily firm-level trading volumes [@lof2018asymmetric]. Trading volumes for *VCV~USD~*, *VCV~MKT~* and *VCV~TO~* are calculatedin US dollars, as a fraction of total market volume on the same day and as a daily turnover, respectively. The control variables are *BM_RATIO* (the annual average of the firm-quarter observations of book equity divided by market equity), *LEVERAGE* (the annual average of the firm-quarter observations of debt divided by total assets) and *ROA* (the annual average of the firm-quarter observations of net income divided by total assets. I include industry and year fixed effects in all regressions. Standard errors are clustered by the industry and year level and reported in parantheses. \*, \*\* and \*\*\* denote the statistical significance at the 10%, 5% and 1% level, respectively. Sample period is 1997-2017. Sources: CRSP, COMPUSTAT, 13F and the cited authors' websites.
-
-\newpage
-
 \begingroup
-\renewcommand\arraystretch{0.45}
+\renewcommand\arraystretch{0.59}
 \begin{landscape}
-\tiny
+\captionsetup{width=\linewidth}
+\scriptsize
 \begin{longtable}{@{\extracolsep{5pt}}lccccccccccc}
-  \mycaption{Panel regression analysis of foreign ownership and foreign breadth}{testi testi}
+  \mycaption{Panel regression analysis of foreign ownership and foreign breadth}{This table reports the results of the annual firm-level panel regression models. In Panel A, the dependent variable (\textit{FOR\_OWN}) is the annual average of the firm's shares held by foreign institutions at the end of each quarter of the year divided by the firm's total shares outstanding at the end of each quarter of the year. In Panel B, the dependent variable (\textit{FOR\_BREADTH}) is the annual average of the number of the firm's distinct foreign institutional shareholders at the end of each quarter of the year divided by the total number of distinct institutional shareholders in 13F database at the end of each quarter of the year (Chen et al., 2002; Lof and Bommel, 2018). The explanatory variables of interest are the various annual firm-level estimates of information asymmetry. \textit{PIN\textsubscript{BHL}} is estimated by Brown et al (2004). \textit{PIN\textsubscript{BH}} is estimated by Brown and Hillegeist (2007). \textit{PIN\textsubscript{EHO}} is estimated by Easley et al. (2010). \textit{PIN\textsubscript{DY}}, \textit{PIN\textsubscript{DY\_ADJ}} and the illiquidity measure \textit{PSOS\textsubscript{DY}} are estimated by Duarte and Young (2009). \textit{MIA} is the annual average of the firm-day observations estimated by Johnson and So (2017). \textit{VCV\textsubscript{USD}}, \textit{VCV\textsubscript{MKT}} and \textit{VCV\textsubscript{TO}} are the fractions of the annual standard deviation of daily firm-level trading volumes and the annual average of daily firm-level trading volumes Lof and Bommel (2018). Trading volumes for \textit{VCV\textsubscript{USD}}, \textit{VCV\textsubscript{MKT}} and \textit{VCV\textsubscript{TO}} are calculated in US dollars, as a fraction of total market volume on the same day and as a daily turnover, respectively. The control variables are \textit{BM\_RATIO} (the annual average of the firm-quarter observations of book equity divided by market capitalization), \textit{LEVERAGE} (the annual average of the firm-quarter observations of debt divided by total assets) and \textit{ROA} (the annual average of the firm-quarter observations of net income divided by total assets. I include industry and year fixed effects in all regressions. Standard errors are clustered by the industry and year level and reported in parantheses. *, ** and *** denote the statistical significance at the 10\%, 5\% and 1\% level, respectively. Sample: 1997-2017. Sources: CRSP, COMPUSTAT, 13F and the cited authors' websites.}
   \label{table_h1} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
- & \multicolumn{11}{c}{\textit{Dependent variable:}} \\ 
+ & \multicolumn{11}{c}{Panel A: Foreign ownership} \\ 
 \cline{2-12} 
- & \multicolumn{11}{c}{FOR\_OWN} \\ 
+ & \multicolumn{11}{c}{\textit{Dependent variable:} FOR\_OWN} \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) & (9) & (10) & (11)\\ 
 \hline \\[-1.8ex] 
-\\[-2.0ex] \multicolumn{12}{@{} l}{Panel A: Foreign ownership}
- \\
  \\[-1.5ex]
  BA\_SPREAD & $-$0.011$^{***}$ &  &  &  &  &  &  &  &  &  &  \\ 
   & (0.003) &  &  &  &  &  &  &  &  &  &  \\ 
@@ -359,13 +358,11 @@ Adjusted R$^{2}$ & 0.150 & 0.336 & 0.330 & 0.299 & 0.351 & 0.190 & 0.199 & 0.258
 \\
 \\[-1.83ex]\hline 
 \hline \\[-1.83ex] 
- & \multicolumn{11}{c}{\textit{Dependent variable:}} \\ 
+ & \multicolumn{11}{c}{Panel B: Foreign breadth} \\ 
 \cline{2-12} 
- & \multicolumn{11}{c}{FOR\_BREADTH} \\ 
+ & \multicolumn{11}{c}{\textit{Dependent variable:} FOR\_BREADTH} \\ 
 \\[-1.83ex] & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) & (9) & (10) & (11)\\ 
 \hline \\[-1.83ex]
-\\[-2.0ex] \multicolumn{12}{@{} l}{Panel B: Foreign breadth}
- \\
  \\[-1.5ex]
  BA\_SPREAD & $-$0.002$^{**}$ &  &  &  &  &  &  &  &  &  &  \\ 
   & (0.001) &  &  &  &  &  &  &  &  &  &  \\ 
@@ -407,6 +404,8 @@ Adjusted R$^{2}$ & 0.253 & 0.394 & 0.415 & 0.329 & 0.442 & 0.371 & 0.360 & 0.479
 \end{longtable}  
 \end{landscape}
 \endgroup
+
+The control variables are mainly statistically significant and in line with the existing literature. BM_RATIO is negative and statistically significant at the 1% level in all regression models except in the model with MIA as the explanatory variable. This implies that foreign investors are driven way of the stocks with relatively high book-to-market ratio (i.e. value stocks). Book-to-market ratio is used as a measure of risk in many asset pricing models (e.g. [@fama1993common]; [@carhart1997persistence]; [@pastor2003liquidity]), which, in addition to my results, support the findings of @ko2007characteristics and @lin2003foreign that foreign investors avoid riskier firms with high book-to-market ratios. Moreover, the regression coefficients of ROA are positive and statistically significant at the 1% level in all models, implying that foreign investors prefer firms with positive probability. Based on column (1), an increase of 1% in return on assets results in an increase of about 0.09% in foreign ownership *ceteris paribus*. The regression coefficients of leverage are mainly positive. LEVERAGE is positive and statistically significant in six out of eleven models, positive and statistically insignificant in four out of eleven models and negative and statistically significant once. Hence, an increase in leverage is mostly associated with an increase in foreign ownership. The results mostly contradicts the findings of foreign investors' preference on low debt ratio firms by @kang1997there and @dahlquist2001direct.
 
 \ref{table_h1} is blaa
 
