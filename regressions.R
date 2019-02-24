@@ -4,6 +4,7 @@ library(lfe)
 library(stargazer)
 library(ggplot2)
 library(MatchIt)
+library(starpolishr)
 
 # baseline regressions
 
@@ -160,14 +161,10 @@ star2 <- stargazer(baseline_names2$model,
                              type = "latex")
                              #title = "Panel regression analysis of foreign breadth", type = "latex")
 
-star_out <- star_panel(star1, star2,
+star_out <- star_panel(star1, star2, same.summary.stats = F,
            panel.names = c("Foreign ownership", "Foreign breadth"))
 
 star_tex_write(star_out, file = "my_tex_file.tex", headers = TRUE)
-
-
-star_tex_write(star_out, file = "my_tex_file.tex", headers = TRUE)
-
 
 
 baseline_regression_summary <- baseline_regression_raw %>% 
