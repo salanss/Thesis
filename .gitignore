@@ -13,3 +13,7 @@ results
 *.bcf
 *.xml
 *.tex
+*.lot
+*.synctex
+*.toc
+*.synctex.gz
