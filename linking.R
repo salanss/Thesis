@@ -13,7 +13,9 @@ thirteenf_merged <- thirteenf %>%
   left_join(thirteenf_institutionals_quarterly, by = "report_date") %>% 
   mutate(report_date = ceiling_date(report_date, unit = "month") - days(1))
 
-crsp_quarter_stock <- read_rds("data/crsp_quarter_stock.rds")
+crsp_quarter_stock <- read_rds("data/crsp_quarter_stock.rds") %>% 
+  select(-ncusip) %>% 
+  distinct(permno, quarter_date, .keep_all = T)
 
 compustat_quarter <- read_rds("data/compustat_quarter_final.rds") %>% 
   mutate(datadate = ceiling_date(datadate, unit = "month") - days(1)) # sanity check
@@ -29,7 +31,6 @@ thirteenf_crsp_not_merged <- crsp_quarter_stock %>%
   mutate(report_date = quarter_date,
          institutional_ownership_shares = 0,
          foreign_institutional_ownership_shares = 0,
-         foreign_institutional_ownership_shares_unadj = 0,
          domestic_institutional_ownership_shares = 0,
          institutional_numbers = 0,
          foreign_institutional_numbers = 0,
@@ -44,8 +45,8 @@ thirteenf_crsp <- bind_rows(thirteenf_crsp_merged, thirteenf_crsp_not_merged) %>
                                                   TRUE ~ foreign_institutional_ownership_shares / shares_outstanding_adjusted),
          domestic_ownership_percentage = case_when(shares_outstanding_adjusted <= 0 ~ NA_real_,
                                                    TRUE ~ domestic_institutional_ownership_shares / shares_outstanding_adjusted),
-         foreign_ownership_percentage2 = if_else(institutional_ownership_shares_unadj <= 0, NA_real_,
-                                                 foreign_institutional_ownership_shares_unadj / institutional_ownership_shares_unadj),
+         foreign_ownership_percentage2 = if_else(institutional_ownership_shares <= 0, NA_real_,
+                                                 foreign_institutional_ownership_shares / institutional_ownership_shares),
          inst_breadth = institutional_numbers / total_institutions,
          foreign_breadth = foreign_institutional_numbers / total_institutions,
          foreign_breadth2 = if_else(institutional_numbers <= 0, NA_real_, 
@@ -75,8 +76,7 @@ thirteenf_crsp_compustat_temp <- thirteenf_crsp %>%
             book_to_market = book_to_market,
             leverage = leverage,
             roa = roa,
-            tobin_q = tobin_q,
-            bid_ask_spread = bid_ask_spread) %>% 
+            tobin_q = tobin_q) %>% 
   arrange(report_date, permno)
 
 thirteenf_crsp_compustat <- thirteenf_crsp_compustat_temp %>% 
@@ -93,8 +93,7 @@ thirteenf_crsp_compustat <- thirteenf_crsp_compustat_temp %>%
          book_to_market = Winsorize(book_to_market, probs = c(0.01, 0.99), na.rm = T),
          leverage = Winsorize(leverage, probs = c(0.01, 0.99), na.rm = T),
          roa = Winsorize(roa, probs = c(0.01, 0.99), na.rm = T),
-         tobin_q = Winsorize(tobin_q, probs = c(0.01, 0.99), na.rm = T),
-         bid_ask_spread = bid_ask_spread) %>% 
+         tobin_q = Winsorize(tobin_q, probs = c(0.01, 0.99), na.rm = T)) %>% 
   filter_at(vars(log_market_cap:tobin_q, sic_code), all_vars(!is.na(.))) # filter control variable NAs away, since going to be used in regression 
 
 thirteenf_crsp_compustat_ia <- thirteenf_crsp_compustat %>% 
@@ -113,10 +112,7 @@ thirteenf_crsp_compustat_ia <- thirteenf_crsp_compustat %>%
             book_to_market = mean(book_to_market, na.rm = T),
             leverage = mean(leverage, na.rm = T),
             roa = mean(roa, na.rm = T),
-            tobin_q = mean(tobin_q, na.rm = T),
-            sales = mean(sales, na.rm = T),
-            log_sales = mean(log_sales, na.rm = T),
-            bid_ask_spread = mean(bid_ask_spread, na.rm = T)) %>% 
+            tobin_q = mean(tobin_q, na.rm = T)) %>% 
   ungroup() %>% 
   inner_join(information_asymmetry_measures, by = c("permno", "year")) %>% 
   distinct()
@@ -130,8 +126,9 @@ write_rds(thirteenf_crsp_compustat_ia, "data/baseline_regression_raw.rds")
 ibes_did <- read_rds("data/ibes_did.rds") %>% 
   distinct()
 
-crsp_compustat_keys <- crsp_quarter_stock %>% 
+crsp_compustat_keys <- read_rds("data/crsp_quarter_stock.rds") %>% 
   select(permno, ncusip) %>% 
+  filter_all(all_vars(!is.na(.))) %>% 
   distinct()
 
 did_temp1 <- ibes_did %>% 
