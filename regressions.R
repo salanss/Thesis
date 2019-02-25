@@ -9,11 +9,12 @@ library(starpolishr)
 # baseline regressions
 
 baseline_regression_raw <- read_rds("data/baseline_regression_raw.rds") %>% 
-  select(permno, year, sic_code, FOR_OWN = foreign_inst_percentage, FOR_BREADTH = foreign_breadth, 
-         INST_OWN = inst_percentage, INST_BREADTH = inst_breadth, LOG_MKT_CAP = log_market_cap,
-         BM_RATIO = book_to_market, LEVERAGE = leverage, ROA = roa, BA_SPREAD = bid_ask_spread,
-         PIN_DY = pin_dy, PIN_DY_ADJ = pin_dy_adj, PSOS_DY = psos_dy, PIN_EHO = pin_eho,
-         PIN_BHL = pin_bhl, PIN_BH = pin_bh, MIA = mia, VCV_USD = vcv1, VCV_MKT = vcv2, VCV_TO = vcv3)
+select(permno, year, sic_code, FOR_OWN = foreign_inst_percentage, FOR_OWN_TO_INST = 
+         foreign_inst_percentage2, FOR_BREADTH = foreign_breadth, INST_OWN = inst_percentage, 
+       INST_BREADTH = inst_breadth, BA_SPREAD = bid_ask_spread,
+       PIN_DY = pin_dy, PIN_DY_ADJ = pin_dy_adj, PSOS_DY = psos_dy, PIN_EHO = pin_eho,
+       PIN_BHL = pin_bhl, PIN_BH = pin_bh, MIA = mia, VCV_USD = vcv1, VCV_MKT = vcv2, VCV_TO = vcv3,
+       LOG_MKT_CAP = log_market_cap, BM_RATIO = book_to_market, LEVERAGE = leverage, ROA = roa)
 
 write_rds(baseline_regression_raw, "results/baseline_regression_raw.rds")
 
@@ -74,7 +75,7 @@ baseline_regression <- baseline_regression_raw %>%
 
 baseline_regression2 <- baseline_regression_raw %>% 
   gather(ia_measure_name, ia_measure, BA_SPREAD:VCV_TO) %>% 
-  gather(dep_measure_name, dep_measure, FOR_BREADTH) %>% 
+  gather(dep_measure_name, dep_measure, FOR_OWN_TO_INST) %>% 
   filter_all(all_vars(!is.na(.))) %>% 
   group_by(dep_measure_name, ia_measure_name) %>% 
   nest()
@@ -151,14 +152,15 @@ star2 <- stargazer(baseline_names2$model,
                              notes.label = "",
                              notes.append = F,
                              notes = "",
-                             column.labels =c("FOR BREADTH"),
+                             column.labels =c("FOR OWN2"),
                              dep.var.labels.include = F,
                              omit.stat = c("ser", "rsq"),
                              font.size = "tiny",
                              no.space = T,
                              add.lines = list(c("Industry fixed effects", rep("Yes", times = 11)),
                                               c("Year fixed effects", rep("Yes", times = 11))),
-                             type = "latex")
+                             type = "latex",
+                   out = "testi.html")
                              #title = "Panel regression analysis of foreign breadth", type = "latex")
 
 star_out <- star_panel(star1, star2, same.summary.stats = F,
