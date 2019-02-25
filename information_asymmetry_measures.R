@@ -77,11 +77,18 @@ vcv_raw <- read_rds("data/vcv.rds")
 vcv <- vcv_raw %>% 
   mutate(permno = as.character(permno))
 
+ba_spread_raw <- read_rds("data/ba_spread.rds")
+
+ba_spread <- ba_spread_raw %>% 
+  mutate(permno = as.character(permno),
+         bid_ask_spread = spread)
+
 information_asymmetry_measures <- pin_dy %>% 
   full_join(pin_eho, by = c("permno", "year")) %>% 
   full_join(pin_bhl, by = c("permno", "year")) %>% 
   full_join(pin_bh, by = c("permno", "year")) %>% 
   full_join(mia, by = c("permno", "year")) %>% 
-  full_join(vcv, by = c("permno", "year"))
+  full_join(vcv, by = c("permno", "year")) %>% 
+  full_join(ba_spread, by = c("permno", "year"))
 
 write_rds(information_asymmetry_measures, "data/information_asymmetry_measures.rds")
