@@ -4,6 +4,7 @@ output:
     toc: true
     latex_engine: xelatex
     keep_tex: true
+    citation package: biblatex
 mainfont: Times New Roman
 bibliography: Bibliography.bib
 csl: journal-of-financial-economics.csl
@@ -43,39 +44,6 @@ header-includes:
 knitr::opts_chunk$set(echo = FALSE, 
                       warning = FALSE, 
                       message = FALSE)
-
-longtable.stargazer = function(..., float = T, longtable.float = F, 
-  longtable.head = T, filename = NULL){
-  # Capturing stargazer to hack it
-  require(stargazer)
-  res = capture.output(
-    stargazer(..., float = float)
-  )
-  # Changing tabulare environment for longtable
-    res = gsub("tabular", "longtable", res)
-  # removing floating environment
-  if(float == T & longtable.float == F){
-    res[grep("table", res)[1]] = res[grep("longtable", res)[1]]
-    # Removing extra longtable commands
-    res = res[-grep("longtable", res)[2]]
-    res = res[-length(res)]
-  }
-  # Adding page headings
-  if(longtable.head == T){
-    res = c(res[1:which(res == "\\hline \\\\[-1.8ex] ")[1] - 1], "\\endhead", res[which(res == "\\hline \\\\[-1.8ex] ")[1]:length(res)])
-  }
-  # Exporting
-  cat(res, sep = "\n")
-  # Exporting
-  if(!is.null(filename)){
-    cat(res, file = filename, sep = "\n")
-    # Message
-    cat(paste("\nLaTeX output printed to", filename, "\n", sep = " ", 
-      collapse = ""))
-  }else{
-    cat(res, sep = "\n")
-  }
-}
 
 ```
 \pagenumbering{roman}
@@ -211,7 +179,7 @@ library(stargazer)
 library(kableExtra)
 library(huxtable)
 cor_matrix <- read_rds("results/cor_matrix.rds")
-kable(cor_matrix, "latex", linesep = "", caption = "\\textbf{Correlations between sample variables}\\newline\\scriptsize This table reports the correlations between different institutional ownership, information asymmetry and accounting related control variables of the baseline sample. Each correlation estimate is the annual average of the within-year of (Pearson) correlations. \\textit{FOR\\_OWN} and \\textit{INST\\_OWN} are the annual averages of the firm's shares held by (foreign) institutions at the end of each quarter of the year divided by the firm's total shares outstanding at the end of each quarter. \\textit{FOR\\_BREADTH} and \\textit{INST\\_BREADTH} are the annual averages of the number of the firm's distinct (foreign) institutional shareholders at the end of each quarter divided by the total number of distinct institutional shareholders in 13F database at the end of each quarter (Chen et al., 2002; Lof and Bommel, 2018). The annual firm-levels of information asymmetry are estimated by various researchers. \\textit{PIN\\textsubscript{BHL}} is estimated by Brown et al (2004). \\textit{PIN\\textsubscript{BH}} is estimated by Brown and Hillegeist (2007). \\textit{PIN\\textsubscript{EHO}} is estimated by Easley et al. (2010). \\textit{PIN\\textsubscript{DY}}, \\textit{PIN\\textsubscript{DY\\_ADJ}} and the illiquidity measure \\textit{PSOS\\textsubscript{DY}} are estimated by Duarte and Young (2009). \\textit{MIA} is the annual average of the firm-day observations estimated by Johnson and So (2017). \\textit{VCV\\textsubscript{USD}}, \\textit{VCV\\textsubscript{MKT}} and \\textit{VCV\\textsubscript{TO}} are the fractions of the annual standard deviation of daily firm-level trading volumes and the annual average of daily firm-level trading volumes Lof and Bommel (2018). Trading volumes for \\textit{VCV\\textsubscript{USD}}, \\textit{VCV\\textsubscript{MKT}} and \\textit{VCV\\textsubscript{TO}} are calculated in US dollars, as a fraction of total market volume on the same day and as a daily turnover, respectively. The accounting related variables are \\textit{LOG\\_MKT\\_CAP} (the annual average of the firm-quarter observations of logarithm of market capitalization) \\textit{BM\\_RATIO} (the annual average of the firm-quarter observations of book equity divided by market capitalization), \\textit{LEVERAGE} (the annual average of the firm-quarter observations of debt divided by total assets) and \\textit{ROA} (the annual average of the firm-quarter observations of net income divided by total assets. Sample: 1997-2017. Sources: CRSP, COMPUSTAT, 13F and the cited authors' websites. \\label{table_cor_matrix}",
+kable(cor_matrix, "latex", linesep = "", caption = "\\textbf{Correlations between sample variables}\\newline\\scriptsize This table reports the correlations between different institutional ownership, information asymmetry and accounting related control variables of the baseline sample. Each correlation estimate is the annual average of the within-year of (Pearson) correlations. \\textit{FOR\\_OWN} and \\textit{INST\\_OWN} are the annual averages of the firm's shares held by (foreign) institutions at the end of each quarter of the year divided by the firm's total shares outstanding at the end of each quarter. \\textit{FOR\\_BREADTH} and \\textit{INST\\_BREADTH} are the annual averages of the number of the firm's distinct (foreign) institutional shareholders at the end of each quarter divided by the total number of distinct institutional shareholders in 13F database at the end of each quarter (Chen et al., 2002; Lof and Bommel, 2018). The annual firm-levels of information asymmetry are mainly estimated by various researchers. \\textit{BA\\_SPREAD} is the annual average of the daily firm-level observations of bid-ask spreads (i.e. the difference of ask and bid price divided by the closing price). \\textit{PIN\\textsubscript{BHL}} is estimated by Brown et al (2004). \\textit{PIN\\textsubscript{BH}} is estimated by Brown and Hillegeist (2007). \\textit{PIN\\textsubscript{EHO}} is estimated by Easley et al. (2010). \\textit{PIN\\textsubscript{DY}}, \\textit{PIN\\textsubscript{DY\\_ADJ}} and the illiquidity measure \\textit{PSOS\\textsubscript{DY}} are estimated by Duarte and Young (2009). \\textit{MIA} is the annual average of the firm-day observations estimated by Johnson and So (2017). \\textit{VCV\\textsubscript{USD}}, \\textit{VCV\\textsubscript{MKT}} and \\textit{VCV\\textsubscript{TO}} are the fractions of the annual standard deviation of daily firm-level trading volumes and the annual average of daily firm-level trading volumes Lof and Bommel (2018). Trading volumes for \\textit{VCV\\textsubscript{USD}}, \\textit{VCV\\textsubscript{MKT}} and \\textit{VCV\\textsubscript{TO}} are calculated in US dollars, as a fraction of total market volume on the same day and as a daily turnover, respectively. The accounting related variables are \\textit{LOG\\_MKT\\_CAP} (the annual average of the firm-quarter observations of logarithm of market capitalization) \\textit{BM\\_RATIO} (the annual average of the firm-quarter observations of book equity divided by market capitalization), \\textit{LEVERAGE} (the annual average of the firm-quarter observations of debt divided by total assets) and \\textit{ROA} (the annual average of the firm-quarter observations of net income divided by total assets. All institutional ownership and breadth variables and control variables are winsorized at the top and bottom 1\\%. Sample: 1997-2017. Sources: CRSP, COMPUSTAT, 13F and the cited authors' websites. \\label{table_cor_matrix}",
       booktabs = T, align = "c") %>%
   kable_styling(latex_options = c("scale_down", "hold_position"), position = "left") %>%
   landscape()
@@ -219,9 +187,9 @@ kable(cor_matrix, "latex", linesep = "", caption = "\\textbf{Correlations betwee
 \endgroup
 
 
-I extend the analysis of the correlation matrix by examining the effect of information asymmetry on foreign ownership in a panel regression setting The dependent variable in every regression model FOR_OWN is the annual average of the foreign ownership for each stock. Different information asymmetry measures are used separately as explanatory variables. The control variables are different measures of firm characteristics. I also include industry and year fixed effects. Table \ref{table_h1} reports the results.
+I extend the analysis of the correlation matrix by examining the effect of information asymmetry on foreign ownership in a panel regression setting The dependent variable in every regression model FOR_OWN is the annual average of the foreign ownership for each stock. Different information asymmetry measures are used separately as explanatory variables. The control variables are different measures of firm characteristics. I also include industry and year fixed effects. Table \ref{table_h1_own} reports the results.
 
-Similar to the findings of correlations in Table ref{table_cor_matrix}, the empirical results of the panel regression models in Table \ref{table_h1} support Hypothesis 1 and the findings by @jiang2004foreign, @baik2013liability and @batten2015foreign of the negative relation between foreign ownership and asymmetric information. The regression coefficients of information asymmetry measures are negative and statistically significant at the 1% level in all regression models. Based on column (3), a 1% increase in information asymmetry (PIN~DY_ADJ~) leads to a decrease of about 0.10% in foreign ownership *ceteris paribus*. Based on all models, a 1% increase in information asymmetry results, on average, in a decrease of about 0.05% in foreign ownership *ceteris paribus*. Overall, the negative relation is stronger with the probability of informed trading measures than with bid-ask spread, multimarket information asymmetry or volume coefficient of variation. Based on the results of adjusted R^2^, models with different probability of informed trading measures and MIA have the best explanatory power.
+Similar to the findings of correlations in Table \ref{table_cor_matrix}, the empirical results of the panel regression models in Table \ref{table_h1_own} support Hypothesis 1 and the findings by @jiang2004foreign, @baik2013liability and @batten2015foreign of the negative relation between foreign ownership and asymmetric information. In Panel A, The regression coefficients of information asymmetry measures are negative and statistically significant at the 1% level in all regression models. Based on column (3), a 1% increase in information asymmetry (PIN~DY_ADJ~) leads to a decrease of about 0.10% in foreign ownership *ceteris paribus*. Based on all models, a 1% increase in information asymmetry results, on average, in a decrease of about 0.05% in foreign ownership *ceteris paribus*. Overall, the negative relation is stronger with the probability of informed trading measures than with bid-ask spread, multimarket information asymmetry or volume coefficient of variation. Based on the results of adjusted R^2^, models with different probability of informed trading measures and MIA have the best explanatory power.
 
 ```{r, results='asis'}
 ## baseline regression table h1 panel a: FOR_OWN and panel b:FOR_breadth
@@ -233,18 +201,18 @@ Similar to the findings of correlations in Table ref{table_cor_matrix}, the empi
 # library(starpolishr)
 # baseline_regression_raw <- read_rds("results/baseline_regression_raw.rds")
 # 
-# baseline_regression <- baseline_regression_raw %>% 
-#   gather(ia_measure_name, ia_measure, BA_SPREAD:VCV_TO) %>% 
-#   gather(dep_measure_name, dep_measure, FOR_OWN) %>% 
-#   filter_all(all_vars(!is.na(.))) %>% 
-#   group_by(dep_measure_name, ia_measure_name) %>% 
+# baseline_regression <- baseline_regression_raw %>%
+#   gather(ia_measure_name, ia_measure, BA_SPREAD:VCV_TO) %>%
+#   gather(dep_measure_name, dep_measure, FOR_OWN) %>%
+#   filter_all(all_vars(!is.na(.))) %>%
+#   group_by(dep_measure_name, ia_measure_name) %>%
 #   nest()
 # 
-# baseline_regression2 <- baseline_regression_raw %>% 
-#   gather(ia_measure_name, ia_measure, BA_SPREAD:VCV_TO) %>% 
-#   gather(dep_measure_name, dep_measure, FOR_BREADTH) %>% 
-#   filter_all(all_vars(!is.na(.))) %>% 
-#   group_by(dep_measure_name, ia_measure_name) %>% 
+# baseline_regression2 <- baseline_regression_raw %>%
+#   gather(ia_measure_name, ia_measure, BA_SPREAD:VCV_TO) %>%
+#   gather(dep_measure_name, dep_measure, INST_OWN) %>%
+#   filter_all(all_vars(!is.na(.))) %>%
+#   group_by(dep_measure_name, ia_measure_name) %>%
 #   nest()
 # 
 # rnm <- function(df, ia_meas, dep_meas) {
@@ -253,7 +221,7 @@ Similar to the findings of correlations in Table ref{table_cor_matrix}, the empi
 # }
 # 
 # model_function <- function(df, ia_meas, dep_meas) {
-#   f <- dep_measure ~ ia_measure + BM_RATIO + LEVERAGE + 
+#   f <- dep_measure ~ ia_measure + BM_RATIO + LEVERAGE +
 #     ROA |year + sic_code|0|year + sic_code
 #   f[[2]] <- sym(dep_meas)
 #   f[[3]][[2]][[2]][[2]][[2]][[2]][[2]] <- sym(ia_meas)
@@ -269,10 +237,10 @@ Similar to the findings of correlations in Table ref{table_cor_matrix}, the empi
 #                          model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
 # 
 # 
-#  star1 <- longtable.stargazer(baseline_names$model,
+#  star1 <-  stargazer(baseline_names$model,
 #            header = F,
 #            #column.labels =c("FOR\\_OWN"),
-#            label = "table_h1",
+#            label = "table_h1_own",
 #            dep.var.labels.include = F,
 #            notes.label = "",
 #            notes.append = F,
@@ -285,35 +253,35 @@ Similar to the findings of correlations in Table ref{table_cor_matrix}, the empi
 #                             c("Year fixed effects", rep("Yes", times = 11))),
 #            title = "Panel regression analysis of foreign ownership", type = "latex")
 # 
-#  star2 <- longtable.stargazer(baseline_names2$model,
+#  star2 <- stargazer(baseline_names2$model,
 #            header = F,
 #            #label = "table_h1_for_breadth",
 #            notes.label = "",
 #            notes.append = F,
 #            notes = "",
-#            column.labels =c("FOR BREADTH"),
+#            #column.labels =c("INST_OWN"),
 #            dep.var.labels.include = F,
 #            omit.stat = c("ser", "rsq"),
 #            font.size = "tiny",
 #            no.space = T,
 #            add.lines = list(c("Industry fixed effects", rep("Yes", times = 11)),
 #                             c("Year fixed effects", rep("Yes", times = 11))),
-#            title = "Panel regression analysis of foreign breadth", type = "latex")
+#            title = "Panel regression analysis of institutional ownership", type = "latex")
 # 
 # a <- star_panel(star1, star2,
-#                         panel.names = c("Foreign ownership", "Foreign breadth"))
+#                         panel.names = c("Foreign ownership", "Institutional ownership"))
 
 
 ```
 
 \begingroup
-\renewcommand\arraystretch{0.59}
+\renewcommand\arraystretch{0.56}
 \begin{landscape}
-\captionsetup{width=\linewidth}
+\captionsetup{width=1.02\linewidth}
 \scriptsize
 \begin{longtable}{@{\extracolsep{5pt}}lccccccccccc}
-  \mycaption{Panel regression analysis of foreign ownership and foreign breadth}{This table reports the results of the annual firm-level panel regression models. In Panel A, the dependent variable (\textit{FOR\_OWN}) is the annual average of the firm's shares held by foreign institutions at the end of each quarter of the year divided by the firm's total shares outstanding at the end of each quarter of the year. In Panel B, the dependent variable (\textit{FOR\_BREADTH}) is the annual average of the number of the firm's distinct foreign institutional shareholders at the end of each quarter of the year divided by the total number of distinct institutional shareholders in 13F database at the end of each quarter of the year (Chen et al., 2002; Lof and Bommel, 2018). The explanatory variables of interest are the various annual firm-level estimates of information asymmetry. \textit{PIN\textsubscript{BHL}} is estimated by Brown et al (2004). \textit{PIN\textsubscript{BH}} is estimated by Brown and Hillegeist (2007). \textit{PIN\textsubscript{EHO}} is estimated by Easley et al. (2010). \textit{PIN\textsubscript{DY}}, \textit{PIN\textsubscript{DY\_ADJ}} and the illiquidity measure \textit{PSOS\textsubscript{DY}} are estimated by Duarte and Young (2009). \textit{MIA} is the annual average of the firm-day observations estimated by Johnson and So (2017). \textit{VCV\textsubscript{USD}}, \textit{VCV\textsubscript{MKT}} and \textit{VCV\textsubscript{TO}} are the fractions of the annual standard deviation of daily firm-level trading volumes and the annual average of daily firm-level trading volumes Lof and Bommel (2018). Trading volumes for \textit{VCV\textsubscript{USD}}, \textit{VCV\textsubscript{MKT}} and \textit{VCV\textsubscript{TO}} are calculated in US dollars, as a fraction of total market volume on the same day and as a daily turnover, respectively. The control variables are \textit{BM\_RATIO} (the annual average of the firm-quarter observations of book equity divided by market capitalization), \textit{LEVERAGE} (the annual average of the firm-quarter observations of debt divided by total assets) and \textit{ROA} (the annual average of the firm-quarter observations of net income divided by total assets. I include industry and year fixed effects in all regressions. Standard errors are clustered by the industry and year level and reported in parantheses. *, ** and *** denote the statistical significance at the 10\%, 5\% and 1\% level, respectively. Sample: 1997-2017. Sources: CRSP, COMPUSTAT, 13F and the cited authors' websites.}
-  \label{table_h1} 
+  \mycaption{Panel regression analysis of foreign ownership and foreign breadth}{This table reports the results of the annual firm-level panel regression models. In Panel A, the dependent variable (\textit{FOR\_OWN}) is the annual average of the firm's shares held by foreign institutions at the end of each quarter divided by the firm's total shares outstanding at the end of each quarter. In Panel B, the dependent variable (\textit{INST\_OWN}) is the annual average of the firm's shares held by  institutional investors at the end of each quarter divided by the firm's total shares outstanding at the end of each quarter. The explanatory variables of interest are the various annual firm-level estimates of information asymmetry. \textit{BA\_SPREAD} is the annual average of the daily firm-level observations of bid-ask spreads (i.e. the difference of ask and bid price divided by the closing price). \textit{PIN\textsubscript{BHL}} is estimated by Brown et al (2004). \textit{PIN\textsubscript{BH}} is estimated by Brown and Hillegeist (2007). \textit{PIN\textsubscript{EHO}} is estimated by Easley et al. (2010). \textit{PIN\textsubscript{DY}}, \textit{PIN\textsubscript{DY\_ADJ}} and the illiquidity measure \textit{PSOS\textsubscript{DY}} are estimated by Duarte and Young (2009). \textit{MIA} is the annual average of the firm-day observations estimated by Johnson and So (2017). \textit{VCV\textsubscript{USD}}, \textit{VCV\textsubscript{MKT}} and \textit{VCV\textsubscript{TO}} are the fractions of the annual standard deviation of daily firm-level trading volumes and the annual average of daily firm-level trading volumes Lof and Bommel (2018). Trading volumes for \textit{VCV\textsubscript{USD}}, \textit{VCV\textsubscript{MKT}} and \textit{VCV\textsubscript{TO}} are calculated in US dollars, as a fraction of total market volume on the same day and as a daily turnover, respectively. The control variables are \textit{BM\_RATIO} (the annual average of the firm-quarter observations of book equity divided by market capitalization), \textit{LEVERAGE} (the annual average of the firm-quarter observations of debt divided by total assets) and \textit{ROA} (the annual average of the firm-quarter observations of net income divided by total assets. I include industry and year fixed effects in all regressions. Standard errors are clustered by the industry and year level and reported in parantheses. All institutional ownership, breadth and control variables are winsorized at the top and bottom 1\%. *, ** and *** denote the statistical significance at the 10\%, 5\% and 1\% level, respectively. Sample: 1997-2017. Sources: CRSP, COMPUSTAT, 13F and the cited authors' websites.}
+  \label{table_h1_own} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
  & \multicolumn{11}{c}{Panel A: Foreign ownership} \\ 
@@ -322,21 +290,21 @@ Similar to the findings of correlations in Table ref{table_cor_matrix}, the empi
 \\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) & (9) & (10) & (11)\\ 
 \hline \\[-1.8ex] 
  \\[-1.5ex]
- BA\_SPREAD & $-$0.011$^{***}$ &  &  &  &  &  &  &  &  &  &  \\ 
-  & (0.003) &  &  &  &  &  &  &  &  &  &  \\ 
-  PIN\_DY &  & $-$0.075$^{***}$ &  &  &  &  &  &  &  &  &  \\ 
-  &  & (0.013) &  &  &  &  &  &  &  &  &  \\ 
-  PIN\_DY\_ADJ &  &  & $-$0.100$^{***}$ &  &  &  &  &  &  &  &  \\ 
-  &  &  & (0.016) &  &  &  &  &  &  &  &  \\ 
-  PSOS\_DY &  &  &  & $-$0.043$^{***}$ &  &  &  &  &  &  &  \\ 
+ BA\_SPREAD & $-$0.005 &  &  &  &  &  &  &  &  &  &  \\ 
+  & (0.004) &  &  &  &  &  &  &  &  &  &  \\ 
+  PIN\_DY &  & $-$0.073$^{***}$ &  &  &  &  &  &  &  &  &  \\ 
+  &  & (0.014) &  &  &  &  &  &  &  &  &  \\ 
+  PIN\_DY\_ADJ &  &  & $-$0.096$^{***}$ &  &  &  &  &  &  &  &  \\ 
+  &  &  & (0.017) &  &  &  &  &  &  &  &  \\ 
+  PSOS\_DY &  &  &  & $-$0.041$^{***}$ &  &  &  &  &  &  &  \\ 
   &  &  &  & (0.010) &  &  &  &  &  &  &  \\ 
-  PIN\_EHO &  &  &  &  & $-$0.093$^{***}$ &  &  &  &  &  &  \\ 
-  &  &  &  &  & (0.014) &  &  &  &  &  &  \\ 
-  PIN\_BHL &  &  &  &  &  & $-$0.078$^{***}$ &  &  &  &  &  \\ 
-  &  &  &  &  &  & (0.017) &  &  &  &  &  \\ 
-  PIN\_BH &  &  &  &  &  &  & $-$0.080$^{***}$ &  &  &  &  \\ 
-  &  &  &  &  &  &  & (0.013) &  &  &  &  \\ 
-  MIA &  &  &  &  &  &  &  & $-$0.035$^{***}$ &  &  &  \\ 
+  PIN\_EHO &  &  &  &  & $-$0.087$^{***}$ &  &  &  &  &  &  \\ 
+  &  &  &  &  & (0.016) &  &  &  &  &  &  \\ 
+  PIN\_BHL &  &  &  &  &  & $-$0.079$^{***}$ &  &  &  &  &  \\ 
+  &  &  &  &  &  & (0.016) &  &  &  &  &  \\ 
+  PIN\_BH &  &  &  &  &  &  & $-$0.083$^{***}$ &  &  &  &  \\ 
+  &  &  &  &  &  &  & (0.014) &  &  &  &  \\ 
+  MIA &  &  &  &  &  &  &  & $-$0.038$^{***}$ &  &  &  \\ 
   &  &  &  &  &  &  &  & (0.008) &  &  &  \\ 
   VCV\_USD &  &  &  &  &  &  &  &  & $-$0.009$^{***}$ &  &  \\ 
   &  &  &  &  &  &  &  &  & (0.001) &  &  \\ 
@@ -346,57 +314,56 @@ Similar to the findings of correlations in Table ref{table_cor_matrix}, the empi
   &  &  &  &  &  &  &  &  &  &  & (0.001) \\ 
   BM\_RATIO & $-$0.008$^{***}$ & $-$0.003$^{***}$ & $-$0.003$^{***}$ & $-$0.005$^{***}$ & $-$0.003$^{***}$ & $-$0.005$^{***}$ & $-$0.003$^{***}$ & $-$0.001 & $-$0.006$^{***}$ & $-$0.006$^{***}$ & $-$0.006$^{***}$ \\ 
   & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) \\ 
-  LEVERAGE & 0.010$^{***}$ & 0.0005 & 0.001 & 0.001 & $-$0.001 & 0.006$^{***}$ & 0.007$^{***}$ & 0.007 & 0.007$^{**}$ & 0.007$^{**}$ & 0.007$^{**}$ \\ 
-  & (0.003) & (0.001) & (0.001) & (0.002) & (0.001) & (0.002) & (0.002) & (0.005) & (0.003) & (0.003) & (0.003) \\ 
-  ROA & 0.089$^{***}$ & 0.071$^{***}$ & 0.073$^{***}$ & 0.071$^{***}$ & 0.054$^{***}$ & 0.070$^{***}$ & 0.070$^{***}$ & 0.084$^{***}$ & 0.078$^{***}$ & 0.078$^{***}$ & 0.082$^{***}$ \\ 
-  & (0.011) & (0.011) & (0.012) & (0.011) & (0.012) & (0.009) & (0.009) & (0.011) & (0.009) & (0.009) & (0.009) \\ 
-\cline{2-12} \\[-2.0ex]
+  LEVERAGE & 0.010$^{***}$ & 0.001 & 0.001 & 0.001 & $-$0.001 & 0.006$^{***}$ & 0.006$^{***}$ & 0.007$^{*}$ & 0.008$^{***}$ & 0.008$^{***}$ & 0.008$^{***}$ \\ 
+  & (0.003) & (0.001) & (0.001) & (0.002) & (0.001) & (0.002) & (0.002) & (0.004) & (0.003) & (0.003) & (0.003) \\ 
+  ROA & 0.092$^{***}$ & 0.075$^{***}$ & 0.078$^{***}$ & 0.075$^{***}$ & 0.059$^{***}$ & 0.066$^{***}$ & 0.066$^{***}$ & 0.082$^{***}$ & 0.073$^{***}$ & 0.073$^{***}$ & 0.077$^{***}$ \\ 
+  & (0.011) & (0.009) & (0.010) & (0.009) & (0.008) & (0.007) & (0.008) & (0.010) & (0.008) & (0.007) & (0.007) \\ 
+ \hline \\[-1.8ex] 
 Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
 Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
-Observations & 104,935 & 14,489 & 14,489 & 14,489 & 9,088 & 75,585 & 75,688 & 20,429 & 92,272 & 92,272 & 92,272 \\ 
-Adjusted R$^{2}$ & 0.150 & 0.336 & 0.330 & 0.299 & 0.351 & 0.190 & 0.199 & 0.258 & 0.171 & 0.171 & 0.171 
-\\
+Observations & 109,170 & 15,126 & 15,126 & 15,126 & 9,678 & 77,256 & 77,363 & 20,754 & 93,613 & 93,613 & 93,613 \\ 
+Adjusted R$^{2}$ & 0.208 & 0.394 & 0.388 & 0.356 & 0.396 & 0.279 & 0.296 & 0.313 & 0.243 & 0.243 & 0.243 \\
 \\[-1.83ex]\hline 
 \hline \\[-1.83ex] 
- & \multicolumn{11}{c}{Panel B: Foreign breadth} \\ 
+ & \multicolumn{11}{c}{Panel B: Institutional ownership} \\ 
 \cline{2-12} 
- & \multicolumn{11}{c}{\textit{Dependent variable:} FOR\_BREADTH} \\ 
+ & \multicolumn{11}{c}{\textit{Dependent variable:} INST\_OWN} \\ 
 \\[-1.83ex] & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) & (9) & (10) & (11)\\ 
 \hline \\[-1.83ex]
  \\[-1.5ex]
- BA\_SPREAD & $-$0.002$^{**}$ &  &  &  &  &  &  &  &  &  &  \\ 
-  & (0.001) &  &  &  &  &  &  &  &  &  &  \\ 
-  PIN\_DY &  & $-$0.015$^{***}$ &  &  &  &  &  &  &  &  &  \\ 
-  &  & (0.003) &  &  &  &  &  &  &  &  &  \\ 
-  PIN\_DY\_ADJ &  &  & $-$0.022$^{***}$ &  &  &  &  &  &  &  &  \\ 
-  &  &  & (0.004) &  &  &  &  &  &  &  &  \\ 
-  PSOS\_DY &  &  &  & $-$0.007$^{***}$ &  &  &  &  &  &  &  \\ 
-  &  &  &  & (0.002) &  &  &  &  &  &  &  \\ 
-  PIN\_EHO &  &  &  &  & $-$0.019$^{***}$ &  &  &  &  &  &  \\ 
-  &  &  &  &  & (0.002) &  &  &  &  &  &  \\ 
-  PIN\_BHL &  &  &  &  &  & $-$0.013$^{***}$ &  &  &  &  &  \\ 
-  &  &  &  &  &  & (0.002) &  &  &  &  &  \\ 
-  PIN\_BH &  &  &  &  &  &  & $-$0.014$^{***}$ &  &  &  &  \\ 
-  &  &  &  &  &  &  & (0.002) &  &  &  &  \\ 
-  MIA &  &  &  &  &  &  &  & $-$0.033$^{***}$ &  &  &  \\ 
-  &  &  &  &  &  &  &  & (0.003) &  &  &  \\ 
-  VCV\_USD &  &  &  &  &  &  &  &  & $-$0.002$^{***}$ &  &  \\ 
-  &  &  &  &  &  &  &  &  & (0.0002) &  &  \\ 
-  VCV\_MKT &  &  &  &  &  &  &  &  &  & $-$0.002$^{***}$ &  \\ 
-  &  &  &  &  &  &  &  &  &  & (0.0002) &  \\ 
-  VCV\_TO &  &  &  &  &  &  &  &  &  &  & $-$0.002$^{***}$ \\ 
-  &  &  &  &  &  &  &  &  &  &  & (0.0002) \\ 
-  BM\_RATIO & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.0004$^{***}$ & $-$0.001$^{**}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ \\ 
-  & (0.0001) & (0.0002) & (0.0002) & (0.0002) & (0.0001) & (0.0001) & (0.0001) & (0.0003) & (0.0001) & (0.0001) & (0.0001) \\ 
-  LEVERAGE & 0.002$^{***}$ & 0.0005 & 0.001 & 0.001 & 0.00002 & 0.001$^{***}$ & 0.001$^{***}$ & 0.003$^{***}$ & 0.002$^{***}$ & 0.002$^{***}$ & 0.002$^{***}$ \\ 
-  & (0.0005) & (0.0004) & (0.0004) & (0.0005) & (0.0003) & (0.0002) & (0.0003) & (0.001) & (0.0005) & (0.0005) & (0.0005) \\ 
-  ROA & 0.011$^{***}$ & 0.012$^{***}$ & 0.012$^{***}$ & 0.012$^{***}$ & 0.007$^{***}$ & 0.006$^{***}$ & 0.007$^{***}$ & 0.020$^{***}$ & 0.009$^{***}$ & 0.009$^{***}$ & 0.010$^{***}$ \\ 
-  & (0.002) & (0.002) & (0.002) & (0.002) & (0.002) & (0.001) & (0.001) & (0.004) & (0.002) & (0.002) & (0.002) \\ 
-\cline{2-12} \\[-2.0ex]
+BA\_SPREAD & $-$0.049 &  &  &  &  &  &  &  &  &  &  \\ 
+  & (0.050) &  &  &  &  &  &  &  &  &  &  \\ 
+  PIN\_DY &  & $-$1.000$^{***}$ &  &  &  &  &  &  &  &  &  \\ 
+  &  & (0.115) &  &  &  &  &  &  &  &  &  \\ 
+  PIN\_DY\_ADJ &  &  & $-$1.276$^{***}$ &  &  &  &  &  &  &  &  \\ 
+  &  &  & (0.141) &  &  &  &  &  &  &  &  \\ 
+  PSOS\_DY &  &  &  & $-$0.590$^{***}$ &  &  &  &  &  &  &  \\ 
+  &  &  &  & (0.093) &  &  &  &  &  &  &  \\ 
+  PIN\_EHO &  &  &  &  & $-$1.293$^{***}$ &  &  &  &  &  &  \\ 
+  &  &  &  &  & (0.080) &  &  &  &  &  &  \\ 
+  PIN\_BHL &  &  &  &  &  & $-$0.820$^{***}$ &  &  &  &  &  \\ 
+  &  &  &  &  &  & (0.111) &  &  &  &  &  \\ 
+  PIN\_BH &  &  &  &  &  &  & $-$0.939$^{***}$ &  &  &  &  \\ 
+  &  &  &  &  &  &  & (0.088) &  &  &  &  \\ 
+  MIA &  &  &  &  &  &  &  & 0.063$^{**}$ &  &  &  \\ 
+  &  &  &  &  &  &  &  & (0.030) &  &  &  \\ 
+  VCV\_USD &  &  &  &  &  &  &  &  & $-$0.095$^{***}$ &  &  \\ 
+  &  &  &  &  &  &  &  &  & (0.007) &  &  \\ 
+  VCV\_MKT &  &  &  &  &  &  &  &  &  & $-$0.096$^{***}$ &  \\ 
+  &  &  &  &  &  &  &  &  &  & (0.007) &  \\ 
+  VCV\_TO &  &  &  &  &  &  &  &  &  &  & $-$0.096$^{***}$ \\ 
+  &  &  &  &  &  &  &  &  &  &  & (0.008) \\ 
+  BM\_RATIO & $-$0.083$^{***}$ & $-$0.027$^{**}$ & $-$0.028$^{***}$ & $-$0.052$^{***}$ & $-$0.032$^{***}$ & $-$0.044$^{***}$ & $-$0.018$^{***}$ & $-$0.030$^{***}$ & $-$0.061$^{***}$ & $-$0.060$^{***}$ & $-$0.062$^{***}$ \\ 
+  & (0.007) & (0.010) & (0.010) & (0.008) & (0.005) & (0.006) & (0.006) & (0.011) & (0.007) & (0.007) & (0.008) \\ 
+  LEVERAGE & 0.101$^{***}$ & 0.052$^{**}$ & 0.062$^{**}$ & 0.056$^{*}$ & 0.019 & 0.074$^{***}$ & 0.079$^{***}$ & 0.128$^{***}$ & 0.075$^{***}$ & 0.075$^{***}$ & 0.078$^{***}$ \\ 
+  & (0.023) & (0.025) & (0.026) & (0.029) & (0.021) & (0.022) & (0.021) & (0.031) & (0.022) & (0.022) & (0.022) \\ 
+  ROA & 1.146$^{***}$ & 1.216$^{***}$ & 1.256$^{***}$ & 1.214$^{***}$ & 1.017$^{***}$ & 0.938$^{***}$ & 0.947$^{***}$ & 1.150$^{***}$ & 0.960$^{***}$ & 0.956$^{***}$ & 1.020$^{***}$ \\ 
+  & (0.072) & (0.078) & (0.080) & (0.074) & (0.099) & (0.050) & (0.052) & (0.105) & (0.052) & (0.052) & (0.053) \\ 
+ \hline \\[-1.8ex] 
 Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
 Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
-Observations & 104,935 & 14,489 & 14,489 & 14,489 & 9,088 & 75,585 & 75,688 & 20,429 & 92,272 & 92,272 & 92,272 \\ 
-Adjusted R$^{2}$ & 0.253 & 0.394 & 0.415 & 0.329 & 0.442 & 0.371 & 0.360 & 0.479 & 0.296 & 0.297 & 0.297 \\ 
+Observations & 109,170 & 15,126 & 15,126 & 15,126 & 9,678 & 77,256 & 77,363 & 20,754 & 93,613 & 93,613 & 93,613 \\ 
+Adjusted R$^{2}$ & 0.324 & 0.534 & 0.518 & 0.492 & 0.535 & 0.423 & 0.463 & 0.375 & 0.383 & 0.384 & 0.374 \\ 
 \\[-2.0ex]
 \hline 
 \hline \\[-1.8ex] 
@@ -405,10 +372,11 @@ Adjusted R$^{2}$ & 0.253 & 0.394 & 0.415 & 0.329 & 0.442 & 0.371 & 0.360 & 0.479
 \end{landscape}
 \endgroup
 
-The control variables are mainly statistically significant and in line with the existing literature. BM_RATIO is negative and statistically significant at the 1% level in all regression models except in the model with MIA as the explanatory variable. This implies that foreign investors are driven way of the stocks with relatively high book-to-market ratio (i.e. value stocks). Book-to-market ratio is used as a measure of risk in many asset pricing models (e.g. [@fama1993common]; [@carhart1997persistence]; [@pastor2003liquidity]), which, in addition to my results, support the findings of @ko2007characteristics and @lin2003foreign that foreign investors avoid riskier firms with high book-to-market ratios. Moreover, the regression coefficients of ROA are positive and statistically significant at the 1% level in all models, implying that foreign investors prefer firms with positive probability. Based on column (1), an increase of 1% in return on assets results in an increase of about 0.09% in foreign ownership *ceteris paribus*. The regression coefficients of leverage are mainly positive. LEVERAGE is positive and statistically significant in six out of eleven models, positive and statistically insignificant in four out of eleven models and negative and statistically significant once. Hence, an increase in leverage is mostly associated with an increase in foreign ownership. The results mostly contradicts the findings of foreign investors' preference on low debt ratio firms by @kang1997there and @dahlquist2001direct.
+The control variables in Panel A are mainly statistically significant and in line with the existing literature. BM_RATIO is negative and statistically significant at the 1% level in all regression models except in the model with MIA as the explanatory variable. This implies that foreign investors are driven way of the stocks with relatively high book-to-market ratio (i.e. value stocks). Book-to-market ratio is used as a measure of risk in many asset pricing models [e.g., @fama1993common; @carhart1997persistence; @pastor2003liquidity], which, in addition to my results, support the findings of @ko2007characteristics and @lin2003foreign that foreign investors avoid riskier firms with high book-to-market ratios. Moreover, the regression coefficients of ROA are positive and statistically significant at the 1% level in all models, implying that foreign investors prefer firms with positive probability. Based on column (1), an increase of 1% in return on assets results in an increase of about 0.09% in foreign ownership *ceteris paribus*. The regression coefficients of leverage are mainly positive. LEVERAGE is positive and statistically significant in six out of eleven models, positive and statistically insignificant in four out of eleven models and negative and statistically significant once. Hence, an increase in leverage is mostly associated with an increase in foreign ownership. The results mostly contradicts the findings of foreign investors' preference on low debt ratio firms by @kang1997there and @dahlquist2001direct.
 
-\ref{table_h1} is blaa
+
+annual average of the number of the firm's distinct foreign institutional shareholders at the end of each quarter of the year divided by the total number of distinct institutional shareholders in 13F database at the end of each quarter of the year (Chen et al., 2002; Lof and Bommel, 2018
 
 \newpage
 
-
+# References
