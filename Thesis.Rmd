@@ -3,10 +3,11 @@ output:
   pdf_document:
     toc: true
     latex_engine: xelatex
+    citation_package: natbib
     keep_tex: true
-    citation package: biblatex
 mainfont: Times New Roman
 bibliography: Bibliography.bib
+biblio-style: chicagoa
 csl: journal-of-financial-economics.csl
 link-citations: yes
 fontsize: 12pt
@@ -36,6 +37,12 @@ header-includes:
 - \usepackage{fixltx2e}
 - \usepackage{hyperref}
 ---
+
+<!-- \biblatex{style=authoryear, -->
+<!-- backend=biber, -->
+<!-- giveninits=true, -->
+<!-- uniquelist=false, -->
+<!-- uniquename=init} -->
 
 \captionsetup{labelfont=bf}
 \newcommand\mycaption[2]{\caption{\textbf{#1}\newline\scriptsize#2}}
