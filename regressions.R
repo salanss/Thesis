@@ -9,12 +9,13 @@ library(starpolishr)
 # baseline regressions
 
 baseline_regression_raw <- read_rds("data/baseline_regression_raw.rds") %>% 
-select(permno, year, sic_code, FOR_OWN = foreign_inst_percentage, FOR_OWN_TO_INST = 
-         foreign_inst_percentage2, FOR_BREADTH = foreign_breadth, INST_OWN = inst_percentage, 
-       INST_BREADTH = inst_breadth, BA_SPREAD = bid_ask_spread,
+rename(FOR_OWN = foreign_own, FOR_OWN_TO_INST = 
+         foreign_own2, FOR_BREADTH = foreign_breadth, INST_OWN = institutional_own, 
+       INST_BREADTH = institutional_breadth, BA_SPREAD = bid_ask_spread,
        PIN_DY = pin_dy, PIN_DY_ADJ = pin_dy_adj, PSOS_DY = psos_dy, PIN_EHO = pin_eho,
        PIN_BHL = pin_bhl, PIN_BH = pin_bh, MIA = mia, VCV_USD = vcv1, VCV_MKT = vcv2, VCV_TO = vcv3,
-       LOG_MKT_CAP = log_market_cap, BM_RATIO = book_to_market, LEVERAGE = leverage, ROA = roa)
+       LOG_MKT_CAP = log_market_cap, BM_RATIO = book_to_market, LEVERAGE = leverage, ROA = roa) %>% 
+  select(-spread)
 
 write_rds(baseline_regression_raw, "results/baseline_regression_raw.rds")
 
@@ -80,6 +81,13 @@ baseline_regression2 <- baseline_regression_raw %>%
   group_by(dep_measure_name, ia_measure_name) %>% 
   nest()
 
+baseline_regression3 <- read_rds("data/baseline_regression_raw.rds") %>% 
+  gather(ia_measure_name, ia_measure, pin_dy:bid_ask_spread) %>% 
+  gather(dep_measure_name, dep_measure, foreign_own:foreign_own_transient) %>% 
+  filter_all(all_vars(!is.na(.))) %>% 
+  group_by(dep_measure_name, ia_measure_name) %>% 
+  nest()
+
 rnm <- function(df, ia_meas, dep_meas) {
   rnm_list <- set_names(c("ia_measure", "dep_measure"), syms(c(ia_meas, dep_meas)))
   rename(df, !!!rnm_list)
@@ -93,6 +101,14 @@ model_function <- function(df, ia_meas, dep_meas) {
   felm(f, data = df)
 }
 
+model_function2 <- function(df, ia_meas, dep_meas) {
+  f <- dep_measure ~ ia_measure + book_to_market + leverage + 
+    roa |year + sic_code|0|year + sic_code
+  f[[2]] <- sym(dep_meas)
+  f[[3]][[2]][[2]][[2]][[2]][[2]][[2]] <- sym(ia_meas)
+  felm(f, data = df)
+}
+
 baseline_names <- mutate(baseline_regression,
                          data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
                          model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
@@ -100,6 +116,10 @@ baseline_names <- mutate(baseline_regression,
 baseline_names2 <- mutate(baseline_regression2,
                           data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
                           model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
+
+baseline_names3 <- mutate(baseline_regression3,
+                          data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
+                          model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function2))
 
 # write_rds(baseline_names, "results/baseline_names.rds")
 
@@ -162,6 +182,10 @@ star2 <- stargazer(baseline_names2$model,
                              type = "latex",
                    out = "testi.html")
                              #title = "Panel regression analysis of foreign breadth", type = "latex")
+
+star3 <- stargazer(baseline_names3$model,
+                   header = F,
+                   out = "testiuusi.html")
 
 star_out <- star_panel(star1, star2, same.summary.stats = F,
            panel.names = c("Foreign ownership", "Foreign breadth"))
