@@ -9,17 +9,20 @@ library(starpolishr)
 # baseline regressions
 
 baseline_regression_raw <- read_rds("data/baseline_regression_raw.rds") %>% 
-rename(FOR_OWN = foreign_own, FOR_OWN_TO_INST = 
-         foreign_own2, FOR_BREADTH = foreign_breadth, INST_OWN = institutional_own, 
-       INST_BREADTH = institutional_breadth, BA_SPREAD = bid_ask_spread,
-       PIN_DY = pin_dy, PIN_DY_ADJ = pin_dy_adj, PSOS_DY = psos_dy, PIN_EHO = pin_eho,
-       PIN_BHL = pin_bhl, PIN_BH = pin_bh, MIA = mia, VCV_USD = vcv1, VCV_MKT = vcv2, VCV_TO = vcv3,
-       LOG_MKT_CAP = log_market_cap, BM_RATIO = book_to_market, LEVERAGE = leverage, ROA = roa) %>% 
+  select(permno:sic_code, bid_ask_spread, everything()) %>% 
+  rename(FOR_OWN = foreign_own, FOR_TO_INST_OWN = 
+           foreign_own2, FOR_BREADTH = foreign_breadth,  FOR_TO_INST_BREADTH = foreign_breadth2,
+         INST_OWN = institutional_own, INST_BREADTH = institutional_breadth, BA_SPREAD = bid_ask_spread,
+         PIN_DY = pin_dy, PIN_DY_ADJ = pin_dy_adj, PSOS_DY = psos_dy, PIN_EHO = pin_eho,
+         PIN_BHL = pin_bhl, PIN_BH = pin_bh, MIA = mia, VCV_USD = vcv1, VCV_MKT = vcv2, VCV_TO = vcv3,
+         LOG_MKT_CAP = log_market_cap, BM_RATIO = book_to_market, LEVERAGE = leverage, ROA = roa) %>% 
   select(-spread)
 
 write_rds(baseline_regression_raw, "results/baseline_regression_raw.rds")
 
-cor_raw <- baseline_regression_raw %>% select(-permno, -sic_code) %>% 
+cor_raw <- baseline_regression_raw %>% 
+  select(year, FOR_OWN:FOR_TO_INST_OWN, FOR_BREADTH:FOR_TO_INST_BREADTH, INST_OWN, INST_BREADTH,
+         LOG_MKT_CAP:ROA, BA_SPREAD, PIN_DY:VCV_TO) %>%
   mutate(year = as.integer(year))
 
 years <- cor_raw %>% transmute(year = as.integer(year)) %>% distinct() %>% flatten_chr()
