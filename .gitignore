@@ -17,3 +17,7 @@ results
 *.synctex
 *.toc
 *.synctex.gz
+*.aux
+*.bbl
+*.blg
+*.out
