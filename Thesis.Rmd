@@ -380,7 +380,7 @@ The control variables in Panel A are mainly statistically significant and in lin
 
 Panel B reports the results of regressing foreign breadth on information asymmetry measures. The results follow similar pattern with foreign ownership results in Panel A. The regression coefficients of coefficients of information asymmetry are negative in all models and statistically significant at the 1% level in all models except with bid-ask spread as the information asymmetry measure. Based on column (8), a 100 basis point increase in information asymmetry (*MIA*) is associated with ca. 0.03 percentage points decrease in foreign breadth *ceteris paribus*. In general, a 1 percentage point increase in information asymmetry results in 0.001-0.03 percentage points decrease of foreign ownership. Based on adjusted R^2^, the explanatory power is, in general, better than with models in Panel A. Notably, the model with *MIA* clearly explains variation better than other models, which differs from the results in Panel A. 
 
-In addition to information asymmetry measures, the control variables in Panel B follow similar pattern with Panel A. Book-to-market ratio is negative and statistically significant at the 1% level in all models, leverage is mainly positive and statistically significant and return on assets is positive and statistically significant at the 1% level in all models. Similar to Panel A, the results support the findings of @ko2007characteristics and @lin2003foreign that foreign investors seek stocks with comfortable characteristics except the results of leverage. In general, the results of \ref{table_h1_base} support strongly the first hypothesis of inverse relation between foreign ownership and information asymmetry.
+In addition to information asymmetry measures, the control variables in Panel B follow similar pattern with Panel A. Book-to-market ratio is negative and statistically significant at the 1% level in all models, leverage is mainly positive and statistically significant and return on assets is positive and statistically significant at the 1% level in all models. Similar to Panel A, the results support the findings of @ko2007characteristics and @lin2003foreign that foreign investors seek stocks with comfortable characteristics except the results of leverage. In general, the results of Table \ref{table_h1_base} support strongly the first hypothesis of inverse relation between foreign ownership and information asymmetry.
 
 In addition to inspecting general market-level foreign ownership and breadth measures, I extend the analysis by comparing foreign ownership against institutional ownership for a given stock in a given time. In particular, I define a variable *FOR_TO_INST_OWN* which is a measure of the annual average of the firm's shares held by foreign institutions at the end of each quarter divided by the firm's shares held by total institutions at the end of each quarter. This enables me to examine whether foreign institutional shareholders have stronger or weaker dislike of information intensive stocks than institutional shareholders in general. Similarly, I define a variable *FOR_TO_INST_BREADTH* which is a measure of the annual average of the number of the firm's distinct foreign institutional shareholders at the end of each quarter divided by the number of the firm's of distinct institutional shareholders at the end of each quarter. I test the dependent variables with the same panel regression models as in Table \ref{table_h1_base}. Table \ref{table_h1_for_to_inst} reports the results.
 
@@ -567,6 +567,63 @@ Adjusted R$^{2}$ & 0.118 & 0.120 & 0.114 & 0.113 & 0.169 & 0.097 & 0.098 & 0.448
 \end{landscape}
 \endgroup
 
+In Panel A, the regression coefficients of asymmetric information variables are all negative except the model with *PIN~EHO~* as the explanatory variable. The results are statistically significant at the 1% level in models with *MIA* and all *VCV* variables as explanatory variables. The results give more supporting evidence of the negative relation between foreign ownership and information asymmetry. Based on the results, foreign investors are more prone to avoid information intensive stocks compared to institutional investors on average. Based on column (8), a 1 percentage point increase in information asymmetry is associated with 0.05 percentage point decrease in ownership of foreign institutions against total institutions. The models with statistically significant results (*MIA* and *VCV*) have the best explanatory power according to the results of adjusted R^2^.
+
+The results of the control variable coefficients are mixed. Book-to-market ratio (*BM_RATIO*) is negative and statistically significant at the 1% level in all regression models except with *MIA* as the explanatory variable. The results are mainly in line with the previous results and existing literature, implying that foreign institutional investors prefer more non-value stocks compared to institutional investors on average. The coefficients of *LEVERAGE* are mainly statistically insignificant, positive in five out eleven models and negative in six out of eleven models. Hence, the results of *LEVERAGE* provide nothing conclusive. The results of *ROA* are to some extent surprising. The coefficients are negative in all models except in *BA_SPREAD* as the explanatory variable and statistically significant at the 1% level in two models. The results imply that foreign institutional investors are more prone to hold less profitable stocks compared to institutional investors on average.
+
+In Panel B, the regression coefficients of asymmetric information variables provide mixed results. The coefficients are negative and statistically significant with models of *PIN~DY~*, *PIN~DY_ADJ~*, *PSOS~DY~* and *PIN~EHO~* and positive and statistically significant with models of *MIA*, *VCV~USD~*,  *VCV~MKT~* and *VCV~TO~*. Hence, it is difficult to derive solid conclusions of the results. However, according to adjusted R^2^, the models with *MIA* and different *VCV* measures as explanatory variables have better explanatory power. In particular, the model with *MIA* has adjusted R^2^ of 0.448 which is clearly better than any other model. Moreover, the sample size in models with *MIA* and *VCV* is notably larger than with *PIN~DY~*, *PIN~DY_ADJ~*, *PSOS~DY~* and *PIN~EHO~*. 
+
+Control variables in Panel B provide mixed results. *BM_RATIO* is negative in seven out of eleven models and statistically significant in five out of eleven models. It is positive and statistically significant in two out of eleven models. Hence, the results primarily suggests that foreign institutional investors are relatively more driven away of the value stocks than institutional investors in general. *LEVERAGE* is positive and statistically significant in five out of eleven models, implying foreign institutional investors' relatively larger tendency towards more levered stocks than institutional investors in general. This is counterintuitive in the light of the results by @kang1997there and @dahlquist2001direct that foreign investors prefer low debt ratio firms. The regression coefficients of *ROA* follow a similar negative and statistically significant pattern than in Panel B. This finding suggests that foreign institutional investors hold relatively less profitable stocks than institutional investors in general.
+
+## 6.2 The results of the quasi-natural experiment
+
+In this section, I report the general results of the quasi-natural experiment.
+
+``` {r parallel_trend, message = FALSE, warning=FALSE, eval=FALSE}
+
+parallel_trend1 <- read_rds("results/did_regression_matched_raw.rds") %>% 
+  mutate(treated = if_else(treated == 1, "treated", "control")) %>% 
+  group_by(treated, quarter_index) %>% 
+  summarise(FOR_OWN = mean(FOR_OWN),
+            FOR_BREADTH = mean(FOR_BREADTH)) %>% 
+  ungroup()
+
+ggplot(parallel_trend1, aes(quarter_index, FOR_OWN, group = treated, color = treated)) +
+  ggtitle("Panel A: Foreign ownership") +
+  geom_line() +
+  labs(x = "Event quarter") +
+  geom_vline(xintercept=0) +
+  theme_classic() +
+  theme(plot.title = element_text(size=9, face="italic")) +
+  scale_color_grey(start = 0.55, end = 0)
+
+ggsave("figures/parallel_trend1a.pdf", 
+       width = 8, height = 4, units = "in")
+
+ggplot(parallel_trend1, aes(quarter_index, FOR_BREADTH, group = treated, color = treated)) +
+  ggtitle("Panel B: Foreign breadth") +
+  geom_line() +
+  labs(x = "Event quarter") +
+  geom_vline(xintercept=0) +
+  theme_classic() +
+  theme(plot.title = element_text(size=9, face="italic")) +
+  scale_color_grey(start = 0.55, end = 0)
+
+ggsave("figures/parallel_trend1b.pdf", 
+       width = 8, height = 4, units = "in")
+  
+```
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width = \linewidth]{figures/parallel_trend1a.pdf}
+\includegraphics[width = \linewidth]{figures/parallel_trend1b.pdf}
+\caption{Foreign ownership between the treatment and control groups around brokerage closures (between quarter -12 and quarter +12)}
+\label{fig_parallel_trend1}
+\end{figure}
+
 \newpage
+
+\addcontentsline{toc}{section}{References}
 
 # References
