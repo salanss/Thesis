@@ -233,14 +233,19 @@ did_regression_raw <- read_rds("data/did_regression_raw.rds") %>%
   mutate(n = n_distinct(after)) %>%
   ungroup() %>% 
   filter(n > 1) %>%  # require for every permno to have before and after value for each event
-  arrange(event_date, quarter_index, treated)
+  arrange(event_date, quarter_index, treated) %>% 
+  rename(FOR_OWN = foreign_own, FOR_TO_INST_OWN = 
+           foreign_own2, FOR_BREADTH = foreign_breadth,  FOR_TO_INST_BREADTH = foreign_breadth2,
+         INST_OWN = institutional_own, INST_BREADTH = institutional_breadth,
+         LOG_MKT_CAP = log_market_cap, BM_RATIO = book_to_market, LEVERAGE = leverage, ROA = roa,
+         ANALYST_COVERAGE = analyst_coverage)
 
 # stargazer(cor_matrix, title = "correlation matrix", out = "correlation_matrix_did.html")
 
-columns_for_summarise <- c("inst_percentage", "foreign_inst_percentage", "domestic_inst_percentage", 
-                           "foreign_inst_percentage2","inst_breadth", "foreign_breadth", 
-                           "foreign_breadth2", "domestic_breadth", "log_market_cap", 
-                           "book_to_market", "leverage", "roa", "tobin_q", "analyst_coverage")
+columns_for_summarise <- c("FOR_OWN", "FOR_TO_INST_OWN", "FOR_BREADTH", 
+                           "FOR_TO_INST_BREADTH","INST_OWN", "INST_BREADTH", 
+                           "LOG_MKT_CAP", "BM_RATIO", "LEVERAGE", 
+                           "ROA", "ANALYST_COVERAGE")
 
 did_regression <- did_regression_raw %>% 
   filter(quarter_index %in% c(-12:12)) %>% 
@@ -257,8 +262,7 @@ did_regression_matched_temp1 <- did_regression %>%
   group_by(permno, event_date, treated) %>% 
   summarise_at(columns_for_summarise, mean) %>% 
   ungroup() %>% 
-  mutate(n = row_number()) %>% 
-  mutate(log_market_quintile = ntile(log_market_cap, 5))
+  mutate(n = row_number())
 
 events <- did_regression_raw %>% select(event_date) %>% distinct() 
 
@@ -268,7 +272,7 @@ filter1 <- function(df, events) {
 }
 
 propensity_match <- function(df) {
-  did_match <- matchit(treated ~ log_market_cap + book_to_market + analyst_coverage,
+  did_match <- matchit(treated ~ LOG_MKT_CAP + BM_RATIO + ANALYST_COVERAGE,
           method = "nearest", distance = "logit", data = df, ratio = 3)
   df <- match.data(did_match)
   df
@@ -285,6 +289,8 @@ did_regression_matched_raw <- did_regression_matched_temp2 %>%
   as_tibble() %>% 
   select(permno, event_date, treated) %>% 
   left_join(did_regression_raw)
+
+write_rds(did_regression_matched_raw, "results/did_regression_matched_raw.rds")
 
 did_regression_matched1 <- did_regression_matched_raw %>% 
   filter(quarter_index %in% c(-4:4)) %>% 
