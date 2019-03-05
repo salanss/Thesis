@@ -292,6 +292,12 @@ did_regression_matched_raw <- did_regression_matched_temp2 %>%
 
 write_rds(did_regression_matched_raw, "results/did_regression_matched_raw.rds")
 
+a <- read_rds("results/did_regression_matched_raw.rds")
+
+b <- a %>%
+  group_by(treated) %>% 
+  summarise(n = n_distinct(permno))
+
 did_regression_matched1 <- did_regression_matched_raw %>% 
   filter(quarter_index %in% c(-4:4)) %>% 
   group_by(permno, event_date, year, treated, after, sic_code) %>% 
@@ -386,6 +392,47 @@ parallel_trend1 <- did_regression_matched_raw %>%
             `Foreign breadth2` = mean(foreign_breadth2)) %>% 
   ungroup() %>% 
   gather(measure_name, measure, `Foreign ownership`:`Foreign breadth2`)
+
+`%nin%` = Negate(`%in%`)
+
+parallel_trend1 <- did_regression_matched_raw %>% 
+  mutate(foreign_own_nonquasi = FOR_OWN - foreign_own_quasi,
+         foreign_breadth_nonquasi = FOR_BREADTH - foreign_breadth_quasi,
+         domestic_own_nonquasi = domestic_own - domestic_own_quasi,
+         domestic_breadth_nonquasi = domestic_breadth - domestic_breadth_quasi,
+         inst_own_nonquasi = INST_OWN - institutional_own_quasi,
+         inst_breadth_nonquasi = INST_BREADTH - institutional_breadth_quasi) %>% 
+  mutate(treated = if_else(treated == 1, "treated", "control")) %>% 
+  group_by(treated, quarter_index) %>% 
+  summarise(FOR_OWN = mean(foreign_breadth_nonquasi),
+            FOR_BREADTH = mean(foreign_breadth_nonquasi),
+            FOR_TO_INST_OWN = mean(FOR_TO_INST_OWN),
+            FOR_TO_INST_BREADTH = mean(FOR_TO_INST_BREADTH),
+            foreign_own_nonquasi = mean(foreign_own_nonquasi),
+            foreign_breadth_nonquasi = mean(foreign_breadth_nonquasi),
+            INST_OWN = mean(INST_OWN),
+            INST_BREADTH = mean(INST_BREADTH),
+            inst_own_nonquasi = mean(inst_own_nonquasi),
+            inst_breadth_nonquasi = mean(inst_breadth_nonquasi),
+            domestic_own = mean(domestic_own),
+            domestic_breadth = mean(domestic_breadth),
+            domestic_own_nonquasi = mean(domestic_own_nonquasi),
+            domestic_breadth_nonquasi = mean(domestic_breadth_nonquasi)) %>% 
+  ungroup()
+
+parallel_trend2 <- parallel_trend1 %>% 
+  group_by(treated, quarter_index) %>% 
+  summarise_all(.funs = funs(mean)) %>% 
+  ungroup()
+
+ggplot(parallel_trend1, aes(quarter_index, foreign_breadth_nonquasi, group = treated, color = treated)) +
+  ggtitle("Panel A: Foreign ownership") +
+  geom_line() +
+  labs(x = "Event quarter") +
+  geom_vline(xintercept=0) +
+  theme_classic() +
+  theme(plot.title = element_text(size=9, face="italic")) +
+  scale_color_grey(start = 0.55, end = 0)
 
 write_rds(parallel_trend1, "results/parallel_trend1.rds")
 
