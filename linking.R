@@ -165,12 +165,13 @@ after_interval_fun <- function (event_date, quarter_index) {
 
 filter1 <- function (df_measures, df_events){
   interval <- df_events$interval  
-  filter(df_measures, report_date %within% interval)
+  df_measures %>% 
+    filter(report_date %within% interval)
 }
 
 summarise1 <- function (df) {
   df %>%
-    group_by(permno, event_date, quarter_index) %>% 
+    group_by(permno, event_date, quarter_index, report_date) %>% 
     summarise_at(columns_for_summarise, last) %>%
     ungroup()
 }
