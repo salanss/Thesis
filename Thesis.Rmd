@@ -121,6 +121,7 @@ I gather control variables data from COMPUSTAT quarter fundamentals and CRSP mon
 ## 4.3 The quasi-natural experiment
 
 For the quasi-natural experiment, I limit the time period of the original sample to 1997-2011 to cover the time period of 22 distinct brokerage closures from June 2000 until January 2008 listed in Appendix A of Kelly and Ljungqvist (2012) plus three years of pre- and post-treatment periods. I identify stocks that lose an analyst covering the firm because of the brokerage closures which provide a source of exogenous variation for the analyst coverage. The list is matched with an analyst coverage data retrieved from the Institutional Brokers’ Estimate System (IBES) detail file. 
+
 To construct the sample of treated firms, I filter out firms that are not covered by analysts employed in the brokerage houses listed in Appendix A of @kelly2012testing. Following @derrien2013real, I require for the treated firms to be covered by an analyst at least one year before the disappearance dates to filter out firms that are not actively covered by the analysts. Furthermore, following @kelly2012testing and @derrien2013real, I only retain firms for which the analyst has not “stopped” his estimate before the corresponding broker disappearance date to eliminate the potential endogeneity problem. For instance, if an analyst terminates the coverage of firms unrelated to the brokerage closure before the disappearance date (e.g. anticipating changes in corporate policies), the decision is endogenous. I collect the data for stopped estimates from IBES stop file. Since the brokerage closure dates listed by @kelly2012testing and corresponding disappearance dates do not coincide completely, I follow @derrien2013real, @he2013dark and @lof2018asymmetric to construct a three-month gap before and after the event date. As a result, I estimate the dependent variables and explanatory variables for each stock in a given quarter by subtracting (adding) three months from the event date and finding the previous (next) available quarter value for before and after measures, respectively. Moreover, I define the variable *ANALYST_COVERAGE* as the number of distinct analysts covering a firm in a given quarter.
 
 
@@ -577,7 +578,7 @@ Control variables in Panel B provide mixed results. *BM_RATIO* is negative in se
 
 ## 6.2 The results of the quasi-natural experiment
 
-In this section, I report the general results of the quasi-natural experiment.
+In this section, I report the general results of the quasi-natural experiment. First, I examine the evolution of the dependent variables foreign ownership (*FOR_OWN*) and foreign breadth (*FOR_BREADTH*) between the treatment and control groups in the twelve quarters (i.e. three years) before and after the brokerage closures that act as exogenous shock events of information asymmetry. The treated firms are firms that lose an analyst due to these brokerage closures. The control firms are selected using propensity score matching that matches each treatment firm to three control firms (nearest neighbor) on multiple covariates (twelve quarter before the event): logarithm of market capitalization, book-to-market ratio and analyst coverage. Figure \ref{fig_parallel_trend1} presents the results.
 
 ``` {r parallel_trend, message = FALSE, warning=FALSE, eval=FALSE}
 
@@ -588,10 +589,10 @@ parallel_trend1 <- read_rds("results/did_regression_matched_raw.rds") %>%
             FOR_BREADTH = mean(FOR_BREADTH)) %>% 
   ungroup()
 
-ggplot(parallel_trend1, aes(quarter_index, FOR_OWN, group = treated, color = treated)) +
+ggplot(parallel_trend1, aes(quarter_index, FOR_OWN, color = treated)) +
   ggtitle("Panel A: Foreign ownership") +
   geom_line() +
-  labs(x = "Event quarter") +
+  labs(x = "Event quarter", color = "") +
   geom_vline(xintercept=0) +
   theme_classic() +
   theme(plot.title = element_text(size=9, face="italic")) +
@@ -600,10 +601,10 @@ ggplot(parallel_trend1, aes(quarter_index, FOR_OWN, group = treated, color = tre
 ggsave("figures/parallel_trend1a.pdf", 
        width = 8, height = 4, units = "in")
 
-ggplot(parallel_trend1, aes(quarter_index, FOR_BREADTH, group = treated, color = treated)) +
+ggplot(parallel_trend1, aes(quarter_index, FOR_BREADTH, color = treated)) +
   ggtitle("Panel B: Foreign breadth") +
   geom_line() +
-  labs(x = "Event quarter") +
+  labs(x = "Event quarter", color = "") +
   geom_vline(xintercept=0) +
   theme_classic() +
   theme(plot.title = element_text(size=9, face="italic")) +
@@ -618,9 +619,15 @@ ggsave("figures/parallel_trend1b.pdf",
 \centering
 \includegraphics[width = \linewidth]{figures/parallel_trend1a.pdf}
 \includegraphics[width = \linewidth]{figures/parallel_trend1b.pdf}
-\caption{Foreign ownership between the treatment and control groups around brokerage closures (between quarter -12 and quarter +12)}
+\caption{\textbf{Foreign ownership between the treatment and control groups around brokerage closures}\newline\scriptsize This figure presents the evolution of the mean of firm-quarter observations of foreign ownership (\textit{FOR\_OWN}) in Panel A and foreign breadth (\textit{FOR\_BREADTH}) in Panel B during the twelve quarters (i.e. three years) before and after an exogenous decrease in analyst coverage due to the 22 distinct brokerage closures listed by Kelly and Ljungqvist (2012). The sample consists of 1603 distinct treated firms and 3521 control firms. Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). The firm-quarter observations of foreign ownership and foreign breadth are winsorized at the top and bottom 1\%. Sample period: 1997- 2010. Sources: CRSP, COMPUSTAT, 13F and IBES.}
 \label{fig_parallel_trend1}
 \end{figure}
+
+As shown in Panel A, foreign ownership between the treatment and control groups follow an increasing but parallel trend before the event. This validates the assumption of pre-treatment parallel trend between treatment and control groups. However, there is no evidence of a post-treatment decline of foreign ownership in the treatment group or a significant post-treatment difference in mean between the two groups. Foreign ownership of both groups continue increasing, although the control group slightly catches the treatment group in the post-treatment period. Abrupt changes in foreign ownership during the event quarters 5 and 10 are largely caused by changes in foreign ownership during 2003. These changes are further illustrated in Figure XX in Appendix XX with event-specific plots.
+
+Panel B provides the results of the evolution of foreign breadth between the treatment and control groups. Similar to Panel A, foreign breadth follows an increasing but parallel trend between the groups before the event, which validates the assumption of pre-treatment parallel trend. The increasing and parallel trend follows also after the event and there is no significant decrease in foreign ownership for the treatment group. There also no evidence of a significant post-treatment difference in mean between the two groups. Therefore, the results of Figure \ref{fig_parallel_trend1} do not support the second hypothesis that an exogenous increase in information asymmetry results in a decrease of foreign ownership. 
+
+I extend the analysis of the quasi-experimental setting by implementing a difference-in-differences regression analysis of foreign ownership and foreign breadth. Compared to results in Figure \ref{fig_parallel_trend1}, this enables me to control for other variables and include year and industry fixed effects. 
 
 \newpage
 
