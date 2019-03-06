@@ -288,7 +288,8 @@ did_regression_matched_temp2 <- map(events$event_date, ~filter1(did_regression_m
 did_regression_matched_raw <- did_regression_matched_temp2 %>% 
   as_tibble() %>% 
   select(permno, event_date, treated) %>% 
-  left_join(did_regression_raw)
+  left_join(did_regression_raw) %>% 
+  rename(AFTER = after, TREATED = treated)
 
 write_rds(did_regression_matched_raw, "results/did_regression_matched_raw.rds")
 
@@ -300,30 +301,36 @@ b <- a %>%
 
 did_regression_matched1 <- did_regression_matched_raw %>% 
   filter(quarter_index %in% c(-4:4)) %>% 
-  group_by(permno, event_date, year, treated, after, sic_code) %>% 
+  group_by(permno, event_date, year, TREATED, AFTER, sic_code) %>% 
   summarise_at(columns_for_summarise, mean) %>% 
   ungroup() %>% 
-  group_by(permno, event_date, treated, after) %>% 
+  group_by(permno, event_date, TREATED, AFTER) %>% 
   mutate(sic_code = last(sic_code)) %>% 
   ungroup()
+
+write_rds(did_regression_matched1, "results/did_regression_matched1.rds")
 
 did_regression_matched2 <- did_regression_matched_raw %>% 
   filter(quarter_index %in% c(-8:8)) %>% 
-  group_by(permno, event_date, year, treated, after, sic_code) %>% 
+  group_by(permno, event_date, year, TREATED, AFTER, sic_code) %>% 
   summarise_at(columns_for_summarise, mean) %>% 
   ungroup() %>% 
-  group_by(permno, event_date, treated, after) %>% 
+  group_by(permno, event_date, TREATED, AFTER) %>% 
   mutate(sic_code = last(sic_code)) %>% 
   ungroup()
 
+write_rds(did_regression_matched2, "results/did_regression_matched2.rds")
+
 did_regression_matched3 <- did_regression_matched_raw %>% 
   filter(quarter_index %in% c(-12:12)) %>% 
-  group_by(permno, event_date, year, treated, after, sic_code) %>% 
+  group_by(permno, event_date, year, TREATED, AFTER, sic_code) %>% 
   summarise_at(columns_for_summarise, mean) %>% 
   ungroup() %>% 
-  group_by(permno, event_date, treated, after) %>% 
+  group_by(permno, event_date, TREATED, AFTER) %>% 
   mutate(sic_code = last(sic_code)) %>% 
   ungroup()
+
+write_rds(did_regression_matched3, "results/did_regression_matched3.rds")
 
 did_regression_summary <- did_regression_matched1 %>% 
   select(-permno, -year, -sic_code) %>% 
@@ -333,53 +340,53 @@ write_rds(did_regression_summary, "results/did_regression_summary.rds")
 
 # stargazer(did_regression_summary, title = "DiD summary statistics", out = "DiD_summary.html")
   
-did_model1 <- felm(foreign_inst_percentage ~ treated + after + treated * after + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched1)
+did_model1 <- felm(FOR_OWN ~ AFTER + TREATED + TREATED * AFTER + BM_RATIO + 
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code, data = did_regression_matched1)
 
-did_model2 <- felm(foreign_inst_percentage ~ treated + after + treated * after + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched2)
+did_model2 <- felm(FOR_OWN ~ AFTER + TREATED + TREATED * AFTER + BM_RATIO + 
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code, data = did_regression_matched2)
 
-did_model3 <- felm(foreign_inst_percentage ~ treated + after + treated * after + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched3)
+did_model3 <- felm(FOR_OWN ~ AFTER + TREATED + TREATED * AFTER + BM_RATIO + 
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code, data = did_regression_matched3)
 
-did_model4 <- felm(foreign_inst_percentage2 ~ treated + after + treated * after + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched1)
+did_model4 <- felm(FOR_TO_INST_OWN ~ AFTER + TREATED + TREATED * AFTER + BM_RATIO + 
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code, data = did_regression_matched1)
 
-did_model5 <- felm(foreign_inst_percentage2 ~ treated + after + treated * after + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched2)
+did_model5 <- felm(FOR_TO_INST_OWN ~ AFTER + TREATED + TREATED * AFTER + BM_RATIO + 
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code, data = did_regression_matched2)
 
-did_model6 <- felm(foreign_inst_percentage2 ~ treated + after + treated * after + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched3)
+did_model6 <- felm(FOR_TO_INST_OWN ~ AFTER + TREATED + TREATED * AFTER + BM_RATIO + 
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code, data = did_regression_matched3)
 
-did_model7 <- felm(foreign_breadth ~ treated + after + treated * after + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched1)
+did_model7 <- felm(FOR_BREADTH ~ AFTER + TREATED + TREATED * AFTER + BM_RATIO + 
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code, data = did_regression_matched1)
 
-did_model8 <- felm(foreign_breadth ~ treated + after + treated * after + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched2)
+did_model8 <- felm(FOR_BREADTH ~ AFTER + TREATED + TREATED * AFTER + BM_RATIO + 
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code, data = did_regression_matched2)
 
-did_model9 <- felm(foreign_breadth ~ treated + after + treated * after + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched3)
+did_model9 <- felm(FOR_BREADTH ~ AFTER + TREATED + TREATED * AFTER + BM_RATIO + 
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code, data = did_regression_matched3)
 
-did_model10 <- felm(foreign_breadth2 ~ treated + after + treated * after + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched1)
+did_model10 <- felm(FOR_TO_INST_BREADTH ~ AFTER + TREATED + TREATED * AFTER + BM_RATIO + 
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code, data = did_regression_matched1)
 
-did_model11 <- felm(foreign_breadth2 ~ treated + after + treated * after + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched2)
+did_model11 <- felm(FOR_TO_INST_BREADTH ~ AFTER + TREATED + TREATED * AFTER + BM_RATIO + 
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code, data = did_regression_matched2)
 
-did_model12 <- felm(foreign_breadth2 ~ treated + after + treated * after + book_to_market + 
-                     leverage + roa + tobin_q |year + sic_code|0|year + sic_code, data = did_regression_matched3)
+did_model12 <- felm(FOR_TO_INST_BREADTH ~ AFTER + TREATED + TREATED * AFTER + BM_RATIO + 
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code, data = did_regression_matched3)
 
 did_list <- list(did_model1, did_model2, did_model3, did_model4, did_model5, did_model6, did_model7, did_model8,
                  did_model9, did_model10, did_model11, did_model12)
 
 write_rds(did_list, "results/did_list.rds")
 
-# stargazer(did_list, title = "Difference-in-differences regression results with propensity score matching (H2)", 
+# stargazer(did_list, title = "Difference-in-differences regression results with propensity score matching (H2)",
 #           dep.var.labels =c("Foreign ownership", "Foreign ownership2",
 #                            "Foreign breadth", "Foreign breadth2"),
 #           column.labels = rep(c("[-1;1] years", "[-2;2] years", "[-3;3] years"), times = 4),
-#           omit.stat = c("ser"), 
-#           add.lines = list(c("Industry fixed effects", rep("Yes", times = 12)), 
+#           omit.stat = c("ser"),
+#           add.lines = list(c("Industry fixed effects", rep("Yes", times = 12)),
 #                            c("Year fixed effects", rep("Yes", times = 12))),
 #           out = "DiD H2 results.html")
 
