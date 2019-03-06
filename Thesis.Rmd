@@ -1,7 +1,7 @@
 ---
 output:
   pdf_document:
-    toc: true
+    toc: false
     latex_engine: xelatex
     citation_package: natbib
     keep_tex: true
@@ -36,6 +36,7 @@ header-includes:
 - \usepackage{hhline}
 - \usepackage{fixltx2e}
 - \usepackage{hyperref}
+- \usepackage{tocloft}
 ---
 
 \captionsetup{labelfont=bf}
@@ -49,8 +50,13 @@ knitr::opts_chunk$set(echo = FALSE,
 ```
 \pagenumbering{roman}
 \setcounter{page}{3}
+\renewcommand*{\contentsname}{Table of Contents}
+\renewcommand{\cftfigfont}{Figure }
+\renewcommand{\cfttabfont}{Table }
+\tableofcontents
 \newpage
 \listoftables
+\listoffigures
 \newpage
 \pagenumbering{arabic}
 
@@ -181,7 +187,7 @@ library(stargazer)
 library(kableExtra)
 library(huxtable)
 cor_matrix <- read_rds("results/cor_matrix.rds")
-kable(cor_matrix, "latex", linesep = "", caption = "\\textbf{Correlations between sample variables}\\newline\\scriptsize This table reports the correlations between different institutional ownership, information asymmetry and accounting related control variables of the baseline sample. Each correlation estimate is the annual average of the within-year of (Pearson) correlations. \\textit{FOR\\_OWN} and \\textit{INST\\_OWN} are the annual averages of the firm's shares held by (foreign) institutions at the end of each quarter of the year divided by the firm's total shares outstanding at the end of each quarter. \\textit{FOR\\_BREADTH} and \\textit{INST\\_BREADTH} are the annual averages of the number of the firm's distinct (foreign) institutional shareholders at the end of each quarter divided by the total number of distinct institutional shareholders in 13F database at the end of each quarter (Chen et al., 2002; Lof and Bommel, 2018). The annual firm-levels of information asymmetry are mainly estimated by various researchers. \\textit{BA\\_SPREAD} is the annual average of the daily firm-level observations of bid-ask spreads (i.e. the difference of ask and bid price divided by the closing price). \\textit{PIN\\textsubscript{BHL}} is estimated by Brown et al (2004). \\textit{PIN\\textsubscript{BH}} is estimated by Brown and Hillegeist (2007). \\textit{PIN\\textsubscript{EHO}} is estimated by Easley et al. (2010). \\textit{PIN\\textsubscript{DY}}, \\textit{PIN\\textsubscript{DY\\_ADJ}} and the illiquidity measure \\textit{PSOS\\textsubscript{DY}} are estimated by Duarte and Young (2009). \\textit{MIA} is the annual average of the firm-day observations estimated by Johnson and So (2017). \\textit{VCV\\textsubscript{USD}}, \\textit{VCV\\textsubscript{MKT}} and \\textit{VCV\\textsubscript{TO}} are the fractions of the annual standard deviation of daily firm-level trading volumes and the annual average of daily firm-level trading volumes Lof and Bommel (2018). Trading volumes for \\textit{VCV\\textsubscript{USD}}, \\textit{VCV\\textsubscript{MKT}} and \\textit{VCV\\textsubscript{TO}} are calculated in US dollars, as a fraction of total market volume on the same day and as a daily turnover, respectively. The accounting related variables are \\textit{LOG\\_MKT\\_CAP} (the annual average of the firm-quarter observations of logarithm of market capitalization) \\textit{BM\\_RATIO} (the annual average of the firm-quarter observations of book equity divided by market capitalization), \\textit{LEVERAGE} (the annual average of the firm-quarter observations of debt divided by total assets) and \\textit{ROA} (the annual average of the firm-quarter observations of net income divided by total assets. All institutional ownership and breadth variables and control variables are winsorized at the top and bottom 1\\%. Sample: 1997-2017. Sources: CRSP, COMPUSTAT, 13F and the cited authors' websites. \\label{table_cor_matrix}",
+kable(cor_matrix, "latex", linesep = "", caption.short = "Correlations between sample variables", caption = "\\textbf{Correlations between sample variables}\\newline\\scriptsize This table reports the correlations between different institutional ownership, information asymmetry and accounting related control variables of the baseline sample. Each correlation estimate is the annual average of the within-year of (Pearson) correlations. \\textit{FOR\\_OWN} and \\textit{INST\\_OWN} are the annual averages of the firm's shares held by (foreign) institutions at the end of each quarter of the year divided by the firm's total shares outstanding at the end of each quarter. \\textit{FOR\\_BREADTH} and \\textit{INST\\_BREADTH} are the annual averages of the number of the firm's distinct (foreign) institutional shareholders at the end of each quarter divided by the total number of distinct institutional shareholders in 13F database at the end of each quarter (Chen et al., 2002; Lof and Bommel, 2018). The annual firm-levels of information asymmetry are mainly estimated by various researchers. \\textit{BA\\_SPREAD} is the annual average of the daily firm-level observations of bid-ask spreads (i.e. the difference of ask and bid price divided by the closing price). \\textit{PIN\\textsubscript{BHL}} is estimated by Brown et al (2004). \\textit{PIN\\textsubscript{BH}} is estimated by Brown and Hillegeist (2007). \\textit{PIN\\textsubscript{EHO}} is estimated by Easley et al. (2010). \\textit{PIN\\textsubscript{DY}}, \\textit{PIN\\textsubscript{DY\\_ADJ}} and the illiquidity measure \\textit{PSOS\\textsubscript{DY}} are estimated by Duarte and Young (2009). \\textit{MIA} is the annual average of the firm-day observations estimated by Johnson and So (2017). \\textit{VCV\\textsubscript{USD}}, \\textit{VCV\\textsubscript{MKT}} and \\textit{VCV\\textsubscript{TO}} are the fractions of the annual standard deviation of daily firm-level trading volumes and the annual average of daily firm-level trading volumes Lof and Bommel (2018). Trading volumes for \\textit{VCV\\textsubscript{USD}}, \\textit{VCV\\textsubscript{MKT}} and \\textit{VCV\\textsubscript{TO}} are calculated in US dollars, as a fraction of total market volume on the same day and as a daily turnover, respectively. The accounting related variables are \\textit{LOG\\_MKT\\_CAP} (the annual average of the firm-quarter observations of logarithm of market capitalization) \\textit{BM\\_RATIO} (the annual average of the firm-quarter observations of book equity divided by market capitalization), \\textit{LEVERAGE} (the annual average of the firm-quarter observations of debt divided by total assets) and \\textit{ROA} (the annual average of the firm-quarter observations of net income divided by total assets. All institutional ownership and breadth variables and control variables are winsorized at the top and bottom 1\\%. Sample: 1997-2017. Sources: CRSP, COMPUSTAT, 13F and the cited authors' websites. \\label{table_cor_matrix}",
       booktabs = T, align = "c") %>%
   kable_styling(latex_options = c("scale_down", "hold_position"), position = "left") %>%
   landscape()
@@ -277,13 +283,14 @@ Similar to the findings of correlations in Table \ref{table_cor_matrix}, the emp
 
 ```
 
+
 \begingroup
 \renewcommand\arraystretch{0.55}
 \begin{landscape}
 \captionsetup{width=1.02\linewidth}
 \scriptsize
 \begin{longtable}{@{\extracolsep{5pt}}lccccccccccc}
-  \mycaption{Panel regression analysis of foreign ownership and foreign breadth}{This table reports the results of the annual firm-level panel regression models. In Panel A, the dependent variable (\textit{FOR\_OWN}) is the annual average of the firm's shares held by foreign institutions at the end of each quarter divided by the firm's total shares outstanding at the end of each quarter. In Panel B, the dependent variable (\textit{FOR\_BREADTH}) is the annual average of the number of the firm's distinct foreign institutional shareholders at the end of each quarter divided by the total number of distinct institutional shareholders in 13F database at the end of each quarter (Chen et al., 2002; Lof and Bommel, 2018). The explanatory variables of interest are the various annual firm-level estimates of information asymmetry. \textit{BA\_SPREAD} is the annual average of the daily firm-level observations of bid-ask spreads (i.e. the difference of ask and bid price divided by the closing price). \textit{PIN\textsubscript{BHL}} is estimated by Brown et al (2004). \textit{PIN\textsubscript{BH}} is estimated by Brown and Hillegeist (2007). \textit{PIN\textsubscript{EHO}} is estimated by Easley et al. (2010). \textit{PIN\textsubscript{DY}}, \textit{PIN\textsubscript{DY\_ADJ}} and the illiquidity measure \textit{PSOS\textsubscript{DY}} are estimated by Duarte and Young (2009). \textit{MIA} is the annual average of the firm-day observations estimated by Johnson and So (2017). \textit{VCV\textsubscript{USD}}, \textit{VCV\textsubscript{MKT}} and \textit{VCV\textsubscript{TO}} are the fractions of the annual standard deviation of daily firm-level trading volumes and the annual average of daily firm-level trading volumes Lof and Bommel (2018). Trading volumes for \textit{VCV\textsubscript{USD}}, \textit{VCV\textsubscript{MKT}} and \textit{VCV\textsubscript{TO}} are calculated in US dollars, as a fraction of total market volume on the same day and as a daily turnover, respectively. The control variables are \textit{BM\_RATIO} (the annual average of the firm-quarter observations of book equity divided by market capitalization), \textit{LEVERAGE} (the annual average of the firm-quarter observations of debt divided by total assets) and \textit{ROA} (the annual average of the firm-quarter observations of net income divided by total assets. I include industry and year fixed effects in all regressions. Standard errors are clustered by the industry and year level and reported in parantheses. All institutional ownership, breadth and control variables are winsorized at the top and bottom 1\%. *, ** and *** denote the statistical significance at the 10\%, 5\% and 1\% level, respectively. Sample: 1997-2017. Sources: CRSP, COMPUSTAT, 13F and the cited authors' websites.}
+  \caption[Panel regression analysis of foreign ownership and foreign breadth]{\textbf{Panel regression analysis of foreign ownership and foreign breadth}\newline\scriptsize This table reports the results of the annual firm-level panel regression models. In Panel A, the dependent variable (\textit{FOR\_OWN}) is the annual average of the firm's shares held by foreign institutions at the end of each quarter divided by the firm's total shares outstanding at the end of each quarter. In Panel B, the dependent variable (\textit{FOR\_BREADTH}) is the annual average of the number of the firm's distinct foreign institutional shareholders at the end of each quarter divided by the total number of distinct institutional shareholders in 13F database at the end of each quarter (Chen et al., 2002; Lof and Bommel, 2018). The explanatory variables of interest are the various annual firm-level estimates of information asymmetry. \textit{BA\_SPREAD} is the annual average of the daily firm-level observations of bid-ask spreads (i.e. the difference of ask and bid price divided by the closing price). \textit{PIN\textsubscript{BHL}} is estimated by Brown et al (2004). \textit{PIN\textsubscript{BH}} is estimated by Brown and Hillegeist (2007). \textit{PIN\textsubscript{EHO}} is estimated by Easley et al. (2010). \textit{PIN\textsubscript{DY}}, \textit{PIN\textsubscript{DY\_ADJ}} and the illiquidity measure \textit{PSOS\textsubscript{DY}} are estimated by Duarte and Young (2009). \textit{MIA} is the annual average of the firm-day observations estimated by Johnson and So (2017). \textit{VCV\textsubscript{USD}}, \textit{VCV\textsubscript{MKT}} and \textit{VCV\textsubscript{TO}} are the fractions of the annual standard deviation of daily firm-level trading volumes and the annual average of daily firm-level trading volumes Lof and Bommel (2018). Trading volumes for \textit{VCV\textsubscript{USD}}, \textit{VCV\textsubscript{MKT}} and \textit{VCV\textsubscript{TO}} are calculated in US dollars, as a fraction of total market volume on the same day and as a daily turnover, respectively. The control variables are \textit{BM\_RATIO} (the annual average of the firm-quarter observations of book equity divided by market capitalization), \textit{LEVERAGE} (the annual average of the firm-quarter observations of debt divided by total assets) and \textit{ROA} (the annual average of the firm-quarter observations of net income divided by total assets. I include industry and year fixed effects in all regressions. Standard errors are clustered by the industry and year level and reported in parantheses. All institutional ownership, breadth and control variables are winsorized at the top and bottom 1\%. *, ** and *** denote the statistical significance at the 10\%, 5\% and 1\% level, respectively. Sample: 1997-2017. Sources: CRSP, COMPUSTAT, 13F and the cited authors' websites.}
    \label{table_h1_base} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
@@ -474,7 +481,7 @@ In addition to inspecting general market-level foreign ownership and breadth mea
 \captionsetup{width=1.02\linewidth}
 \scriptsize
 \begin{longtable}{@{\extracolsep{5pt}}lccccccccccc}
-  \mycaption{Panel regression analysis of foreign-to-institution ownership and breadth ratios}{This table reports the results of the annual firm-level panel regression models. In Panel A, the dependent variable (\textit{FOR\_TO\_INST\_OWN}) is the annual average of the firm's shares held by foreign institutions at the end of each quarter divided by the firm's shares held by institutions in total at the end of each quarter. In Panel B, the dependent variable (\textit{FOR\_TO\_INST\_BREADTH}) is the annual average of the distinct number of the firm's foreign institutional investors at the end of each quarter divided by the distinct number of the firm's institutional investors in total at the end of each quarter. The explanatory variables of interest are the various annual firm-level estimates of information asymmetry. \textit{BA\_SPREAD} is the annual average of the daily firm-level observations of bid-ask spreads (i.e. the difference of ask and bid price divided by the closing price). \textit{PIN\textsubscript{BHL}} is estimated by Brown et al (2004). \textit{PIN\textsubscript{BH}} is estimated by Brown and Hillegeist (2007). \textit{PIN\textsubscript{EHO}} is estimated by Easley et al. (2010). \textit{PIN\textsubscript{DY}}, \textit{PIN\textsubscript{DY\_ADJ}} and the illiquidity measure \textit{PSOS\textsubscript{DY}} are estimated by Duarte and Young (2009). \textit{MIA} is the annual average of the firm-day observations estimated by Johnson and So (2017). \textit{VCV\textsubscript{USD}}, \textit{VCV\textsubscript{MKT}} and \textit{VCV\textsubscript{TO}} are the fractions of the annual standard deviation of daily firm-level trading volumes and the annual average of daily firm-level trading volumes Lof and Bommel (2018). Trading volumes for \textit{VCV\textsubscript{USD}}, \textit{VCV\textsubscript{MKT}} and \textit{VCV\textsubscript{TO}} are calculated in US dollars, as a fraction of total market volume on the same day and as a daily turnover, respectively. The control variables are \textit{BM\_RATIO} (the annual average of the firm-quarter observations of book equity divided by market capitalization), \textit{LEVERAGE} (the annual average of the firm-quarter observations of debt divided by total assets) and \textit{ROA} (the annual average of the firm-quarter observations of net income divided by total assets. I include industry and year fixed effects in all regressions. Standard errors are clustered by the industry and year level and reported in parantheses. All institutional ownership, breadth and control variables are winsorized at the top and bottom 1\%. *, ** and *** denote the statistical significance at the 10\%, 5\% and 1\% level, respectively. Sample: 1997-2017. Sources: CRSP, COMPUSTAT, 13F and the cited authors' websites.}
+  \caption[Panel regression analysis of foreign-to-institution ownership and breadth ratios]{\textbf{Panel regression analysis of foreign-to-institution ownership and breadth ratios}\newline\scriptsize This table reports the results of the annual firm-level panel regression models. In Panel A, the dependent variable (\textit{FOR\_TO\_INST\_OWN}) is the annual average of the firm's shares held by foreign institutions at the end of each quarter divided by the firm's shares held by institutions in total at the end of each quarter. In Panel B, the dependent variable (\textit{FOR\_TO\_INST\_BREADTH}) is the annual average of the distinct number of the firm's foreign institutional investors at the end of each quarter divided by the distinct number of the firm's institutional investors in total at the end of each quarter. The explanatory variables of interest are the various annual firm-level estimates of information asymmetry. \textit{BA\_SPREAD} is the annual average of the daily firm-level observations of bid-ask spreads (i.e. the difference of ask and bid price divided by the closing price). \textit{PIN\textsubscript{BHL}} is estimated by Brown et al (2004). \textit{PIN\textsubscript{BH}} is estimated by Brown and Hillegeist (2007). \textit{PIN\textsubscript{EHO}} is estimated by Easley et al. (2010). \textit{PIN\textsubscript{DY}}, \textit{PIN\textsubscript{DY\_ADJ}} and the illiquidity measure \textit{PSOS\textsubscript{DY}} are estimated by Duarte and Young (2009). \textit{MIA} is the annual average of the firm-day observations estimated by Johnson and So (2017). \textit{VCV\textsubscript{USD}}, \textit{VCV\textsubscript{MKT}} and \textit{VCV\textsubscript{TO}} are the fractions of the annual standard deviation of daily firm-level trading volumes and the annual average of daily firm-level trading volumes Lof and Bommel (2018). Trading volumes for \textit{VCV\textsubscript{USD}}, \textit{VCV\textsubscript{MKT}} and \textit{VCV\textsubscript{TO}} are calculated in US dollars, as a fraction of total market volume on the same day and as a daily turnover, respectively. The control variables are \textit{BM\_RATIO} (the annual average of the firm-quarter observations of book equity divided by market capitalization), \textit{LEVERAGE} (the annual average of the firm-quarter observations of debt divided by total assets) and \textit{ROA} (the annual average of the firm-quarter observations of net income divided by total assets. I include industry and year fixed effects in all regressions. Standard errors are clustered by the industry and year level and reported in parantheses. All institutional ownership, breadth and control variables are winsorized at the top and bottom 1\%. *, ** and *** denote the statistical significance at the 10\%, 5\% and 1\% level, respectively. Sample: 1997-2017. Sources: CRSP, COMPUSTAT, 13F and the cited authors' websites.}
   \label{table_h1_for_to_inst} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
@@ -619,7 +626,7 @@ ggsave("figures/parallel_trend1b.pdf",
 \centering
 \includegraphics[width = \linewidth]{figures/parallel_trend1a.pdf}
 \includegraphics[width = \linewidth]{figures/parallel_trend1b.pdf}
-\caption{\textbf{Foreign ownership between the treatment and control groups around brokerage closures}\newline\scriptsize This figure presents the evolution of the mean of firm-quarter observations of foreign ownership (\textit{FOR\_OWN}) in Panel A and foreign breadth (\textit{FOR\_BREADTH}) in Panel B during the twelve quarters (i.e. three years) before and after an exogenous decrease in analyst coverage due to the 22 distinct brokerage closures listed by Kelly and Ljungqvist (2012). The sample consists of 1603 distinct treated firms and 3521 control firms. Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). The firm-quarter observations of foreign ownership and foreign breadth are winsorized at the top and bottom 1\%. Sample period: 1997- 2010. Sources: CRSP, COMPUSTAT, 13F and IBES.}
+\caption[Foreign ownership between the treatment and control groups around brokerage closures]{\textbf{Foreign ownership and breadth between the treatment and control groups around brokerage closures}\newline\scriptsize This figure presents the evolution of the mean of firm-quarter observations of foreign ownership (\textit{FOR\_OWN}) in Panel A and foreign breadth (\textit{FOR\_BREADTH}) in Panel B during the twelve quarters (i.e. three years) before and after an exogenous decrease in analyst coverage due to the 22 distinct brokerage closures listed by Kelly and Ljungqvist (2012). I impose a three-month gap over the events so that foreign ownership estimates are from quarters -13:-1 and 1:13, with the brokerage closure occurring in the quarter 0. The sample consists of 1603 distinct treated firms and 3521 control firms. Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). The firm-quarter observations of foreign ownership and foreign breadth are winsorized at the top and bottom 1\%. Sample period: 1997- 2010. Sources: CRSP, COMPUSTAT, 13F and IBES.}
 \label{fig_parallel_trend1}
 \end{figure}
 
@@ -628,6 +635,101 @@ As shown in Panel A, foreign ownership between the treatment and control groups 
 Panel B provides the results of the evolution of foreign breadth between the treatment and control groups. Similar to Panel A, foreign breadth follows an increasing but parallel trend between the groups before the event, which validates the assumption of pre-treatment parallel trend. The increasing and parallel trend follows also after the event and there is no significant decrease in foreign ownership for the treatment group. There also no evidence of a significant post-treatment difference in mean between the two groups. Therefore, the results of Figure \ref{fig_parallel_trend1} do not support the second hypothesis that an exogenous increase in information asymmetry results in a decrease of foreign ownership. 
 
 I extend the analysis of the quasi-experimental setting by implementing a difference-in-differences regression analysis of foreign ownership and foreign breadth. Compared to results in Figure \ref{fig_parallel_trend1}, this enables me to control for other variables and include year and industry fixed effects. 
+
+``` {r, results='asis', echo = FALSE}
+
+# library(tidyverse)
+# library(lfe)
+# library(stargazer)
+# 
+# did_regression_matched1 <- read_rds("results/did_regression_matched1.rds") %>% 
+#   mutate(AFTER_TREATED = TREATED * AFTER)
+# did_regression_matched2 <- read_rds("results/did_regression_matched2.rds") %>% 
+#   mutate(AFTER_TREATED = TREATED * AFTER)
+# did_regression_matched3 <- read_rds("results/did_regression_matched3.rds") %>% 
+#   mutate(AFTER_TREATED = TREATED * AFTER)
+# 
+# did_model1 <- felm(FOR_OWN ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO + 
+#                      LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+#                    data = did_regression_matched1)
+# 
+# did_model2 <- felm(FOR_OWN ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO + 
+#                      LEVERAGE + ROA|year + sic_code|0|year + sic_code, 
+#                    data = did_regression_matched2)
+# 
+# did_model3 <- felm(FOR_OWN ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO + 
+#                      LEVERAGE + ROA|year + sic_code|0|year + sic_code, 
+#                    data = did_regression_matched3)
+# 
+# did_model7 <- felm(FOR_BREADTH ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO + 
+#                      LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+#                    data = did_regression_matched1)
+# 
+# did_model8 <- felm(FOR_BREADTH ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO + 
+#                      LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+#                    data = did_regression_matched2)
+# 
+# did_model9 <- felm(FOR_BREADTH ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO + 
+#                      LEVERAGE + ROA|year + sic_code|0|year + sic_code, 
+#                    data = did_regression_matched3)
+# 
+# did_list <- list(did_model1, did_model2, did_model3, did_model7, did_model8, did_model9)
+# 
+# stargazer(did_list, title = "\\textbf{Difference-in-differences regression analysis of foreign ownership and breadth}\\newline\\small This table reports the results of the difference-in-differences regression analysis of foreign ownership and breadth. The explanatory variables are \\textit{AFTER}.",
+#           label = "table_h2_1",
+#           header = F,
+#           dep.var.labels =c("FOR\\_OWN", "FOR\\_BREADTH"),
+#           column.labels = rep(c("-1:1 years", "-2:2 years", "-3:3 years"), times = 2),
+#           covariate.labels = c("AFTER", "TREATED", "AFTER\\texttimes TREATED", "BM\\_RATIO", "LEVERAGE", "ROA"),
+#           omit.stat = c("ser", "rsq"),
+#           add.lines = list(c("Industry fixed effects", rep("Yes", times = 6)),
+#                            c("Year fixed effects", rep("Yes", times = 6))),
+#           type = 'latex',
+#           notes.label = "",
+#           notes.append = F,
+#           notes = "",
+#           font.size = "small",
+#           no.space = T)
+
+```
+
+\renewcommand\arraystretch{0.89}
+\captionsetup{width=1.0\linewidth}
+\begin{table}[htbp]
+  \caption[Difference-in-differences regression analysis of foreign ownership and breadth]{\textbf{Difference-in-differences regression analysis of foreign ownership and breadth}\newline\small This table reports the results of the difference-in-differences regression analysis of foreign ownership and breadth. The explanatory variables are \textit{AFTER}} 
+  \label{table_h2_1} 
+\small 
+\begin{tabular}{@{\extracolsep{5pt}}lcccccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{6}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-7} 
+\\[-1.8ex] & \multicolumn{3}{c}{FOR\_OWN} & \multicolumn{3}{c}{FOR\_BREADTH} \\ 
+ & -1:1 years & -2:2 years & -3:3 years & -1:1 years & -2:2 years & -3:3 years \\ 
+\\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6)\\ 
+\hline \\[-1.8ex] 
+ AFTER & 0.008$^{***}$ & 0.011$^{***}$ & 0.014$^{***}$ & 0.001$^{**}$ & 0.001$^{***}$ & 0.002$^{***}$ \\ 
+  & (0.003) & (0.004) & (0.003) & (0.0003) & (0.0003) & (0.0003) \\ 
+  TREATED & 0.003$^{***}$ & 0.002$^{**}$ & 0.002$^{**}$ & 0.002$^{***}$ & 0.002$^{***}$ & 0.002$^{***}$ \\ 
+  & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.0005) \\ 
+  AFTER\texttimes TREATED & $-$0.001 & $-$0.0003 & 0.0004 & $-$0.0001 & 0.0001 & 0.0003 \\ 
+  & (0.001) & (0.001) & (0.001) & (0.0001) & (0.0002) & (0.0002) \\ 
+  BM\_RATIO & $-$0.005$^{***}$ & $-$0.004$^{***}$ & $-$0.005$^{***}$ & $-$0.002$^{***}$ & $-$0.002$^{***}$ & $-$0.002$^{***}$ \\ 
+  & (0.001) & (0.002) & (0.001) & (0.0002) & (0.0002) & (0.0002) \\ 
+  LEVERAGE & 0.003 & 0.004 & 0.004 & 0.0002 & 0.0003 & 0.0005 \\ 
+  & (0.005) & (0.004) & (0.004) & (0.001) & (0.001) & (0.001) \\ 
+  ROA & 0.091$^{***}$ & 0.105$^{***}$ & 0.112$^{***}$ & 0.015$^{**}$ & 0.017$^{***}$ & 0.017$^{***}$ \\ 
+  & (0.022) & (0.021) & (0.020) & (0.006) & (0.006) & (0.005) \\ 
+ \hline \\[-1.8ex] 
+Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
+Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
+Observations & 22,194 & 23,659 & 24,399 & 22,194 & 23,659 & 24,399 \\ 
+Adjusted R$^{2}$ & 0.298 & 0.308 & 0.310 & 0.355 & 0.360 & 0.365 \\ 
+\hline 
+\hline \\[-1.8ex] 
+\multicolumn{7}{r}{} \\ 
+\end{tabular} 
+\end{table}
 
 \newpage
 
