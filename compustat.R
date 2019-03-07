@@ -109,7 +109,8 @@ compustat_quarter_final <- compustat_quarter %>%
                                - coalesce(preferred_stock, 0), NA_real_),
          book_equity = if_else(book_equity_temp < 0, NA_real_, book_equity_temp),
          book_to_market = book_equity / market_cap,
-         leverage = if_else(assets <= 0, NA_real_, (debt_in_current_liabilities + debt_long_term) / assets),
+         debt = coalesce(debt_in_current_liabilities, 0) + coalesce(debt_long_term, 0),
+         leverage = if_else(assets <= 0, NA_real_, debt_liabilities / assets),
          roa = if_else(assets <= 0, NA_real_, net_income / assets),
          sales = if_else(sales <= 0, NA_real_, sales),
          tobin_q = if_else(assets <= 0, NA_real_, (assets + market_cap - book_equity) / assets))
