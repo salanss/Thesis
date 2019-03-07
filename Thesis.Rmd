@@ -587,16 +587,18 @@ Control variables in Panel B provide mixed results. *BM_RATIO* is negative in se
 
 In this section, I report the general results of the quasi-natural experiment. First, I examine the evolution of the dependent variables foreign ownership (*FOR_OWN*) and foreign breadth (*FOR_BREADTH*) between the treatment and control groups in the twelve quarters (i.e. three years) before and after the brokerage closures that act as exogenous shock events of information asymmetry. The treated firms are firms that lose an analyst due to these brokerage closures. The control firms are selected using propensity score matching that matches each treatment firm to three control firms (nearest neighbor) on multiple covariates (twelve quarter before the event): logarithm of market capitalization, book-to-market ratio and analyst coverage. Figure \ref{fig_parallel_trend1} presents the results.
 
-``` {r parallel_trend, message = FALSE, warning=FALSE, eval=FALSE}
+``` {r parallel_trend1, message = FALSE, warning=FALSE, eval=FALSE}
+
+library(tidyverse)
 
 parallel_trend1 <- read_rds("results/did_regression_matched_raw.rds") %>% 
-  mutate(treated = if_else(treated == 1, "treated", "control")) %>% 
-  group_by(treated, quarter_index) %>% 
+  mutate(TREATED = if_else(TREATED == 1, "Treated", "Control")) %>% 
+  group_by(TREATED, quarter_index) %>% 
   summarise(FOR_OWN = mean(FOR_OWN),
             FOR_BREADTH = mean(FOR_BREADTH)) %>% 
   ungroup()
 
-ggplot(parallel_trend1, aes(quarter_index, FOR_OWN, color = treated)) +
+ggplot(parallel_trend1, aes(quarter_index, FOR_OWN, color = TREATED)) +
   ggtitle("Panel A: Foreign ownership") +
   geom_line() +
   labs(x = "Event quarter", color = "") +
@@ -608,7 +610,7 @@ ggplot(parallel_trend1, aes(quarter_index, FOR_OWN, color = treated)) +
 ggsave("figures/parallel_trend1a.pdf", 
        width = 8, height = 4, units = "in")
 
-ggplot(parallel_trend1, aes(quarter_index, FOR_BREADTH, color = treated)) +
+ggplot(parallel_trend1, aes(quarter_index, FOR_BREADTH, color = TREATED)) +
   ggtitle("Panel B: Foreign breadth") +
   geom_line() +
   labs(x = "Event quarter", color = "") +
@@ -636,67 +638,67 @@ Panel B provides the results of the evolution of foreign breadth between the tre
 
 I extend the analysis of the quasi-experimental setting by implementing a difference-in-differences regression analysis of foreign ownership and foreign breadth. Compared to results in Figure \ref{fig_parallel_trend1}, this enables me to control for other variables and include year and industry fixed effects. 
 
-``` {r, results='asis', echo = FALSE}
+``` {r, results='asis', echo = FALSE, eval=TRUE}
 
-# library(tidyverse)
-# library(lfe)
-# library(stargazer)
-# 
-# did_regression_matched1 <- read_rds("results/did_regression_matched1.rds") %>% 
-#   mutate(AFTER_TREATED = TREATED * AFTER)
-# did_regression_matched2 <- read_rds("results/did_regression_matched2.rds") %>% 
-#   mutate(AFTER_TREATED = TREATED * AFTER)
-# did_regression_matched3 <- read_rds("results/did_regression_matched3.rds") %>% 
-#   mutate(AFTER_TREATED = TREATED * AFTER)
-# 
-# did_model1 <- felm(FOR_OWN ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO + 
-#                      LEVERAGE + ROA|year + sic_code|0|year + sic_code,
-#                    data = did_regression_matched1)
-# 
-# did_model2 <- felm(FOR_OWN ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO + 
-#                      LEVERAGE + ROA|year + sic_code|0|year + sic_code, 
-#                    data = did_regression_matched2)
-# 
-# did_model3 <- felm(FOR_OWN ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO + 
-#                      LEVERAGE + ROA|year + sic_code|0|year + sic_code, 
-#                    data = did_regression_matched3)
-# 
-# did_model7 <- felm(FOR_BREADTH ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO + 
-#                      LEVERAGE + ROA|year + sic_code|0|year + sic_code,
-#                    data = did_regression_matched1)
-# 
-# did_model8 <- felm(FOR_BREADTH ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO + 
-#                      LEVERAGE + ROA|year + sic_code|0|year + sic_code,
-#                    data = did_regression_matched2)
-# 
-# did_model9 <- felm(FOR_BREADTH ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO + 
-#                      LEVERAGE + ROA|year + sic_code|0|year + sic_code, 
-#                    data = did_regression_matched3)
-# 
-# did_list <- list(did_model1, did_model2, did_model3, did_model7, did_model8, did_model9)
-# 
-# stargazer(did_list, title = "\\textbf{Difference-in-differences regression analysis of foreign ownership and breadth}\\newline\\small This table reports the results of the difference-in-differences regression analysis of foreign ownership and breadth. The explanatory variables are \\textit{AFTER}.",
-#           label = "table_h2_1",
-#           header = F,
-#           dep.var.labels =c("FOR\\_OWN", "FOR\\_BREADTH"),
-#           column.labels = rep(c("-1:1 years", "-2:2 years", "-3:3 years"), times = 2),
-#           covariate.labels = c("AFTER", "TREATED", "AFTER\\texttimes TREATED", "BM\\_RATIO", "LEVERAGE", "ROA"),
-#           omit.stat = c("ser", "rsq"),
-#           add.lines = list(c("Industry fixed effects", rep("Yes", times = 6)),
-#                            c("Year fixed effects", rep("Yes", times = 6))),
-#           type = 'latex',
-#           notes.label = "",
-#           notes.append = F,
-#           notes = "",
-#           font.size = "small",
-#           no.space = T)
+library(tidyverse)
+library(lfe)
+library(stargazer)
+
+did_regression_matched1 <- read_rds("results/did_regression_matched1.rds") %>%
+  mutate(AFTER_TREATED = TREATED * AFTER)
+did_regression_matched2 <- read_rds("results/did_regression_matched2.rds") %>%
+  mutate(AFTER_TREATED = TREATED * AFTER)
+did_regression_matched3 <- read_rds("results/did_regression_matched3.rds") %>%
+  mutate(AFTER_TREATED = TREATED * AFTER)
+
+did_model1 <- felm(FOR_OWN ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched1)
+
+did_model2 <- felm(FOR_OWN ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched2)
+
+did_model3 <- felm(FOR_OWN ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched3)
+
+did_model7 <- felm(FOR_BREADTH ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched1)
+
+did_model8 <- felm(FOR_BREADTH ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched2)
+
+did_model9 <- felm(FOR_BREADTH ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched3)
+
+did_list <- list(did_model1, did_model2, did_model3, did_model7, did_model8, did_model9)
+
+stargazer(did_list, title = "\\textbf{Difference-in-differences regression analysis of foreign ownership and breadth}\\newline\\small This table reports the results of the difference-in-differences regression analysis of foreign ownership and breadth. The explanatory variables are \\textit{AFTER}.",
+          label = "table_h2_1",
+          header = F,
+          dep.var.labels =c("FOR\\_OWN", "FOR\\_BREADTH"),
+          column.labels = rep(c("-1:1 years", "-2:2 years", "-3:3 years"), times = 2),
+          covariate.labels = c("AFTER", "TREATED", "AFTER\\texttimes TREATED", "BM\\_RATIO", "LEVERAGE", "ROA"),
+          omit.stat = c("ser", "rsq"),
+          add.lines = list(c("Industry fixed effects", rep("Yes", times = 6)),
+                           c("Year fixed effects", rep("Yes", times = 6))),
+          type = 'latex',
+          notes.label = "",
+          notes.append = F,
+          notes = "",
+          font.size = "small",
+          no.space = T)
 
 ```
 
 \renewcommand\arraystretch{0.89}
 \captionsetup{width=1.0\linewidth}
 \begin{table}[htbp]
-  \caption[Difference-in-differences regression analysis of foreign ownership and breadth]{\textbf{Difference-in-differences regression analysis of foreign ownership and breadth}\newline\small This table reports the results of the difference-in-differences regression analysis of foreign ownership and breadth. The explanatory variables are \textit{AFTER}} 
+  \caption[Difference-in-differences regression analysis of foreign ownership and breadth]{\textbf{Difference-in-differences regression analysis of foreign ownership and breadth}\newline\small This table reports the results of the difference-in-differences regression analysis of foreign ownership and breadth. The sample consists of 1601 distinct treated stocks and 3500 distinct control firms, . The explanatory variables are \textit{AFTER}} 
   \label{table_h2_1} 
 \small 
 \begin{tabular}{@{\extracolsep{5pt}}lcccccc} 
@@ -708,28 +710,123 @@ I extend the analysis of the quasi-experimental setting by implementing a differ
  & -1:1 years & -2:2 years & -3:3 years & -1:1 years & -2:2 years & -3:3 years \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6)\\ 
 \hline \\[-1.8ex] 
- AFTER & 0.008$^{***}$ & 0.011$^{***}$ & 0.014$^{***}$ & 0.001$^{**}$ & 0.001$^{***}$ & 0.002$^{***}$ \\ 
-  & (0.003) & (0.004) & (0.003) & (0.0003) & (0.0003) & (0.0003) \\ 
-  TREATED & 0.003$^{***}$ & 0.002$^{**}$ & 0.002$^{**}$ & 0.002$^{***}$ & 0.002$^{***}$ & 0.002$^{***}$ \\ 
-  & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.0005) \\ 
-  AFTER\texttimes TREATED & $-$0.001 & $-$0.0003 & 0.0004 & $-$0.0001 & 0.0001 & 0.0003 \\ 
-  & (0.001) & (0.001) & (0.001) & (0.0001) & (0.0002) & (0.0002) \\ 
-  BM\_RATIO & $-$0.005$^{***}$ & $-$0.004$^{***}$ & $-$0.005$^{***}$ & $-$0.002$^{***}$ & $-$0.002$^{***}$ & $-$0.002$^{***}$ \\ 
-  & (0.001) & (0.002) & (0.001) & (0.0002) & (0.0002) & (0.0002) \\ 
-  LEVERAGE & 0.003 & 0.004 & 0.004 & 0.0002 & 0.0003 & 0.0005 \\ 
-  & (0.005) & (0.004) & (0.004) & (0.001) & (0.001) & (0.001) \\ 
-  ROA & 0.091$^{***}$ & 0.105$^{***}$ & 0.112$^{***}$ & 0.015$^{**}$ & 0.017$^{***}$ & 0.017$^{***}$ \\ 
-  & (0.022) & (0.021) & (0.020) & (0.006) & (0.006) & (0.005) \\ 
+ AFTER & 0.009$^{***}$ & 0.013$^{***}$ & 0.017$^{***}$ & 0.001$^{**}$ & 0.001$^{***}$ & 0.002$^{***}$ \\ 
+  & (0.003) & (0.004) & (0.003) & (0.0003) & (0.0002) & (0.0002) \\ 
+  TREATED & 0.003$^{***}$ & 0.002$^{*}$ & 0.001 & 0.002$^{***}$ & 0.002$^{***}$ & 0.002$^{***}$ \\ 
+  & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) \\ 
+  AFTER\texttimes TREATED & $-$0.002$^{**}$ & $-$0.002 & $-$0.001 & $-$0.0002$^{*}$ & $-$0.00002 & 0.0003 \\ 
+  & (0.001) & (0.002) & (0.001) & (0.0001) & (0.0002) & (0.0003) \\ 
+  BM\_RATIO & $-$0.002 & $-$0.001 & $-$0.003$^{*}$ & $-$0.002$^{***}$ & $-$0.003$^{***}$ & $-$0.004$^{***}$ \\ 
+  & (0.003) & (0.003) & (0.002) & (0.0003) & (0.001) & (0.001) \\ 
+  LEVERAGE & 0.006 & 0.005 & 0.005 & 0.003$^{***}$ & 0.004$^{***}$ & 0.004$^{***}$ \\ 
+  & (0.004) & (0.003) & (0.004) & (0.001) & (0.001) & (0.001) \\ 
+  ROA & 0.094$^{***}$ & 0.095$^{***}$ & 0.104$^{***}$ & 0.020$^{**}$ & 0.023$^{**}$ & 0.033$^{***}$ \\ 
+  & (0.034) & (0.024) & (0.035) & (0.009) & (0.011) & (0.012) \\ 
  \hline \\[-1.8ex] 
 Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
 Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
-Observations & 22,194 & 23,659 & 24,399 & 22,194 & 23,659 & 24,399 \\ 
-Adjusted R$^{2}$ & 0.298 & 0.308 & 0.310 & 0.355 & 0.360 & 0.365 \\ 
+Observations & 17,144 & 14,325 & 11,862 & 17,144 & 14,325 & 11,862 \\ 
+Adjusted R$^{2}$ & 0.342 & 0.389 & 0.416 & 0.390 & 0.432 & 0.458 \\ 
 \hline 
 \hline \\[-1.8ex] 
 \multicolumn{7}{r}{} \\ 
 \end{tabular} 
 \end{table}
+
+``` {r parallel_trend2, message = FALSE, warning=FALSE, eval=TRUE}
+
+library(tidyverse)
+
+parallel_trend1 <- read_rds("results/did_regression_matched_raw.rds") %>% 
+  mutate(TREATED = if_else(TREATED == 1, "Treated", "Control")) %>% 
+  group_by(TREATED, quarter_index) %>% 
+  summarise(FOR_TO_INST_OWN = mean(FOR_TO_INST_OWN),
+            FOR_TO_INST_BREADTH = mean(FOR_TO_INST_BREADTH)) %>% 
+  ungroup()
+
+ggplot(parallel_trend1, aes(quarter_index, FOR_TO_INST_OWN, color = TREATED)) +
+  ggtitle("Panel A: Foreign-to-institution ownership") +
+  geom_line() +
+  labs(x = "Event quarter", color = "") +
+  geom_vline(xintercept=0) +
+  theme_classic() +
+  theme(plot.title = element_text(size=9, face="italic")) +
+  scale_color_grey(start = 0.55, end = 0)
+
+ggsave("figures/parallel_trend2a.pdf", 
+       width = 8, height = 4, units = "in")
+
+ggplot(parallel_trend1, aes(quarter_index, FOR_TO_INST_BREADTH, color = TREATED)) +
+  ggtitle("Panel B: Foreign-to-institution breadth") +
+  geom_line() +
+  labs(x = "Event quarter", color = "") +
+  geom_vline(xintercept=0) +
+  theme_classic() +
+  theme(plot.title = element_text(size=9, face="italic")) +
+  scale_color_grey(start = 0.55, end = 0)
+
+ggsave("figures/parallel_trend2b.pdf", 
+       width = 8, height = 4, units = "in")
+  
+```
+
+
+``` {r, results='asis', echo = FALSE, eval=TRUE}
+
+library(tidyverse)
+library(lfe)
+library(stargazer)
+
+did_regression_matched1 <- read_rds("results/did_regression_matched1.rds") %>%
+  mutate(AFTER_TREATED = TREATED * AFTER)
+did_regression_matched2 <- read_rds("results/did_regression_matched2.rds") %>%
+  mutate(AFTER_TREATED = TREATED * AFTER)
+did_regression_matched3 <- read_rds("results/did_regression_matched3.rds") %>%
+  mutate(AFTER_TREATED = TREATED * AFTER)
+
+did_model1 <- felm(FOR_TO_INST_OWN ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched1)
+
+did_model2 <- felm(FOR_TO_INST_OWN ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched2)
+
+did_model3 <- felm(FOR_TO_INST_OWN ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched3)
+
+did_model7 <- felm(FOR_TO_INST_BREADTH ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched1)
+
+did_model8 <- felm(FOR_TO_INST_BREADTH ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched2)
+
+did_model9 <- felm(FOR_TO_INST_BREADTH ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched3)
+
+did_list <- list(did_model1, did_model2, did_model3, did_model7, did_model8, did_model9)
+
+stargazer(did_list, title = "\\textbf{Difference-in-differences regression analysis of foreign-to-institutions ownership and breadth}\\newline\\small This table reports the results of the difference-in-differences regression analysis of foreign-to-institution ownership and breadth. The explanatory variables are \\textit{AFTER}.",
+          label = "table_h2_2",
+          header = F,
+          dep.var.labels =c("FOR\\_TO\\_INST\\_OWN", "FOR\\_TO\\_INST\\_BREADTH"),
+          column.labels = rep(c("-1:1 years", "-2:2 years", "-3:3 years"), times = 2),
+          covariate.labels = c("AFTER", "TREATED", "AFTER\\texttimes TREATED", "BM\\_RATIO", "LEVERAGE", "ROA"),
+          omit.stat = c("ser", "rsq"),
+          add.lines = list(c("Industry fixed effects", rep("Yes", times = 6)),
+                           c("Year fixed effects", rep("Yes", times = 6))),
+          type = 'latex',
+          notes.label = "",
+          notes.append = F,
+          notes = "",
+          font.size = "small",
+          no.space = T)
+
+```
 
 \newpage
 
