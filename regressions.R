@@ -256,7 +256,6 @@ did_regression <- did_regression_raw %>%
   mutate(sic_code = last(sic_code)) %>% 
   ungroup()
 
-
 did_regression_matched_temp1 <- did_regression %>% 
   filter(after == 0) %>% # match only based on before values during [-3;0] years
   group_by(permno, event_date, treated) %>% 
@@ -289,7 +288,11 @@ did_regression_matched_raw <- did_regression_matched_temp2 %>%
   as_tibble() %>% 
   select(permno, event_date, treated) %>% 
   left_join(did_regression_raw) %>% 
-  rename(AFTER = after, TREATED = treated)
+  rename(AFTER = after, TREATED = treated) %>% 
+  group_by(permno, event_date, TREATED) %>% 
+  mutate(n = n_distinct(quarter_index[quarter_index <= 4 & quarter_index >= -4])) %>% 
+  ungroup() %>% 
+  filter(n == 8) 
 
 write_rds(did_regression_matched_raw, "results/did_regression_matched_raw.rds")
 
@@ -301,6 +304,10 @@ b <- a %>%
 
 did_regression_matched1 <- did_regression_matched_raw %>% 
   filter(quarter_index %in% c(-4:4)) %>% 
+  group_by(permno, event_date, TREATED) %>% 
+  mutate(n = n_distinct(quarter_index[quarter_index <= 4 & quarter_index >= -4])) %>% 
+  ungroup() %>% 
+  filter(n == 8) %>% 
   group_by(permno, event_date, year, TREATED, AFTER, sic_code) %>% 
   summarise_at(columns_for_summarise, mean) %>% 
   ungroup() %>% 
@@ -312,6 +319,10 @@ write_rds(did_regression_matched1, "results/did_regression_matched1.rds")
 
 did_regression_matched2 <- did_regression_matched_raw %>% 
   filter(quarter_index %in% c(-8:8)) %>% 
+  group_by(permno, event_date, TREATED) %>% 
+  mutate(n = n_distinct(quarter_index[quarter_index <= 4 & quarter_index >= -4])) %>% 
+  ungroup() %>% 
+  filter(n == 8) %>%
   group_by(permno, event_date, year, TREATED, AFTER, sic_code) %>% 
   summarise_at(columns_for_summarise, mean) %>% 
   ungroup() %>% 
@@ -323,6 +334,10 @@ write_rds(did_regression_matched2, "results/did_regression_matched2.rds")
 
 did_regression_matched3 <- did_regression_matched_raw %>% 
   filter(quarter_index %in% c(-12:12)) %>% 
+  group_by(permno, event_date, TREATED) %>% 
+  mutate(n = n_distinct(quarter_index[quarter_index <= 4 & quarter_index >= -4])) %>% 
+  ungroup() %>% 
+  filter(n == 8) %>%
   group_by(permno, event_date, year, TREATED, AFTER, sic_code) %>% 
   summarise_at(columns_for_summarise, mean) %>% 
   ungroup() %>% 
