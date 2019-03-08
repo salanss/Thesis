@@ -199,87 +199,87 @@ I extend the analysis of the correlation matrix by examining the effect of infor
 
 Similar to the findings of correlations in Table \ref{table_cor_matrix}, the empirical results of the panel regression models in Table \ref{table_h1_base} support Hypothesis 1 and the findings by @jiang2004foreign, @baik2013liability and @batten2015foreign of the negative relation between foreign ownership and asymmetric information. In Panel A, The regression coefficients of information asymmetry measures are negative in all models and statistically significant at the 1% level in all regression models except with bid-ask spread as the information asymmetry measure. Based on column (3), a 1 percentage point increase in information asymmetry (PIN~DY_ADJ~) leads to a decrease of about 0.10% in foreign ownership *ceteris paribus*. Based on all models, a 1 percentage point increase in information asymmetry results, on average, in a decrease of about 0.05% in foreign ownership *ceteris paribus*. Overall, the negative relation is stronger with the probability of informed trading measures than with bid-ask spread, multimarket information asymmetry or volume coefficient of variation. Based on the results of adjusted R^2^, models with different probability of informed trading measures and MIA have the best explanatory power.
 
-```{r, results='asis'}
+```{r, results='asis', message = FALSE, warning=FALSE, eval = FALSE}
 ## baseline regression table h1 panel a: FOR_OWN and panel b:FOR_BREADTH
 ## code chunk produces tex file which is used in output
-# library(tidyverse)
-# library(stargazer)
-# library(lfe)
-# library(kableExtra)
-# library(starpolishr)
-# baseline_regression_raw <- read_rds("results/baseline_regression_raw.rds")
-# 
-# baseline_regression <- baseline_regression_raw %>%
-#   gather(ia_measure_name, ia_measure, BA_SPREAD:VCV_TO) %>%
-#   gather(dep_measure_name, dep_measure, FOR_OWN) %>%
-#   filter_all(all_vars(!is.na(.))) %>%
-#   group_by(dep_measure_name, ia_measure_name) %>%
-#   nest()
-# 
-# baseline_regression2 <- baseline_regression_raw %>%
-#   gather(ia_measure_name, ia_measure, BA_SPREAD:VCV_TO) %>%
-#   gather(dep_measure_name, dep_measure, FOR_BREADTH) %>%
-#   filter_all(all_vars(!is.na(.))) %>%
-#   group_by(dep_measure_name, ia_measure_name) %>%
-#   nest()
-# 
-# rnm <- function(df, ia_meas, dep_meas) {
-#   rnm_list <- set_names(c("ia_measure", "dep_measure"), syms(c(ia_meas, dep_meas)))
-#   rename(df, !!!rnm_list)
-# }
-# 
-# model_function <- function(df, ia_meas, dep_meas) {
-#   f <- dep_measure ~ ia_measure + BM_RATIO + LEVERAGE +
-#     ROA |year + sic_code|0|year + sic_code
-#   f[[2]] <- sym(dep_meas)
-#   f[[3]][[2]][[2]][[2]][[2]][[2]][[2]] <- sym(ia_meas)
-#   felm(f, data = df)
-# }
-# 
-# baseline_names <- mutate(baseline_regression,
-#                          data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
-#                          model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
-# 
-# baseline_names2 <- mutate(baseline_regression2,
-#                          data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
-#                          model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
-# 
-# 
-#  star1 <-  stargazer(baseline_names$model,
-#            header = F,
-#            column.labels =c("FOR\\_OWN"),
-#            label = "table_h1_base",
-#            dep.var.labels.include = F,
-#            notes.label = "",
-#            notes.append = F,
-#            notes = "",
-#            column.separate = c(11),
-#            omit.stat = c("ser", "rsq"),
-#            font.size = "tiny",
-#            no.space = T,
-#            add.lines = list(c("Industry fixed effects", rep("Yes", times = 11)),
-#                             c("Year fixed effects", rep("Yes", times = 11))),
-#            title = "Panel regression analysis of foreign ownership", type = "latex")
-# 
-#  star2 <- stargazer(baseline_names2$model,
-#            header = F,
-#            #label = "table_h1_for_breadth",
-#            notes.label = "",
-#            notes.append = F,
-#            notes = "",
-#            column.labels =c("FOR_BREADTH"),
-#            dep.var.labels.include = F,
-#            omit.stat = c("ser", "rsq"),
-#            font.size = "tiny",
-#            no.space = T,
-#            add.lines = list(c("Industry fixed effects", rep("Yes", times = 11)),
-#                             c("Year fixed effects", rep("Yes", times = 11))),
-#            title = "Panel regression analysis of foreign breadth", type = "latex")
-# 
-# a <- star_panel(star1, star2,
-#                         panel.names = c("Foreign ownership", "Foreign breadth"), same.summary.stats = F)
-# 
-# starpolishr::star_tex_write(a, file = "my_tex_file2.tex", headers = TRUE)
+library(tidyverse)
+library(stargazer)
+library(lfe)
+library(kableExtra)
+library(starpolishr)
+baseline_regression_raw <- read_rds("results/baseline_regression_raw.rds")
+
+baseline_regression <- baseline_regression_raw %>%
+  gather(ia_measure_name, ia_measure, BA_SPREAD:VCV_TO) %>%
+  gather(dep_measure_name, dep_measure, FOR_OWN) %>%
+  filter_all(all_vars(!is.na(.))) %>%
+  group_by(dep_measure_name, ia_measure_name) %>%
+  nest()
+
+baseline_regression2 <- baseline_regression_raw %>%
+  gather(ia_measure_name, ia_measure, BA_SPREAD:VCV_TO) %>%
+  gather(dep_measure_name, dep_measure, FOR_BREADTH) %>%
+  filter_all(all_vars(!is.na(.))) %>%
+  group_by(dep_measure_name, ia_measure_name) %>%
+  nest()
+
+rnm <- function(df, ia_meas, dep_meas) {
+  rnm_list <- set_names(c("ia_measure", "dep_measure"), syms(c(ia_meas, dep_meas)))
+  rename(df, !!!rnm_list)
+}
+
+model_function <- function(df, ia_meas, dep_meas) {
+  f <- dep_measure ~ ia_measure + BM_RATIO + LEVERAGE +
+    ROA |year + sic_code|0|year + sic_code
+  f[[2]] <- sym(dep_meas)
+  f[[3]][[2]][[2]][[2]][[2]][[2]][[2]] <- sym(ia_meas)
+  felm(f, data = df)
+}
+
+baseline_names <- mutate(baseline_regression,
+                         data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
+                         model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
+
+baseline_names2 <- mutate(baseline_regression2,
+                         data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
+                         model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
+
+
+ star1 <-  stargazer(baseline_names$model,
+           header = F,
+           column.labels =c("FOR\\_OWN"),
+           label = "table_h1_base",
+           dep.var.labels.include = F,
+           notes.label = "",
+           notes.append = F,
+           notes = "",
+           column.separate = c(11),
+           omit.stat = c("ser", "rsq"),
+           font.size = "tiny",
+           no.space = T,
+           add.lines = list(c("Industry fixed effects", rep("Yes", times = 11)),
+                            c("Year fixed effects", rep("Yes", times = 11))),
+           title = "Panel regression analysis of foreign ownership", type = "latex")
+
+ star2 <- stargazer(baseline_names2$model,
+           header = F,
+           #label = "table_h1_for_breadth",
+           notes.label = "",
+           notes.append = F,
+           notes = "",
+           column.labels =c("FOR_BREADTH"),
+           dep.var.labels.include = F,
+           omit.stat = c("ser", "rsq"),
+           font.size = "tiny",
+           no.space = T,
+           add.lines = list(c("Industry fixed effects", rep("Yes", times = 11)),
+                            c("Year fixed effects", rep("Yes", times = 11))),
+           title = "Panel regression analysis of foreign breadth", type = "latex")
+
+a <- star_panel(star1, star2,
+                        panel.names = c("Foreign ownership", "Foreign breadth"), same.summary.stats = F)
+
+starpolishr::star_tex_write(a, file = "my_tex_file2.tex", headers = TRUE)
 
 ```
 
@@ -304,37 +304,37 @@ Similar to the findings of correlations in Table \ref{table_cor_matrix}, the emp
  \\[-1.5ex]
  BA\_SPREAD & $-$0.004 &  &  &  &  &  &  &  &  &  &  \\ 
   & (0.004) &  &  &  &  &  &  &  &  &  &  \\ 
-  PIN\_DY &  & $-$0.073$^{***}$ &  &  &  &  &  &  &  &  &  \\ 
+  PIN\_DY &  & $-$0.072$^{***}$ &  &  &  &  &  &  &  &  &  \\ 
   &  & (0.014) &  &  &  &  &  &  &  &  &  \\ 
-  PIN\_DY\_ADJ &  &  & $-$0.097$^{***}$ &  &  &  &  &  &  &  &  \\ 
+  PIN\_DY\_ADJ &  &  & $-$0.095$^{***}$ &  &  &  &  &  &  &  &  \\ 
   &  &  & (0.017) &  &  &  &  &  &  &  &  \\ 
   PSOS\_DY &  &  &  & $-$0.041$^{***}$ &  &  &  &  &  &  &  \\ 
   &  &  &  & (0.010) &  &  &  &  &  &  &  \\ 
-  PIN\_EHO &  &  &  &  & $-$0.087$^{***}$ &  &  &  &  &  &  \\ 
-  &  &  &  &  & (0.016) &  &  &  &  &  &  \\ 
+  PIN\_EHO &  &  &  &  & $-$0.086$^{***}$ &  &  &  &  &  &  \\ 
+  &  &  &  &  & (0.015) &  &  &  &  &  &  \\ 
   PIN\_BHL &  &  &  &  &  & $-$0.079$^{***}$ &  &  &  &  &  \\ 
   &  &  &  &  &  & (0.016) &  &  &  &  &  \\ 
   PIN\_BH &  &  &  &  &  &  & $-$0.083$^{***}$ &  &  &  &  \\ 
   &  &  &  &  &  &  & (0.014) &  &  &  &  \\ 
   MIA &  &  &  &  &  &  &  & $-$0.038$^{***}$ &  &  &  \\ 
-  &  &  &  &  &  &  &  & (0.008) &  &  &  \\ 
+  &  &  &  &  &  &  &  & (0.007) &  &  &  \\ 
   VCV\_USD &  &  &  &  &  &  &  &  & $-$0.009$^{***}$ &  &  \\ 
   &  &  &  &  &  &  &  &  & (0.001) &  &  \\ 
   VCV\_MKT &  &  &  &  &  &  &  &  &  & $-$0.009$^{***}$ &  \\ 
   &  &  &  &  &  &  &  &  &  & (0.001) &  \\ 
   VCV\_TO &  &  &  &  &  &  &  &  &  &  & $-$0.010$^{***}$ \\ 
   &  &  &  &  &  &  &  &  &  &  & (0.001) \\ 
-  BM\_RATIO & $-$0.008$^{***}$ & $-$0.003$^{***}$ & $-$0.003$^{***}$ & $-$0.005$^{***}$ & $-$0.003$^{***}$ & $-$0.005$^{***}$ & $-$0.003$^{***}$ & $-$0.001 & $-$0.006$^{***}$ & $-$0.006$^{***}$ & $-$0.006$^{***}$ \\ 
+  BM\_RATIO & $-$0.008$^{***}$ & $-$0.003$^{***}$ & $-$0.003$^{***}$ & $-$0.005$^{***}$ & $-$0.003$^{***}$ & $-$0.005$^{***}$ & $-$0.003$^{***}$ & 0.00002 & $-$0.006$^{***}$ & $-$0.006$^{***}$ & $-$0.006$^{***}$ \\ 
   & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) \\ 
-  LEVERAGE & 0.010$^{***}$ & 0.001 & 0.001 & 0.001 & $-$0.001 & 0.006$^{***}$ & 0.006$^{***}$ & 0.008$^{*}$ & 0.008$^{***}$ & 0.008$^{***}$ & 0.008$^{***}$ \\ 
-  & (0.003) & (0.001) & (0.001) & (0.002) & (0.001) & (0.002) & (0.002) & (0.004) & (0.003) & (0.003) & (0.003) \\ 
-  ROA & 0.093$^{***}$ & 0.075$^{***}$ & 0.078$^{***}$ & 0.075$^{***}$ & 0.059$^{***}$ & 0.066$^{***}$ & 0.067$^{***}$ & 0.085$^{***}$ & 0.073$^{***}$ & 0.073$^{***}$ & 0.077$^{***}$ \\ 
-  & (0.011) & (0.009) & (0.010) & (0.009) & (0.008) & (0.007) & (0.008) & (0.011) & (0.008) & (0.007) & (0.007) \\ 
+  LEVERAGE & 0.004$^{*}$ & 0.007$^{***}$ & 0.007$^{***}$ & 0.008$^{***}$ & 0.003$^{***}$ & 0.003 & 0.004$^{**}$ & 0.010$^{***}$ & 0.004 & 0.004 & 0.004 \\ 
+  & (0.003) & (0.002) & (0.002) & (0.002) & (0.001) & (0.002) & (0.002) & (0.003) & (0.003) & (0.003) & (0.003) \\ 
+  ROA & 0.095$^{***}$ & 0.078$^{***}$ & 0.080$^{***}$ & 0.078$^{***}$ & 0.060$^{***}$ & 0.068$^{***}$ & 0.069$^{***}$ & 0.088$^{***}$ & 0.074$^{***}$ & 0.075$^{***}$ & 0.079$^{***}$ \\ 
+  & (0.012) & (0.009) & (0.010) & (0.009) & (0.009) & (0.007) & (0.008) & (0.011) & (0.008) & (0.008) & (0.008) \\ 
 \cline{2-12} \\[-2.0ex]
 Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
 Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
-Observations & 108,271 & 15,122 & 15,122 & 15,122 & 9,676 & 77,040 & 77,147 & 20,659 & 93,030 & 93,030 & 93,030 \\ 
-Adjusted R$^{2}$ & 0.209 & 0.394 & 0.388 & 0.355 & 0.396 & 0.280 & 0.296 & 0.314 & 0.245 & 0.244 & 0.244 \\ 
+Observations & 110,998 & 15,532 & 15,532 & 15,532 & 9,965 & 79,095 & 79,208 & 21,017 & 95,241 & 95,241 & 95,241 \\ 
+Adjusted R$^{2}$ & 0.210 & 0.406 & 0.399 & 0.367 & 0.398 & 0.282 & 0.298 & 0.317 & 0.246 & 0.246 & 0.246 \\ 
 \\[-1.83ex] 
  & \multicolumn{11}{c}{\textit{Dependent variable:}} \\ 
 \cline{2-12} 
@@ -344,13 +344,13 @@ Adjusted R$^{2}$ & 0.209 & 0.394 & 0.388 & 0.355 & 0.396 & 0.280 & 0.296 & 0.314
 \\[-2.0ex] \multicolumn{12}{@{} l}{Panel B: Foreign breadth}
  \\
  \\[-1.5ex]
- BA\_SPREAD & $-$0.001 &  &  &  &  &  &  &  &  &  &  \\ 
+BA\_SPREAD & $-$0.001 &  &  &  &  &  &  &  &  &  &  \\ 
   & (0.001) &  &  &  &  &  &  &  &  &  &  \\ 
   PIN\_DY &  & $-$0.014$^{***}$ &  &  &  &  &  &  &  &  &  \\ 
   &  & (0.003) &  &  &  &  &  &  &  &  &  \\ 
-  PIN\_DY\_ADJ &  &  & $-$0.022$^{***}$ &  &  &  &  &  &  &  &  \\ 
-  &  &  & (0.004) &  &  &  &  &  &  &  &  \\ 
-  PSOS\_DY &  &  &  & $-$0.007$^{***}$ &  &  &  &  &  &  &  \\ 
+  PIN\_DY\_ADJ &  &  & $-$0.021$^{***}$ &  &  &  &  &  &  &  &  \\ 
+  &  &  & (0.003) &  &  &  &  &  &  &  &  \\ 
+  PSOS\_DY &  &  &  & $-$0.006$^{***}$ &  &  &  &  &  &  &  \\ 
   &  &  &  & (0.002) &  &  &  &  &  &  &  \\ 
   PIN\_EHO &  &  &  &  & $-$0.018$^{***}$ &  &  &  &  &  &  \\ 
   &  &  &  &  & (0.002) &  &  &  &  &  &  \\ 
@@ -366,17 +366,17 @@ Adjusted R$^{2}$ & 0.209 & 0.394 & 0.388 & 0.355 & 0.396 & 0.280 & 0.296 & 0.314
   &  &  &  &  &  &  &  &  &  & (0.0002) &  \\ 
   VCV\_TO &  &  &  &  &  &  &  &  &  &  & $-$0.002$^{***}$ \\ 
   &  &  &  &  &  &  &  &  &  &  & (0.0002) \\ 
-  BM\_RATIO & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.0004$^{***}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ \\ 
+  BM\_RATIO & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.0003$^{***}$ & $-$0.0005$^{**}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ \\ 
   & (0.0001) & (0.0002) & (0.0002) & (0.0002) & (0.0001) & (0.0001) & (0.0001) & (0.0002) & (0.0001) & (0.0001) & (0.0001) \\ 
-  LEVERAGE & 0.002$^{***}$ & 0.0005 & 0.001 & 0.001 & 0.0001 & 0.001$^{***}$ & 0.001$^{***}$ & 0.003$^{***}$ & 0.002$^{***}$ & 0.002$^{***}$ & 0.002$^{***}$ \\ 
-  & (0.0004) & (0.0004) & (0.0004) & (0.0005) & (0.0003) & (0.0002) & (0.0002) & (0.001) & (0.0004) & (0.0004) & (0.0004) \\ 
-  ROA & 0.012$^{***}$ & 0.012$^{***}$ & 0.012$^{***}$ & 0.013$^{***}$ & 0.008$^{***}$ & 0.006$^{***}$ & 0.007$^{***}$ & 0.019$^{***}$ & 0.009$^{***}$ & 0.009$^{***}$ & 0.010$^{***}$ \\ 
-  & (0.002) & (0.002) & (0.002) & (0.002) & (0.001) & (0.001) & (0.001) & (0.003) & (0.002) & (0.002) & (0.002) \\ 
+  LEVERAGE & 0.002$^{***}$ & 0.003$^{***}$ & 0.002$^{***}$ & 0.003$^{***}$ & 0.002$^{***}$ & 0.001$^{***}$ & 0.002$^{***}$ & 0.005$^{***}$ & 0.002$^{***}$ & 0.002$^{***}$ & 0.002$^{***}$ \\ 
+  & (0.0004) & (0.001) & (0.001) & (0.001) & (0.0003) & (0.0002) & (0.0003) & (0.001) & (0.0004) & (0.0004) & (0.0004) \\ 
+  ROA & 0.013$^{***}$ & 0.013$^{***}$ & 0.013$^{***}$ & 0.013$^{***}$ & 0.008$^{***}$ & 0.006$^{***}$ & 0.007$^{***}$ & 0.021$^{***}$ & 0.010$^{***}$ & 0.009$^{***}$ & 0.010$^{***}$ \\ 
+  & (0.002) & (0.002) & (0.002) & (0.002) & (0.002) & (0.001) & (0.001) & (0.003) & (0.002) & (0.002) & (0.002) \\ 
  \hline \\[-1.8ex] 
 Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
 Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
-Observations & 108,271 & 15,122 & 15,122 & 15,122 & 9,676 & 77,040 & 77,147 & 20,659 & 93,030 & 93,030 & 93,030 \\ 
-Adjusted R$^{2}$ & 0.261 & 0.374 & 0.393 & 0.314 & 0.383 & 0.368 & 0.362 & 0.487 & 0.317 & 0.318 & 0.318 \\ 
+Observations & 110,998 & 15,532 & 15,532 & 15,532 & 9,965 & 79,095 & 79,208 & 21,017 & 95,241 & 95,241 & 95,241 \\ 
+Adjusted R$^{2}$ & 0.265 & 0.382 & 0.400 & 0.323 & 0.386 & 0.371 & 0.366 & 0.493 & 0.320 & 0.321 & 0.321 \\ 
 \hline 
 \hline \\[-1.8ex] 
 \multicolumn{12}{r}{} \\ 
@@ -393,85 +393,85 @@ In addition to information asymmetry measures, the control variables in Panel B 
 In addition to inspecting general market-level foreign ownership and breadth measures, I extend the analysis by comparing foreign ownership against institutional ownership for a given stock in a given time. In particular, I define a variable *FOR_TO_INST_OWN* which is a measure of the annual average of the firm's shares held by foreign institutions at the end of each quarter divided by the firm's shares held by total institutions at the end of each quarter. This enables me to examine whether foreign institutional shareholders have stronger or weaker dislike of information intensive stocks than institutional shareholders in general. Similarly, I define a variable *FOR_TO_INST_BREADTH* which is a measure of the annual average of the number of the firm's distinct foreign institutional shareholders at the end of each quarter divided by the number of the firm's of distinct institutional shareholders at the end of each quarter. I test the dependent variables with the same panel regression models as in Table \ref{table_h1_base}. Table \ref{table_h1_for_to_inst} reports the results.
 
 
-``` {r, results='asis'}
-# library(tidyverse)
-# library(stargazer)
-# library(lfe)
-# library(kableExtra)
-# library(starpolishr)
-# 
-# baseline_regression_raw <- read_rds("results/baseline_regression_raw.rds")
-# 
-# baseline_regression <- baseline_regression_raw %>%
-#   gather(ia_measure_name, ia_measure, BA_SPREAD:VCV_TO) %>%
-#   gather(dep_measure_name, dep_measure, FOR_TO_INST_OWN) %>%
-#   filter_all(all_vars(!is.na(.))) %>%
-#   group_by(dep_measure_name, ia_measure_name) %>%
-#   nest()
-# 
-# baseline_regression2 <- baseline_regression_raw %>%
-#   gather(ia_measure_name, ia_measure, BA_SPREAD:VCV_TO) %>%
-#   gather(dep_measure_name, dep_measure, FOR_TO_INST_BREADTH) %>%
-#   filter_all(all_vars(!is.na(.))) %>%
-#   group_by(dep_measure_name, ia_measure_name) %>%
-#   nest()
-# 
-# rnm <- function(df, ia_meas, dep_meas) {
-#   rnm_list <- set_names(c("ia_measure", "dep_measure"), syms(c(ia_meas, dep_meas)))
-#   rename(df, !!!rnm_list)
-# }
-# 
-# model_function <- function(df, ia_meas, dep_meas) {
-#   f <- dep_measure ~ ia_measure + BM_RATIO + LEVERAGE +
-#     ROA |year + sic_code|0|year + sic_code
-#   f[[2]] <- sym(dep_meas)
-#   f[[3]][[2]][[2]][[2]][[2]][[2]][[2]] <- sym(ia_meas)
-#   felm(f, data = df)
-# }
-# 
-# baseline_names <- mutate(baseline_regression,
-#                          data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
-#                          model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
-# 
-# baseline_names2 <- mutate(baseline_regression2,
-#                          data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
-#                          model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
-# 
-# star1 <-  stargazer(baseline_names$model,
-#            header = F,
-#            column.labels =c("FOR\\_TO\\_INST\\_OWN"),
-#            label = "table_h1_for_to_inst",
-#            dep.var.labels.include = F,
-#            notes.label = "",
-#            notes.append = F,
-#            notes = "",
-#            column.separate = c(11),
-#            omit.stat = c("ser", "rsq"),
-#            font.size = "tiny",
-#            no.space = T,
-#            add.lines = list(c("Industry fixed effects", rep("Yes", times = 11)),
-#                             c("Year fixed effects", rep("Yes", times = 11))),
-#            title = "Panel regression analysis of foreign-to-institution ownership and breadth ratios", type = "latex")
-# 
-#  star2 <- stargazer(baseline_names2$model,
-#            header = F,
-#            column.labels =c("FOR\\_TO\\_INST\\_BREADTH"),
-#            notes.label = "",
-#            notes.append = F,
-#            notes = "",
-#            dep.var.labels.include = F,
-#            omit.stat = c("ser", "rsq"),
-#            font.size = "tiny",
-#            no.space = T,
-#            add.lines = list(c("Industry fixed effects", rep("Yes", times = 11)),
-#                             c("Year fixed effects", rep("Yes", times = 11))),
-#            title = "Panel regression analysis of foreign-to-institution breadth ratio ", type = "latex")
-# 
-# a <- star_panel(star1, star2,
-#                         panel.names = c("Foreign-to-institution ownership ratio", "Foreign-to-institution breadth ratio"), same.summary.stats = F)
-# 
-# 
-# starpolishr::star_tex_write(a, file = "my_tex_file3.tex", headers = TRUE)
+``` {r, results='asis', message = FALSE, warning=FALSE, eval = FALSE}
+library(tidyverse)
+library(stargazer)
+library(lfe)
+library(kableExtra)
+library(starpolishr)
+
+baseline_regression_raw <- read_rds("results/baseline_regression_raw.rds")
+
+baseline_regression <- baseline_regression_raw %>%
+  gather(ia_measure_name, ia_measure, BA_SPREAD:VCV_TO) %>%
+  gather(dep_measure_name, dep_measure, FOR_TO_INST_OWN) %>%
+  filter_all(all_vars(!is.na(.))) %>%
+  group_by(dep_measure_name, ia_measure_name) %>%
+  nest()
+
+baseline_regression2 <- baseline_regression_raw %>%
+  gather(ia_measure_name, ia_measure, BA_SPREAD:VCV_TO) %>%
+  gather(dep_measure_name, dep_measure, FOR_TO_INST_BREADTH) %>%
+  filter_all(all_vars(!is.na(.))) %>%
+  group_by(dep_measure_name, ia_measure_name) %>%
+  nest()
+
+rnm <- function(df, ia_meas, dep_meas) {
+  rnm_list <- set_names(c("ia_measure", "dep_measure"), syms(c(ia_meas, dep_meas)))
+  rename(df, !!!rnm_list)
+}
+
+model_function <- function(df, ia_meas, dep_meas) {
+  f <- dep_measure ~ ia_measure + BM_RATIO + LEVERAGE +
+    ROA |year + sic_code|0|year + sic_code
+  f[[2]] <- sym(dep_meas)
+  f[[3]][[2]][[2]][[2]][[2]][[2]][[2]] <- sym(ia_meas)
+  felm(f, data = df)
+}
+
+baseline_names <- mutate(baseline_regression,
+                         data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
+                         model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
+
+baseline_names2 <- mutate(baseline_regression2,
+                         data_named = pmap(list(data, ia_measure_name, dep_measure_name), rnm),
+                         model = pmap(list(data_named, ia_measure_name, dep_measure_name), model_function))
+
+star1 <-  stargazer(baseline_names$model,
+           header = F,
+           column.labels =c("FOR\\_TO\\_INST\\_OWN"),
+           label = "table_h1_for_to_inst",
+           dep.var.labels.include = F,
+           notes.label = "",
+           notes.append = F,
+           notes = "",
+           column.separate = c(11),
+           omit.stat = c("ser", "rsq"),
+           font.size = "tiny",
+           no.space = T,
+           add.lines = list(c("Industry fixed effects", rep("Yes", times = 11)),
+                            c("Year fixed effects", rep("Yes", times = 11))),
+           title = "Panel regression analysis of foreign-to-institution ownership and breadth ratios", type = "latex")
+
+ star2 <- stargazer(baseline_names2$model,
+           header = F,
+           column.labels =c("FOR\\_TO\\_INST\\_BREADTH"),
+           notes.label = "",
+           notes.append = F,
+           notes = "",
+           dep.var.labels.include = F,
+           omit.stat = c("ser", "rsq"),
+           font.size = "tiny",
+           no.space = T,
+           add.lines = list(c("Industry fixed effects", rep("Yes", times = 11)),
+                            c("Year fixed effects", rep("Yes", times = 11))),
+           title = "Panel regression analysis of foreign-to-institution breadth ratio ", type = "latex")
+
+a <- star_panel(star1, star2,
+                        panel.names = c("Foreign-to-institution ownership ratio", "Foreign-to-institution breadth ratio"), same.summary.stats = F)
+
+
+starpolishr::star_tex_write(a, file = "my_tex_file3.tex", headers = TRUE)
 
 ```
 
@@ -495,37 +495,37 @@ In addition to inspecting general market-level foreign ownership and breadth mea
  \\[-1.5ex]
  BA\_SPREAD & $-$0.002 &  &  &  &  &  &  &  &  &  &  \\ 
   & (0.002) &  &  &  &  &  &  &  &  &  &  \\ 
-  PIN\_DY &  & $-$0.013 &  &  &  &  &  &  &  &  &  \\ 
+  PIN\_DY &  & $-$0.011 &  &  &  &  &  &  &  &  &  \\ 
   &  & (0.040) &  &  &  &  &  &  &  &  &  \\ 
-  PIN\_DY\_ADJ &  &  & $-$0.030 &  &  &  &  &  &  &  &  \\ 
-  &  &  & (0.047) &  &  &  &  &  &  &  &  \\ 
-  PSOS\_DY &  &  &  & $-$0.0004 &  &  &  &  &  &  &  \\ 
+  PIN\_DY\_ADJ &  &  & $-$0.026 &  &  &  &  &  &  &  &  \\ 
+  &  &  & (0.048) &  &  &  &  &  &  &  &  \\ 
+  PSOS\_DY &  &  &  & $-$0.001 &  &  &  &  &  &  &  \\ 
   &  &  &  & (0.021) &  &  &  &  &  &  &  \\ 
-  PIN\_EHO &  &  &  &  & 0.056 &  &  &  &  &  &  \\ 
-  &  &  &  &  & (0.068) &  &  &  &  &  &  \\ 
-  PIN\_BHL &  &  &  &  &  & $-$0.029 &  &  &  &  &  \\ 
-  &  &  &  &  &  & (0.020) &  &  &  &  &  \\ 
+  PIN\_EHO &  &  &  &  & 0.054 &  &  &  &  &  &  \\ 
+  &  &  &  &  & (0.066) &  &  &  &  &  &  \\ 
+  PIN\_BHL &  &  &  &  &  & $-$0.030 &  &  &  &  &  \\ 
+  &  &  &  &  &  & (0.019) &  &  &  &  &  \\ 
   PIN\_BH &  &  &  &  &  &  & $-$0.032 &  &  &  &  \\ 
   &  &  &  &  &  &  & (0.028) &  &  &  &  \\ 
-  MIA &  &  &  &  &  &  &  & $-$0.054$^{***}$ &  &  &  \\ 
+  MIA &  &  &  &  &  &  &  & $-$0.056$^{***}$ &  &  &  \\ 
   &  &  &  &  &  &  &  & (0.012) &  &  &  \\ 
   VCV\_USD &  &  &  &  &  &  &  &  & $-$0.007$^{***}$ &  &  \\ 
   &  &  &  &  &  &  &  &  & (0.002) &  &  \\ 
-  VCV\_MKT &  &  &  &  &  &  &  &  &  & $-$0.006$^{***}$ &  \\ 
+  VCV\_MKT &  &  &  &  &  &  &  &  &  & $-$0.007$^{***}$ &  \\ 
   &  &  &  &  &  &  &  &  &  & (0.002) &  \\ 
   VCV\_TO &  &  &  &  &  &  &  &  &  &  & $-$0.009$^{***}$ \\ 
   &  &  &  &  &  &  &  &  &  &  & (0.002) \\ 
-  BM\_RATIO & $-$0.011$^{***}$ & $-$0.007$^{***}$ & $-$0.006$^{***}$ & $-$0.007$^{**}$ & $-$0.008$^{***}$ & $-$0.011$^{***}$ & $-$0.010$^{***}$ & 0.003 & $-$0.010$^{***}$ & $-$0.010$^{***}$ & $-$0.009$^{***}$ \\ 
+  BM\_RATIO & $-$0.011$^{***}$ & $-$0.006$^{***}$ & $-$0.006$^{***}$ & $-$0.007$^{**}$ & $-$0.009$^{***}$ & $-$0.011$^{***}$ & $-$0.010$^{***}$ & 0.004 & $-$0.010$^{***}$ & $-$0.010$^{***}$ & $-$0.010$^{***}$ \\ 
   & (0.002) & (0.002) & (0.002) & (0.003) & (0.002) & (0.002) & (0.002) & (0.003) & (0.002) & (0.002) & (0.002) \\ 
-  LEVERAGE & 0.010$^{*}$ & $-$0.005 & $-$0.005 & $-$0.005 & $-$0.006 & 0.002 & 0.002 & $-$0.001 & 0.008 & 0.008 & 0.008 \\ 
-  & (0.006) & (0.005) & (0.005) & (0.005) & (0.006) & (0.006) & (0.006) & (0.010) & (0.007) & (0.007) & (0.007) \\ 
-  ROA & 0.006 & $-$0.035 & $-$0.036 & $-$0.033 & $-$0.046 & $-$0.043$^{***}$ & $-$0.045$^{***}$ & $-$0.030 & $-$0.022 & $-$0.022 & $-$0.022 \\ 
-  & (0.024) & (0.034) & (0.035) & (0.034) & (0.048) & (0.015) & (0.015) & (0.032) & (0.023) & (0.023) & (0.023) \\ 
-\cline{2-12} \\[-2.0ex]
+  LEVERAGE & $-$0.002 & 0.0004 & 0.00003 & 0.001 & $-$0.002 & $-$0.005 & $-$0.004 & 0.006 & $-$0.004 & $-$0.004 & $-$0.004 \\ 
+  & (0.005) & (0.004) & (0.004) & (0.004) & (0.006) & (0.005) & (0.005) & (0.007) & (0.005) & (0.005) & (0.005) \\ 
+  ROA & 0.006 & $-$0.030 & $-$0.031 & $-$0.028 & $-$0.043 & $-$0.044$^{***}$ & $-$0.046$^{***}$ & $-$0.029 & $-$0.024 & $-$0.023 & $-$0.024 \\ 
+  & (0.025) & (0.037) & (0.038) & (0.038) & (0.050) & (0.015) & (0.015) & (0.033) & (0.023) & (0.023) & (0.024) \\ 
+ \hline \\[-1.8ex] 
 Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
 Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
-Observations & 108,271 & 15,122 & 15,122 & 15,122 & 9,676 & 77,040 & 77,147 & 20,659 & 93,030 & 93,030 & 93,030 \\ 
-Adjusted R$^{2}$ & 0.095 & 0.089 & 0.090 & 0.089 & 0.102 & 0.097 & 0.096 & 0.218 & 0.108 & 0.108 & 0.109 \\ 
+Observations & 110,998 & 15,532 & 15,532 & 15,532 & 9,965 & 79,095 & 79,208 & 21,017 & 95,241 & 95,241 & 95,241 \\ 
+Adjusted R$^{2}$ & 0.095 & 0.088 & 0.088 & 0.087 & 0.100 & 0.098 & 0.096 & 0.219 & 0.109 & 0.109 & 0.110 \\
 \\[-1.83ex] 
  & \multicolumn{11}{c}{\textit{Dependent variable:}} \\ 
 \cline{2-12} 
@@ -535,21 +535,21 @@ Adjusted R$^{2}$ & 0.095 & 0.089 & 0.090 & 0.089 & 0.102 & 0.097 & 0.096 & 0.218
 \\[-2.0ex] \multicolumn{12}{@{} l}{Panel B: Foreign-to-institution breadth ratio}
  \\
  \\[-1.5ex]
- BA\_SPREAD & $-$0.002 &  &  &  &  &  &  &  &  &  &  \\ 
+BA\_SPREAD & $-$0.002 &  &  &  &  &  &  &  &  &  &  \\ 
   & (0.002) &  &  &  &  &  &  &  &  &  &  \\ 
-  PIN\_DY &  & 0.079$^{**}$ &  &  &  &  &  &  &  &  &  \\ 
+  PIN\_DY &  & 0.081$^{**}$ &  &  &  &  &  &  &  &  &  \\ 
   &  & (0.033) &  &  &  &  &  &  &  &  &  \\ 
-  PIN\_DY\_ADJ &  &  & 0.090$^{**}$ &  &  &  &  &  &  &  &  \\ 
+  PIN\_DY\_ADJ &  &  & 0.092$^{**}$ &  &  &  &  &  &  &  &  \\ 
   &  &  & (0.038) &  &  &  &  &  &  &  &  \\ 
-  PSOS\_DY &  &  &  & 0.046$^{**}$ &  &  &  &  &  &  &  \\ 
+  PSOS\_DY &  &  &  & 0.047$^{**}$ &  &  &  &  &  &  &  \\ 
   &  &  &  & (0.019) &  &  &  &  &  &  &  \\ 
   PIN\_EHO &  &  &  &  & 0.167$^{***}$ &  &  &  &  &  &  \\ 
   &  &  &  &  & (0.054) &  &  &  &  &  &  \\ 
-  PIN\_BHL &  &  &  &  &  & 0.012 &  &  &  &  &  \\ 
+  PIN\_BHL &  &  &  &  &  & 0.013 &  &  &  &  &  \\ 
   &  &  &  &  &  & (0.019) &  &  &  &  &  \\ 
-  PIN\_BH &  &  &  &  &  &  & 0.037 &  &  &  &  \\ 
+  PIN\_BH &  &  &  &  &  &  & 0.038 &  &  &  &  \\ 
   &  &  &  &  &  &  & (0.030) &  &  &  &  \\ 
-  MIA &  &  &  &  &  &  &  & $-$0.023$^{***}$ &  &  &  \\ 
+  MIA &  &  &  &  &  &  &  & $-$0.025$^{***}$ &  &  &  \\ 
   &  &  &  &  &  &  &  & (0.009) &  &  &  \\ 
   VCV\_USD &  &  &  &  &  &  &  &  & $-$0.005$^{*}$ &  &  \\ 
   &  &  &  &  &  &  &  &  & (0.003) &  &  \\ 
@@ -557,17 +557,17 @@ Adjusted R$^{2}$ & 0.095 & 0.089 & 0.090 & 0.089 & 0.102 & 0.097 & 0.096 & 0.218
   &  &  &  &  &  &  &  &  &  & (0.003) &  \\ 
   VCV\_TO &  &  &  &  &  &  &  &  &  &  & $-$0.006$^{*}$ \\ 
   &  &  &  &  &  &  &  &  &  &  & (0.003) \\ 
-  BM\_RATIO & $-$0.005$^{**}$ & 0.002 & 0.003 & 0.004$^{*}$ & $-$0.001 & $-$0.001 & $-$0.003$^{*}$ & 0.003$^{**}$ & $-$0.005$^{***}$ & $-$0.005$^{***}$ & $-$0.005$^{***}$ \\ 
-  & (0.003) & (0.002) & (0.002) & (0.002) & (0.002) & (0.002) & (0.002) & (0.001) & (0.002) & (0.002) & (0.002) \\ 
-  LEVERAGE & 0.015$^{***}$ & $-$0.003 & $-$0.004 & $-$0.004 & $-$0.005 & 0.002 & 0.003 & 0.014$^{**}$ & 0.015$^{***}$ & 0.015$^{***}$ & 0.015$^{***}$ \\ 
-  & (0.006) & (0.004) & (0.004) & (0.004) & (0.005) & (0.004) & (0.004) & (0.006) & (0.005) & (0.005) & (0.005) \\ 
-  ROA & 0.004 & $-$0.052$^{**}$ & $-$0.056$^{**}$ & $-$0.052$^{*}$ & $-$0.050 & $-$0.047$^{***}$ & $-$0.042$^{***}$ & $-$0.002 & $-$0.017 & $-$0.017 & $-$0.016 \\ 
-  & (0.026) & (0.027) & (0.028) & (0.027) & (0.039) & (0.015) & (0.014) & (0.020) & (0.019) & (0.019) & (0.020) \\ 
+  BM\_RATIO & $-$0.005$^{*}$ & 0.002 & 0.002 & 0.004 & $-$0.002 & $-$0.001 & $-$0.003$^{*}$ & 0.004$^{**}$ & $-$0.005$^{***}$ & $-$0.005$^{***}$ & $-$0.004$^{***}$ \\ 
+  & (0.003) & (0.002) & (0.002) & (0.002) & (0.002) & (0.002) & (0.002) & (0.002) & (0.002) & (0.002) & (0.002) \\ 
+  LEVERAGE & 0.004 & 0.002 & 0.002 & 0.001 & $-$0.003 & $-$0.001 & $-$0.001 & 0.014$^{***}$ & 0.003 & 0.003 & 0.003 \\ 
+  & (0.004) & (0.003) & (0.004) & (0.004) & (0.004) & (0.003) & (0.003) & (0.005) & (0.004) & (0.004) & (0.004) \\ 
+  ROA & 0.003 & $-$0.054$^{*}$ & $-$0.058$^{*}$ & $-$0.054$^{*}$ & $-$0.055 & $-$0.050$^{***}$ & $-$0.045$^{***}$ & 0.0002 & $-$0.019 & $-$0.018 & $-$0.017 \\ 
+  & (0.026) & (0.029) & (0.030) & (0.030) & (0.041) & (0.015) & (0.014) & (0.022) & (0.019) & (0.019) & (0.020) \\ 
  \hline \\[-1.8ex] 
 Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
 Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
-Observations & 108,271 & 15,122 & 15,122 & 15,122 & 9,676 & 77,040 & 77,147 & 20,659 & 93,030 & 93,030 & 93,030 \\ 
-Adjusted R$^{2}$ & 0.118 & 0.120 & 0.114 & 0.113 & 0.169 & 0.097 & 0.098 & 0.448 & 0.150 & 0.150 & 0.151 \\
+Observations & 110,998 & 15,532 & 15,532 & 15,532 & 9,965 & 79,095 & 79,208 & 21,017 & 95,241 & 95,241 & 95,241 \\ 
+Adjusted R$^{2}$ & 0.117 & 0.118 & 0.111 & 0.111 & 0.168 & 0.097 & 0.098 & 0.448 & 0.150 & 0.150 & 0.151 \\
 \hline 
 \hline \\[-1.8ex] 
 \multicolumn{12}{r}{} \\ 
@@ -628,7 +628,7 @@ ggsave("figures/parallel_trend1b.pdf",
 \centering
 \includegraphics[width = \linewidth]{figures/parallel_trend1a.pdf}
 \includegraphics[width = \linewidth]{figures/parallel_trend1b.pdf}
-\caption[Foreign ownership between the treatment and control groups around brokerage closures]{\textbf{Foreign ownership and breadth between the treatment and control groups around brokerage closures}\newline\scriptsize This figure presents the evolution of the mean of firm-quarter observations of foreign ownership (\textit{FOR\_OWN}) in Panel A and foreign breadth (\textit{FOR\_BREADTH}) in Panel B during the twelve quarters (i.e. three years) before and after an exogenous decrease in analyst coverage due to the 22 distinct brokerage closures listed by Kelly and Ljungqvist (2012). I impose a three-month gap over the events so that foreign ownership estimates are from quarters -13:-1 and 1:13, with the brokerage closure occurring in the quarter 0. The sample consists of 1603 distinct treated firms and 3521 control firms. Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). The firm-quarter observations of foreign ownership and foreign breadth are winsorized at the top and bottom 1\%. Sample period: 1997- 2010. Sources: CRSP, COMPUSTAT, 13F and IBES.}
+\caption[Foreign ownership and breadth between the treatment and control groups around brokerage closures]{\textbf{Foreign ownership and breadth between the treatment and control groups around brokerage closures}\newline\scriptsize This figure presents the evolution of the mean of firm-quarter observations of foreign ownership (\textit{FOR\_OWN}) in Panel A and foreign breadth (\textit{FOR\_BREADTH}) in Panel B during the twelve quarters (i.e. three years) before and after an exogenous decrease in analyst coverage due to the 22 distinct brokerage closures listed by Kelly and Ljungqvist (2012). I impose a three-month gap over the events so that foreign ownership estimates are from quarters -13:-1 and 1:13, with the brokerage closure occurring in the quarter 0. The sample consists of 1603 distinct treated firms and 3521 control firms. Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). The firm-quarter observations of foreign ownership and foreign breadth are winsorized at the top and bottom 1\%. Sample period: 1997- 2010. Sources: CRSP, COMPUSTAT, 13F and IBES.}
 \label{fig_parallel_trend1}
 \end{figure}
 
@@ -638,7 +638,7 @@ Panel B provides the results of the evolution of foreign breadth between the tre
 
 I extend the analysis of the quasi-experimental setting by implementing a difference-in-differences regression analysis of foreign ownership and foreign breadth. Compared to results in Figure \ref{fig_parallel_trend1}, this enables me to control for other variables and include year and industry fixed effects. 
 
-``` {r, results='asis', echo = FALSE, eval=TRUE}
+``` {r, results='asis', echo = FALSE, eval=FALSE}
 
 library(tidyverse)
 library(lfe)
@@ -698,7 +698,7 @@ stargazer(did_list, title = "\\textbf{Difference-in-differences regression analy
 \renewcommand\arraystretch{0.89}
 \captionsetup{width=1.0\linewidth}
 \begin{table}[htbp]
-  \caption[Difference-in-differences regression analysis of foreign ownership and breadth]{\textbf{Difference-in-differences regression analysis of foreign ownership and breadth}\newline\small This table reports the results of the difference-in-differences regression analysis of foreign ownership and breadth. The sample consists of 1601 distinct treated stocks and 3500 distinct control firms, . The explanatory variables are \textit{AFTER}} 
+  \caption[Difference-in-differences regression analysis of foreign ownership and breadth]{\textbf{Difference-in-differences regression analysis of foreign ownership and breadth}\newline\small This table reports the results of the difference-in-differences regression analysis of foreign ownership and breadth. The sample consists of 1240 distinct treated stocks and 3500 distinct control firms, . The explanatory variables are \textit{AFTER}} 
   \label{table_h2_1} 
 \small 
 \begin{tabular}{@{\extracolsep{5pt}}lcccccc} 
@@ -710,30 +710,30 @@ stargazer(did_list, title = "\\textbf{Difference-in-differences regression analy
  & -1:1 years & -2:2 years & -3:3 years & -1:1 years & -2:2 years & -3:3 years \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6)\\ 
 \hline \\[-1.8ex] 
- AFTER & 0.009$^{***}$ & 0.013$^{***}$ & 0.017$^{***}$ & 0.001$^{**}$ & 0.001$^{***}$ & 0.002$^{***}$ \\ 
+ AFTER & 0.009$^{***}$ & 0.013$^{***}$ & 0.016$^{***}$ & 0.001$^{**}$ & 0.001$^{***}$ & 0.002$^{***}$ \\ 
   & (0.003) & (0.004) & (0.003) & (0.0003) & (0.0002) & (0.0002) \\ 
-  TREATED & 0.003$^{***}$ & 0.002$^{*}$ & 0.001 & 0.002$^{***}$ & 0.002$^{***}$ & 0.002$^{***}$ \\ 
+  TREATED & 0.003$^{***}$ & 0.002$^{***}$ & 0.002$^{***}$ & 0.002$^{***}$ & 0.002$^{***}$ & 0.002$^{***}$ \\ 
   & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) \\ 
-  AFTER\texttimes TREATED & $-$0.002$^{**}$ & $-$0.002 & $-$0.001 & $-$0.0002$^{*}$ & $-$0.00002 & 0.0003 \\ 
-  & (0.001) & (0.002) & (0.001) & (0.0001) & (0.0002) & (0.0003) \\ 
-  BM\_RATIO & $-$0.002 & $-$0.001 & $-$0.003$^{*}$ & $-$0.002$^{***}$ & $-$0.003$^{***}$ & $-$0.004$^{***}$ \\ 
-  & (0.003) & (0.003) & (0.002) & (0.0003) & (0.001) & (0.001) \\ 
-  LEVERAGE & 0.006 & 0.005 & 0.005 & 0.003$^{***}$ & 0.004$^{***}$ & 0.004$^{***}$ \\ 
-  & (0.004) & (0.003) & (0.004) & (0.001) & (0.001) & (0.001) \\ 
-  ROA & 0.094$^{***}$ & 0.095$^{***}$ & 0.104$^{***}$ & 0.020$^{**}$ & 0.023$^{**}$ & 0.033$^{***}$ \\ 
-  & (0.034) & (0.024) & (0.035) & (0.009) & (0.011) & (0.012) \\ 
+  AFTER\texttimes TREATED & $-$0.002$^{**}$ & $-$0.002 & $-$0.001 & $-$0.0002$^{*}$ & 0.00001 & 0.0002 \\ 
+  & (0.001) & (0.002) & (0.001) & (0.0001) & (0.0002) & (0.0002) \\ 
+  BM\_RATIO & $-$0.002 & $-$0.002 & $-$0.003$^{**}$ & $-$0.002$^{***}$ & $-$0.003$^{***}$ & $-$0.003$^{***}$ \\ 
+  & (0.003) & (0.002) & (0.002) & (0.0003) & (0.0004) & (0.0004) \\ 
+  LEVERAGE & 0.006 & 0.007$^{**}$ & 0.008$^{**}$ & 0.003$^{***}$ & 0.004$^{***}$ & 0.004$^{***}$ \\ 
+  & (0.004) & (0.003) & (0.003) & (0.001) & (0.001) & (0.001) \\ 
+  ROA & 0.095$^{***}$ & 0.111$^{***}$ & 0.122$^{***}$ & 0.020$^{**}$ & 0.025$^{***}$ & 0.026$^{***}$ \\ 
+  & (0.034) & (0.029) & (0.030) & (0.009) & (0.009) & (0.008) \\ 
  \hline \\[-1.8ex] 
 Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
 Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
-Observations & 17,144 & 14,325 & 11,862 & 17,144 & 14,325 & 11,862 \\ 
-Adjusted R$^{2}$ & 0.342 & 0.389 & 0.416 & 0.390 & 0.432 & 0.458 \\ 
+Observations & 17,138 & 18,067 & 18,560 & 17,138 & 18,067 & 18,560 \\ 
+Adjusted R$^{2}$ & 0.342 & 0.363 & 0.362 & 0.390 & 0.402 & 0.411 \\ 
 \hline 
 \hline \\[-1.8ex] 
 \multicolumn{7}{r}{} \\ 
 \end{tabular} 
 \end{table}
 
-``` {r parallel_trend2, message = FALSE, warning=FALSE, eval=TRUE}
+``` {r parallel_trend2, message = FALSE, warning=FALSE, eval=FALSE}
 
 library(tidyverse)
 
@@ -770,8 +770,16 @@ ggsave("figures/parallel_trend2b.pdf",
   
 ```
 
+\begin{figure}[!htb]
+\centering
+\includegraphics[width = \linewidth]{figures/parallel_trend2a.pdf}
+\includegraphics[width = \linewidth]{figures/parallel_trend2b.pdf}
+\caption[Foreign-to-institution ownership and breadth between the treatment and control groups around brokerage closures]{\textbf{Foreign-to-institution ownership and breadth between the treatment and control groups around brokerage closures}\newline\scriptsize This figure presents the evolution of the mean of firm-quarter observations of foreign ownership (\textit{FOR\_OWN}) in Panel A and foreign breadth (\textit{FOR\_BREADTH}) in Panel B during the twelve quarters (i.e. three years) before and after an exogenous decrease in analyst coverage due to the 22 distinct brokerage closures listed by Kelly and Ljungqvist (2012). I impose a three-month gap over the events so that foreign ownership estimates are from quarters -13:-1 and 1:13, with the brokerage closure occurring in the quarter 0. The sample consists of 1603 distinct treated firms and 3521 control firms. Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). The firm-quarter observations of foreign ownership and foreign breadth are winsorized at the top and bottom 1\%. Sample period: 1997- 2010. Sources: CRSP, COMPUSTAT, 13F and IBES.}
+\label{fig_parallel_trend2}
+\end{figure}
 
-``` {r, results='asis', echo = FALSE, eval=TRUE}
+
+``` {r, results='asis', echo = FALSE, eval=FALSE}
 
 library(tidyverse)
 library(lfe)
@@ -827,6 +835,45 @@ stargazer(did_list, title = "\\textbf{Difference-in-differences regression analy
           no.space = T)
 
 ```
+
+\renewcommand\arraystretch{0.89}
+\captionsetup{width=1.0\linewidth}
+\begin{table}[htbp]
+  \caption[Difference-in-differences regression analysis of foreign-to-institution ownership and breadth]{\textbf{Difference-in-differences regression analysis of foreign-to-institution ownership and breadth}\newline\small This table reports the results of the difference-in-differences regression analysis of foreign-to-institution ownership and breadth. The sample consists of 1601 distinct treated stocks and 3500 distinct control firms, . The explanatory variables are \textit{AFTER}} 
+  \label{table_h2_2} 
+\small 
+\begin{tabular}{@{\extracolsep{5pt}}lcccccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{6}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-7} 
+\\[-1.8ex] & \multicolumn{3}{c}{FOR\_TO\_INST\_OWN} & \multicolumn{3}{c}{FOR\_TO\_INST\_BREADTH} \\ 
+ & -1:1 years & -2:2 years & -3:3 years & -1:1 years & -2:2 years & -3:3 years \\ 
+\\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6)\\ 
+\hline \\[-1.8ex] 
+ AFTER & 0.007$^{**}$ & 0.010$^{*}$ & 0.013$^{***}$ & 0.004 & 0.009$^{*}$ & 0.014$^{***}$ \\ 
+  & (0.004) & (0.006) & (0.004) & (0.005) & (0.005) & (0.005) \\ 
+  TREATED & 0.0001 & $-$0.0005 & $-$0.001 & $-$0.002 & $-$0.001 & $-$0.001 \\ 
+  & (0.002) & (0.002) & (0.002) & (0.002) & (0.002) & (0.001) \\ 
+  AFTER\texttimes TREATED & $-$0.003$^{***}$ & $-$0.002 & $-$0.001 & 0.001 & 0.001 & 0.001 \\ 
+  & (0.001) & (0.002) & (0.002) & (0.001) & (0.002) & (0.002) \\ 
+  BM\_RATIO & 0.001 & 0.001 & $-$0.002 & 0.002 & $-$0.0002 & $-$0.001 \\ 
+  & (0.003) & (0.002) & (0.002) & (0.001) & (0.002) & (0.002) \\ 
+  LEVERAGE & $-$0.006 & $-$0.003 & $-$0.002 & 0.003 & 0.003 & 0.003 \\ 
+  & (0.008) & (0.007) & (0.007) & (0.005) & (0.005) & (0.005) \\ 
+  ROA & $-$0.00003 & 0.014 & 0.016 & $-$0.046$^{**}$ & $-$0.040 & $-$0.041 \\ 
+  & (0.047) & (0.038) & (0.037) & (0.020) & (0.025) & (0.028) \\ 
+ \hline \\[-1.8ex] 
+Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
+Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
+Observations & 17,138 & 18,067 & 18,560 & 17,138 & 18,067 & 18,560 \\ 
+Adjusted R$^{2}$ & 0.235 & 0.255 & 0.249 & 0.322 & 0.340 & 0.352 \\ 
+\hline 
+\hline \\[-1.8ex] 
+\multicolumn{7}{r}{} \\ 
+\end{tabular} 
+\end{table}
+
 
 \newpage
 
