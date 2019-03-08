@@ -18,7 +18,8 @@ crsp_quarter_stock <- read_rds("data/crsp_quarter_stock.rds") %>%
   distinct(permno, quarter_date, .keep_all = T)
 
 compustat_quarter <- read_rds("data/compustat_quarter_final.rds") %>% 
-  mutate(datadate = ceiling_date(datadate, unit = "month") - days(1)) # sanity check
+  mutate(datadate = ceiling_date(datadate, unit = "month") - days(1)) %>%  # sanity check
+  distinct(permno, datadate, .keep_all = T) # only distinct permno-datadate values
 
 information_asymmetry_measures <- read_rds("data/information_asymmetry_measures.rds")
 
