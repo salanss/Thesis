@@ -10,6 +10,7 @@ library(starpolishr)
 
 baseline_regression_raw <- read_rds("data/baseline_regression_raw.rds") %>% 
   select(permno:sic_code, bid_ask_spread, everything()) %>% 
+  select(-debt) %>% 
   rename(FOR_OWN = foreign_own, FOR_TO_INST_OWN = 
            foreign_own2, FOR_BREADTH = foreign_breadth,  FOR_TO_INST_BREADTH = foreign_breadth2,
          INST_OWN = institutional_own, INST_BREADTH = institutional_breadth, BA_SPREAD = bid_ask_spread,
@@ -79,7 +80,7 @@ baseline_regression <- baseline_regression_raw %>%
 
 baseline_regression2 <- baseline_regression_raw %>% 
   gather(ia_measure_name, ia_measure, BA_SPREAD:VCV_TO) %>% 
-  gather(dep_measure_name, dep_measure, FOR_OWN_TO_INST) %>% 
+  gather(dep_measure_name, dep_measure, FOR_TO_INST_OWN) %>% 
   filter_all(all_vars(!is.na(.))) %>% 
   group_by(dep_measure_name, ia_measure_name) %>% 
   nest()
@@ -260,8 +261,7 @@ did_regression_matched_temp1 <- did_regression %>%
   filter(after == 0) %>% # match only based on before values during [-3;0] years
   group_by(permno, event_date, treated) %>% 
   summarise_at(columns_for_summarise, mean) %>% 
-  ungroup() %>% 
-  mutate(n = row_number())
+  ungroup()
 
 events <- did_regression_raw %>% select(event_date) %>% distinct() 
 
@@ -296,18 +296,8 @@ did_regression_matched_raw <- did_regression_matched_temp2 %>%
 
 write_rds(did_regression_matched_raw, "results/did_regression_matched_raw.rds")
 
-a <- read_rds("results/did_regression_matched_raw.rds")
-
-b <- a %>%
-  group_by(treated) %>% 
-  summarise(n = n_distinct(permno))
-
 did_regression_matched1 <- did_regression_matched_raw %>% 
   filter(quarter_index %in% c(-4:4)) %>% 
-  group_by(permno, event_date, TREATED) %>% 
-  mutate(n = n_distinct(quarter_index[quarter_index <= 4 & quarter_index >= -4])) %>% 
-  ungroup() %>% 
-  filter(n == 8) %>% 
   group_by(permno, event_date, year, TREATED, AFTER, sic_code) %>% 
   summarise_at(columns_for_summarise, mean) %>% 
   ungroup() %>% 
