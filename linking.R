@@ -123,7 +123,9 @@ did_temp1 <- ibes_did %>%
   left_join(crsp_compustat_keys, by = c("cusip" = "ncusip")) %>% 
   filter(!is.na(permno)) %>% 
   arrange(permno) %>% 
-  filter(!is.na(quarter_index))
+  filter(!is.na(quarter_index)) %>% 
+  select(-cusip) %>% 
+  distinct(event_date, permno, treated, after, quarter_index, .keep_all = T)
 
 # retrieve data from thirteenf_crsp_compustat-data and do the interval filtering [-15;-3] and [3;15] for all measures
 # and link that to ibes firms (treated, control, before and after events)
