@@ -250,11 +250,11 @@ columns_for_summarise <- c("FOR_OWN", "FOR_TO_INST_OWN", "FOR_BREADTH",
 
 did_regression <- did_regression_raw %>% 
   filter(quarter_index %in% c(-12:12)) %>% 
+  group_by(permno, event_date, year, treated, after) %>% 
+  mutate(sic_code = last(sic_code)) %>%
+  ungroup() %>% 
   group_by(permno, event_date, year, treated, after, sic_code) %>% 
   summarise_at(columns_for_summarise, mean) %>% 
-  ungroup() %>% 
-  group_by(permno, event_date, treated, after) %>% 
-  mutate(sic_code = last(sic_code)) %>% 
   ungroup()
 
 did_regression_matched_temp1 <- did_regression %>% 
@@ -298,11 +298,11 @@ write_rds(did_regression_matched_raw, "results/did_regression_matched_raw.rds")
 
 did_regression_matched1 <- did_regression_matched_raw %>% 
   filter(quarter_index %in% c(-4:4)) %>% 
-  group_by(permno, event_date, year, TREATED, AFTER, sic_code) %>% 
-  summarise_at(columns_for_summarise, mean) %>% 
-  ungroup() %>% 
   group_by(permno, event_date, TREATED, AFTER) %>% 
   mutate(sic_code = last(sic_code)) %>% 
+  ungroup() %>% 
+  group_by(permno, event_date, year, TREATED, AFTER, sic_code) %>% 
+  summarise_at(columns_for_summarise, mean) %>% 
   ungroup()
 
 write_rds(did_regression_matched1, "results/did_regression_matched1.rds")
