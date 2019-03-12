@@ -1,0 +1,85 @@
+---
+output:
+  md_document:
+    variant: markdown
+mainfont: Times New Roman
+bibliography: Bibliography.bib
+biblio-style: chicagoa
+link-citations: yes
+fontsize: 12pt
+geometry: [top=3cm, bottom=2.5cm, right=2.5cm, left=3cm]
+header-includes:
+- \usepackage{setspace}
+- \doublespacing
+- \usepackage{dcolumn}
+- \usepackage{rotating}
+- \usepackage{booktabs}
+- \usepackage{longtable}
+- \usepackage{array}
+- \usepackage{multirow}
+- \usepackage{wrapfig}
+- \usepackage{float}
+- \usepackage{colortbl}
+- \usepackage{pdflscape}
+- \usepackage{tabu}
+- \usepackage{threeparttable}
+- \usepackage{threeparttablex}
+- \usepackage[normalem]{ulem}
+- \usepackage{makecell}
+- \usepackage{xcolor}
+- \usepackage{caption}
+- \usepackage{tabularx}
+- \usepackage{hhline}
+- \usepackage{fixltx2e}
+- \usepackage{hyperref}
+- \usepackage{tocloft}
+---
+
+\captionsetup{labelfont=bf}
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE)
+
+```
+
+
+``` {r parallel_trend1_facet, message = FALSE, warning=FALSE, eval=FALSE}
+
+library(tidyverse)
+
+parallel_trend1_facet <- read_rds("results/did_regression_matched_raw.rds") %>% 
+  mutate(TREATED = if_else(TREATED == 1, "Treated", "Control")) %>% 
+  group_by(event_date) %>% 
+  mutate(sample = n()) %>% 
+  ungroup() %>% 
+  mutate(facet_column = paste(event_date, ": N=", sample)) %>% 
+  group_by(TREATED, quarter_index, facet_column) %>% 
+  summarise(FOR_OWN = mean(FOR_OWN),
+            FOR_BREADTH = mean(FOR_BREADTH)) %>% 
+  ungroup()
+
+ggplot(parallel_trend1_facet, aes(quarter_index, FOR_OWN, color = TREATED)) +
+  ggtitle("") +
+  geom_line() +
+  labs(x = "Event quarter", color = "") +
+  geom_vline(xintercept=0) +
+  theme_classic() +
+  theme(plot.title = element_text(size=9, face="italic")) +
+  scale_color_grey(start = 0.55, end = 0) +
+  facet_wrap(. ~ facet_column, ncol = 4)
+
+ggsave("figures/parallel_trend1a_facet.pdf", 
+       width = 8, height = 8, units = "in")
+  
+```
+
+\section{Appendix}\label{appendix}
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width = \linewidth]{figures/parallel_trend1a_facet.pdf}
+\caption[Foreign ownership and breadth between the treatment and control groups around brokerage closures]{\textbf{Foreign ownership and breadth between the treatment and control groups around brokerage closures}\newline\scriptsize This figure presents the evolution of the mean of firm-quarter observations of foreign ownership (\textit{FOR\_OWN}) in Panel A and foreign breadth (\textit{FOR\_BREADTH}) in Panel B during the twelve quarters (i.e. three years) before and after an exogenous decrease in analyst coverage due to the 22 distinct brokerage closures listed by Kelly and Ljungqvist (2012). I impose a three-month gap over the events so that foreign ownership estimates are from quarters -13:-1 and 1:13, with the brokerage closure occurring in the quarter 0. The sample consists of 1240 distinct treated firms and 2524 control firms. Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). The firm-quarter observations of foreign ownership and foreign breadth are winsorized at the top and bottom 1\%. Sample period: 1997- 2010. Sources: CRSP, COMPUSTAT, 13F and IBES.}
+\label{fig_parallel_trend1_facet}
+\end{figure}
