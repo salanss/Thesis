@@ -5,6 +5,8 @@ output:
     latex_engine: xelatex
     citation_package: natbib
     keep_tex: true
+    includes:
+      after_body: appendix.md
 mainfont: Times New Roman
 bibliography: Bibliography.bib
 biblio-style: chicagoa
@@ -37,6 +39,7 @@ header-includes:
 - \usepackage{fixltx2e}
 - \usepackage{hyperref}
 - \usepackage{tocloft}
+- \usepackage{appendix}
 ---
 
 \captionsetup{labelfont=bf}
@@ -587,7 +590,7 @@ Control variables in Panel B provide mixed results. *BM_RATIO* is negative in se
 
 In this section, I report the general results of the quasi-natural experiment. First, I examine the evolution of the dependent variables foreign ownership (*FOR_OWN*) and foreign breadth (*FOR_BREADTH*) between the treatment and control groups in the twelve quarters (i.e. three years) before and after the brokerage closures that act as exogenous shock events of information asymmetry. The treated firms are firms that lose an analyst due to these brokerage closures. The control firms are selected using propensity score matching that matches each treatment firm to three control firms (nearest neighbor) on multiple covariates (twelve quarter before the event): logarithm of market capitalization, book-to-market ratio and analyst coverage. Figure \ref{fig_parallel_trend1} presents the results.
 
-``` {r parallel_trend1, message = FALSE, warning=FALSE, eval=FALSE}
+``` {r parallel_trend1, message = FALSE, warning=FALSE, eval=TRUE}
 
 library(tidyverse)
 
@@ -882,27 +885,27 @@ Adjusted R$^{2}$ & 0.227 & 0.243 & 0.238 & 0.323 & 0.337 & 0.350 \\
 
 ## 6.3 The results of the quasi-natural experiment with low analyst coverage and institutional ownership
 
-``` {r, results='asis', echo = FALSE, eval=FALSE}
+``` {r, results='asis', echo = FALSE, eval=TRUE}
 
 library(tidyverse)
 library(lfe)
 library(stargazer)
 
 did_regression_matched1 <- read_rds("results/did_regression_matched1.rds") %>%
-  mutate(AFTER_TREATED = TREATED * AFTER) %>% 
-  group_by(event_date) %>% 
+  #group_by(event_date) %>% 
+  mutate(AFTER_TREATED = TREATED * AFTER) %>%
   mutate(inst_percent = percent_rank(INST_OWN),
-         analyst_percent = percent_rank(ANALYST_COVERAGE)) %>% 
+         analyst_percent = percent_rank(ANALYST_COVERAGE)) %>%
   ungroup()
 
 did_regression_matched1_low_inst <- did_regression_matched1 %>% 
-  filter(inst_percent <= 0.2)
+  filter(analyst_percent <= 0.33)
 
 did_regression_matched1_low_analyst <- did_regression_matched1 %>% 
-  filter(analyst_percent <= 0.2)
+  filter(analyst_percent >= 0.33 & analyst_percent <= 0.66)
 
 did_regression_matched1_low_both <- did_regression_matched1 %>% 
-  filter(inst_percent <= 0.2 & analyst_percent <= 0.2)
+  filter(analyst_percent >= 0.66 & analyst_percent <= 1)
 
 did_model1 <- felm(FOR_OWN ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO +
                      LEVERAGE + ROA|year + sic_code|0|year + sic_code,
@@ -943,7 +946,7 @@ stargazer(did_list, title = "\\textbf{Difference-in-differences regression analy
           notes.label = "",
           notes.append = F,
           notes = "",
-          font.size = "small",
+          font.size = "scriptsize",
           no.space = T)
 
 ```
@@ -988,6 +991,6 @@ Adjusted R$^{2}$ & 0.356 & 0.377 & 0.318 & 0.400 & 0.472 & 0.539 \\
 
 \newpage
 
-\addcontentsline{toc}{section}{References}
 
 # References
+
