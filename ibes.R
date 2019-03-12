@@ -81,13 +81,13 @@ detail_temp4 <- detail_temp3 %>%
                                     # otherwise endogenous "stoppings", i.e. decided to stop covering
 
 treated_firms_temp1 <- detail_temp4 %>% 
-  group_by(cusip, event_date) %>% 
+  group_by(cusip, event_date, brokerage_name) %>% 
   summarise(treated = 1,
             after= 0) %>% 
   ungroup()
 
 treated_firms_temp2 <- detail_temp4 %>% 
-  group_by(cusip, event_date) %>% 
+  group_by(cusip, event_date, brokerage_name) %>% 
   summarise(treated = 1,
             after= 1) %>% 
   ungroup()
@@ -110,8 +110,8 @@ all_firms_temp1 <- detail_temp3 %>%
   summarise(k = 1) %>% 
   ungroup()
 
-closures_temp1 <- events %>%
-  select(event_date) %>% 
+closures_temp1 <- closures %>%
+  select(event_date, brokerage_name) %>% 
   mutate(k = 1)
 
 all_firms <- inner_join(all_firms_temp1, closures_temp1, by = 'k') %>% 
@@ -121,7 +121,7 @@ all_firms <- inner_join(all_firms_temp1, closures_temp1, by = 'k') %>%
 control_firms_temp1 <- all_firms %>% 
   mutate(yearbefore = announce_date %within% interval(event_date %m-% months(12), event_date)) %>%
   filter(yearbefore == T) %>% # potential controls have to be similarly actively covered year before
-  anti_join(treated_firms, by = c("cusip", "event_date"))
+  anti_join(treated_firms, by = c("cusip", "event_date", "brokerage_name"))
 
 control_firms_temp2 <- control_firms_temp1 %>%
   select(-announce_date, -yearbefore) %>% 
