@@ -207,24 +207,16 @@ write_rds(baseline_regression_summary, "results/baseline_regression_summary.rds"
 
 baseline_development <- baseline_regression_raw %>% 
   group_by(year) %>% 
-  summarise(inst_percentage = mean(inst_percentage),
-            foreign_inst_percentage = mean(foreign_inst_percentage),
-            foreign_inst_percentage2 = mean(foreign_inst_percentage2, na.rm = T),
-            foreign_breadth = mean(foreign_breadth),
-            foreign_breadth2 = mean(foreign_breadth2, na.rm = T),
-            domestic_inst_percentage = mean(domestic_inst_percentage)) %>% 
+  summarise(FOR_OWN = mean(FOR_OWN),
+            INST_OWN = mean(INST_OWN)) %>% 
   ungroup()
 
 write_rds(baseline_development, "results/baseline_development.rds")
 
-# ggplot(baseline_development, aes(year)) + 
-#   #geom_line(aes(y = inst_percentage, colour = "inst_percentage")) + 
-#   geom_line(aes(y = foreign_inst_percentage, colour = "foreign_inst_percentage")) +
-#   geom_line(aes(y = foreign_inst_percentage2, colour = "foreign_inst_percentage2")) +
-#   geom_line(aes(y = foreign_breadth, colour = "foreign_breadth")) +
-#   geom_line(aes(y = foreign_breadth2, colour = "foreign_breadth2")) +
-#   #geom_line(aes(y = domestic_inst_percentage, colour = "domestic_inst_percentage")) + 
-#   theme_classic()
+ggplot(baseline_development, aes(year)) +
+  #geom_line(aes(y = INST_OWN, colour = "INST_OWN")) +
+  geom_line(aes(y = FOR_OWN, colour = "FOR_OWN")) +
+  theme_classic()
 
 ## difference-in-differences regressions (did)
 
