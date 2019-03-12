@@ -65,7 +65,8 @@ thirteenf_crsp <- bind_rows(thirteenf_crsp_merged, thirteenf_crsp_not_merged) %>
          foreign_breadth2 = if_else(institutional_numbers <= 0, NA_real_, 
                                     foreign_institutional_numbers / institutional_numbers)) %>% 
   mutate_at(vars(institutional_ownership_shares:domestic_shares_transient), 
-            funs(if_else(shares_outstanding_adjusted <= 0, NA_real_, ./shares_outstanding_adjusted))) %>% 
+            funs(if_else(shares_outstanding_adjusted <= 0, NA_real_,
+                         if_else(./shares_outstanding_adjusted > 1, 1, ./shares_outstanding_adjusted)))) %>% 
   rename_at(vars(institutional_ownership_shares:domestic_shares_transient), 
             funs(stringr::str_replace_all(., 
                                           c("shares" = "own", "_ownership" = "", 
@@ -87,7 +88,7 @@ thirteenf_crsp_compustat_temp <- thirteenf_crsp %>%
   arrange(report_date, permno)
 
 thirteenf_crsp_compustat <- thirteenf_crsp_compustat_temp %>% 
-  mutate_at(vars(institutional_own:domestic_breadth_transient, book_to_market:tobin_q, log_market_cap),
+  mutate_at(vars(book_to_market:tobin_q, log_market_cap),
             funs(Winsorize(., probs = c(0.01, 0.99), na.rm = T))) %>%
   select(permno, report_date, year, sic_code, institutional_own:domestic_breadth_transient,
          log_market_cap, book_to_market:tobin_q) %>% 
@@ -246,3 +247,16 @@ did <- did_temp1 %>%
   distinct()
 
 write_rds(did, "data/did_regression_raw.rds")
+
+baseline_development <- thirteenf_crsp %>% 
+  select(report_date, institutional_own, foreign_own) %>% 
+  filter_all(all_vars(!is.na(.))) %>% 
+  group_by(report_date) %>% 
+  summarise(FOR_OWN = mean(foreign_own),
+            INST_OWN = mean(institutional_own)) %>% 
+  ungroup()
+
+ggplot(baseline_development, aes(report_date)) +
+  geom_line(aes(y = INST_OWN, colour = "INST_OWN")) +
+  #geom_line(aes(y = FOR_OWN, colour = "FOR_OWN")) +
+  theme_classic()
