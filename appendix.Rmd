@@ -35,7 +35,7 @@ header-includes:
 - \usepackage{tocloft}
 ---
 
-\captionsetup{labelfont=bf}
+\clearpage
 
 ```{r global_options, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, 
