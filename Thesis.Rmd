@@ -40,6 +40,7 @@ header-includes:
 - \usepackage{hyperref}
 - \usepackage{tocloft}
 - \usepackage{appendix}
+- \usepackage{hyperref}
 ---
 
 \captionsetup{labelfont=bf}
@@ -57,10 +58,10 @@ knitr::opts_chunk$set(echo = FALSE,
 \renewcommand{\cftfigfont}{Figure }
 \renewcommand{\cfttabfont}{Table }
 \tableofcontents
-\newpage
+\clearpage
 \listoftables
 \listoffigures
-\newpage
+\clearpage
 \pagenumbering{arabic}
 
 # 1 Introduction
@@ -133,11 +134,19 @@ I obtain data for information asymmetry measures of annual firm-level PIN (*PIN~
 
 I gather control variables data from COMPUSTAT quarter fundamentals and CRSP monthly stock files. To make CRSP and COMPUSTAT variables comparable, I convert monthly CRSP data to quarter level by taking the last non-missing estimate for a stock in each quarter of the given variable. Using CRSP, I compute *LOG_MARKET_CAP* by multiplying market price of each stock by the shares outstanding at the end of each quarter, converting it to an annual average and taking the logarithm of this measure. Accounting related control variables are gathered from COMPUSTAT. *BM_RATIO* is an annual average of the stock's book value of equity divided by the market value at the end of each quarter. *LEVERAGE* is an annual average of the stock's total debt divided by total assets at the end of each quarter. *ROA* is an annual average of the stock's net income divided by total assets at the end of each quarter. I use SIC codes from CRSP to capture the corresponding industry for each stock.
 
-## 4.3 The quasi-natural experiment
+## 4.3 Identification of the quasi-natural experiment
 
-For the quasi-natural experiment, I limit the time period of the original sample to 1997-2011 to cover the time period of 22 distinct brokerage closures from June 2000 until January 2008 listed in Appendix A of Kelly and Ljungqvist (2012) plus three years of pre- and post-treatment periods. I identify stocks that lose an analyst covering the firm because of the brokerage closures which provide a source of exogenous variation for the analyst coverage. The list is matched with an analyst coverage data retrieved from the Institutional Brokers’ Estimate System (IBES) detail file. 
+For the quasi-natural experiment, I limit the time period of the baseline sample to 1997-2010 to cover the time period of 22 distinct brokerage closures from June 2000 until November 2007 listed in Appendix A of @kelly2012testing plus three years of pre- and
+post-treatment periods. I identify stocks that lose an analyst covering the firm because of the brokerage closures which provide a source of exogenous variation for the analyst coverage. The list is matched with an analyst coverage data retrieved from the Institutional Brokers’ Estimate System (IBES) detail file. 
 
-To construct the sample of treated firms, I filter out firms that are not covered by analysts employed in the brokerage houses listed in Appendix A of @kelly2012testing. Following @derrien2013real, I require for the treated firms to be covered by an analyst at least one year before the disappearance dates to filter out firms that are not actively covered by the analysts. Furthermore, following @kelly2012testing and @derrien2013real, I only retain firms for which the analyst has not “stopped” his estimate before the corresponding broker disappearance date to eliminate the potential endogeneity problem. For instance, if an analyst terminates the coverage of firms unrelated to the brokerage closure before the disappearance date (e.g. anticipating changes in corporate policies), the decision is endogenous. I collect the data for stopped estimates from IBES stop file. Since the brokerage closure dates listed by @kelly2012testing and corresponding disappearance dates do not coincide completely, I follow @derrien2013real, @he2013dark and @lof2018asymmetric to construct a three-month gap before and after the event date. As a result, I estimate the dependent variables and explanatory variables for each stock in a given quarter by subtracting (adding) three months from the event date and finding the previous (next) available quarter value for before and after measures, respectively. Moreover, I define the variable *ANALYST_COVERAGE* as the number of distinct analysts covering a firm in a given quarter.
+The identification strategy of the quasi-experimental setting by @kelly2012testing is based on argument that in addtion to genuine financial distress reasons, brokerage firms respond to adverse changes in revenue making by downsizing or closing their research operations. Hence, the decisions to close research department is driven by business strategy rather than by the characteristics of the firms covered by their analysts. Therefore, the brokerage closure events provide a robust quasi-experimental setting of exogenous reductions in analyst coverage. @kelly2012testing include also events of the brokerage mergers which involve a thorough data processing to eliminate endogeneity problems. Dealing with these endogeneity issues is crucial in order to use merger events as a source of exogenous variation. Due to data availability and potential endogeneity issues, I limit my sample of events to include only brokerage closures.
+
+
+To construct the sample of treated firms, I filter out firms that are not covered by analysts employed in the brokerage houses listed in Appendix A of @kelly2012testing. Following @derrien2013real, I require for the treated firms to be covered by an analyst at least one year before the disappearance dates to filter out firms that are not actively covered by the analysts. Furthermore, following @kelly2012testing and @derrien2013real, I only retain firms for which the analyst has not “stopped” his estimate before the corresponding broker disappearance date to eliminate the potential endogeneity problem. For instance, if an analyst terminates the coverage of firms unrelated to the brokerage closure before the disappearance date (e.g. anticipating changes in corporate policies), the decision is endogenous. I collect the data for stopped estimates from IBES stop file. 
+
+I start the identification of control firms by gathering all distinct firms from IBES detail file. To make groups comparable, I require similarly the potential control firms to be covered by an analyst one year before the disappearance dates to keep only actively covered firms. Then, based on the treatment group, I identify firms that, for a given event, are not affected by the reductions in analyst coverage.
+
+Since the brokerage closure dates listed by @kelly2012testing and corresponding disappearance dates do not coincide completely, I follow @derrien2013real, @he2013dark and @lof2018asymmetric to construct a three-month gap before and after the event date. As a result, I estimate the dependent variables and explanatory variables for each stock in a given quarter by subtracting (adding) three months from the event date and finding the previous (next) available quarter value for before and after measures, respectively. Moreover, I define the variable *ANALYST_COVERAGE* as the number of distinct analysts covering a firm in a given quarter.
 
 
 
@@ -637,7 +646,7 @@ ggsave("figures/parallel_trend1b.pdf",
 \centering
 \includegraphics[width = \linewidth]{figures/parallel_trend1a.pdf}
 \includegraphics[width = \linewidth]{figures/parallel_trend1b.pdf}
-\caption[Foreign ownership and breadth between the treatment and control groups around brokerage closures]{\textbf{Foreign ownership and breadth between the treatment and control groups around brokerage closures}\newline\scriptsize This figure presents the evolution of the mean of firm-quarter observations of foreign ownership (\textit{FOR\_OWN}) in Panel A and foreign breadth (\textit{FOR\_BREADTH}) in Panel B during the twelve quarters (i.e. three years) before and after an exogenous decrease in analyst coverage due to the 22 distinct brokerage closures listed by Kelly and Ljungqvist (2012). I impose a three-month gap over the events so that foreign ownership estimates are from quarters -13:-1 and 1:13, with the brokerage closure occurring in the quarter 0. The sample consists of 1240 distinct treated firms and 2524 control firms. Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). The firm-quarter observations of foreign ownership and foreign breadth are winsorized at the top and bottom 1\%. Sample period: 1997- 2010. Sources: CRSP, COMPUSTAT, 13F and IBES.}
+\caption[Foreign ownership and breadth between the treatment and control groups around brokerage closures]{\textbf{Foreign ownership and breadth between the treatment and control groups around brokerage closures}\newline\scriptsize This figure presents the evolution of the mean of firm-quarter observations of foreign ownership (\textit{FOR\_OWN}) in Panel A and foreign breadth (\textit{FOR\_BREADTH}) in Panel B during the twelve quarters (i.e. three years) before and after an exogenous decrease in analyst coverage due to the 22 distinct brokerage closures listed by \citet{kelly2012testing}. I impose a three-month gap over the events so that foreign ownership estimates are from quarters -13:-1 and 1:13, with the brokerage closure occurring in the quarter 0. The sample consists of 1240 distinct treated firms and 2524 control firms. Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). The firm-quarter observations of foreign ownership and foreign breadth are winsorized at the top and bottom 1\%. Sample period: 1997- 2010. Sources: CRSP, COMPUSTAT, 13F and IBES.}
 \label{fig_parallel_trend1}
 \end{figure}
 
@@ -707,9 +716,9 @@ stargazer(did_list, title = "\\textbf{Difference-in-differences regression analy
 <!-- \renewcommand\arraystretch{1} -->
 \captionsetup{width=1.0\linewidth}
 \begin{table}[htbp]
-  \caption[Difference-in-differences regression analysis of foreign ownership and breadth]{\textbf{Difference-in-differences regression analysis of foreign ownership and breadth}\newline\scriptsize This table reports the results of the difference-in-differences regression analysis of foreign ownership and breadth. The treatment group is determined as stocks that lose a covering analyst due to 22 distinct brokerage closures listed by Kelly and Ljungqvist (2012). Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). The sample consists of 2097 (1240 distinct) treated stocks and 5965 (2524 distinct) control firms. For all 8067 stocks, I compute averages of the dependent variables in columns (1) and (4) over the quarters [-5,-1] and over the quarters [1,5], with the brokerage closure occurring in quarter 0, resulting in a total observations of 16124. In columns (2) and  (5) the dependent variables are computed over the quarters [-9,-1] and [1,9] and in columns (3) and (6) over the quarters [-13,-1] and [1,13]. The explanatory variables are dummy variables indicating the treatment group (\textit{TREATED}), the post-event period (\textit{AFTER}) and their interaction (\textit{AFTER}\texttimes\textit{TREATED}). The control variables are \textit{BM\_RATIO} (pre- and post-event average of the firm-quarter observations of book equity divided by market capitalization), \textit{LEVERAGE} (pre- and post-event average of the firm-quarter observations of debt divided by total assets) and \textit{ROA} (pre- and post-event average the firm-quarter observations of net income divided by total assets. I include industry and year fixed effects in all regressions. Standard errors are clustered by the industry and year level and reported in parentheses. Foreign ownership and breadth and control variables are winsorized at the top and bottom 1\%. *, ** and *** denote the statistical significance at the 10\%, 5\% and 1\% level, respectively. Sample: 1997-2010. Sources: CRSP, COMPUSTAT, 13F and IBES.} 
+  \caption[Difference-in-differences regression analysis of foreign ownership and breadth]{\textbf{Difference-in-differences regression analysis of foreign ownership and breadth}\newline\scriptsize This table reports the results of the difference-in-differences regression analysis of foreign ownership and breadth. The treatment group is determined as stocks that lose a covering analyst due to 22 distinct brokerage closures listed by \citet{kelly2012testing}. Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). The sample consists of 2097 (1240 distinct) treated stocks and 5965 (2524 distinct) control firms. For all 8067 stocks, I compute averages of the dependent variables in columns (1) and (4) over the quarters [-5,-1] and over the quarters [1,5], with the brokerage closure occurring in quarter 0, resulting in a total observations of 16124. In columns (2) and  (5) the dependent variables are computed over the quarters [-9,-1] and [1,9] and in columns (3) and (6) over the quarters [-13,-1] and [1,13]. The explanatory variables are dummy variables indicating the treatment group (\textit{TREATED}), the post-event period (\textit{AFTER}) and their interaction (\textit{AFTER}\texttimes\textit{TREATED}). The control variables are \textit{BM\_RATIO} (pre- and post-event average of the firm-quarter observations of book equity divided by market capitalization), \textit{LEVERAGE} (pre- and post-event average of the firm-quarter observations of debt divided by total assets) and \textit{ROA} (pre- and post-event average the firm-quarter observations of net income divided by total assets. I include industry and year fixed effects in all regressions. Standard errors are clustered by the industry and year level and reported in parentheses. Foreign ownership and breadth and control variables are winsorized at the top and bottom 1\%. *, ** and *** denote the statistical significance at the 10\%, 5\% and 1\% level, respectively. Sample: 1997-2010. Sources: CRSP, COMPUSTAT, 13F and IBES.} 
   \label{table_h2_1} 
-\small
+\small 
 \begin{tabular}{@{\extracolsep{5pt}}lcccccc} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
@@ -719,23 +728,23 @@ stargazer(did_list, title = "\\textbf{Difference-in-differences regression analy
  & -1:1 years & -2:2 years & -3:3 years & -1:1 years & -2:2 years & -3:3 years \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6)\\ 
 \hline \\[-1.8ex] 
- AFTER & 0.009$^{**}$ & 0.013$^{***}$ & 0.016$^{***}$ & 0.001$^{***}$ & 0.001$^{***}$ & 0.002$^{***}$ \\ 
-  & (0.003) & (0.004) & (0.003) & (0.0003) & (0.0002) & (0.0002) \\ 
-  TREATED & 0.002$^{***}$ & 0.002$^{**}$ & 0.002$^{*}$ & 0.002$^{**}$ & 0.001$^{**}$ & 0.001$^{**}$ \\ 
+ AFTER & 0.008$^{***}$ & 0.012$^{***}$ & 0.016$^{***}$ & 0.001$^{**}$ & 0.001$^{***}$ & 0.002$^{***}$ \\ 
+  & (0.003) & (0.005) & (0.003) & (0.0003) & (0.0003) & (0.0003) \\ 
+  TREATED & 0.002$^{***}$ & 0.002$^{**}$ & 0.002$^{*}$ & 0.001$^{**}$ & 0.001$^{**}$ & 0.001$^{**}$ \\ 
   & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) \\ 
-  AFTER\texttimes TREATED & $-$0.002 & $-$0.002 & $-$0.001 & $-$0.0002$^{**}$ & 0.00002 & 0.0002 \\ 
-  & (0.002) & (0.002) & (0.002) & (0.0001) & (0.0002) & (0.0002) \\ 
-  BM\_RATIO & $-$0.002 & $-$0.002 & $-$0.003$^{**}$ & $-$0.003$^{***}$ & $-$0.003$^{***}$ & $-$0.003$^{***}$ \\ 
-  & (0.003) & (0.002) & (0.001) & (0.0003) & (0.0004) & (0.0003) \\ 
-  LEVERAGE & 0.006 & 0.007$^{*}$ & 0.008$^{**}$ & 0.003$^{***}$ & 0.004$^{***}$ & 0.004$^{***}$ \\ 
-  & (0.004) & (0.004) & (0.003) & (0.001) & (0.001) & (0.001) \\ 
-  ROA & 0.076$^{**}$ & 0.090$^{***}$ & 0.097$^{***}$ & 0.020$^{*}$ & 0.025$^{***}$ & 0.026$^{***}$ \\ 
-  & (0.031) & (0.028) & (0.027) & (0.010) & (0.009) & (0.009) \\ 
+  AFTER\texttimes TREATED & $-$0.002 & $-$0.001 & $-$0.001 & $-$0.0002 & 0.00001 & 0.0002 \\ 
+  & (0.001) & (0.002) & (0.001) & (0.0001) & (0.0002) & (0.0003) \\ 
+  BM\_RATIO & $-$0.006$^{***}$ & $-$0.005$^{***}$ & $-$0.006$^{***}$ & $-$0.002$^{***}$ & $-$0.002$^{***}$ & $-$0.003$^{***}$ \\ 
+  & (0.002) & (0.002) & (0.001) & (0.0003) & (0.0003) & (0.0003) \\ 
+  LEVERAGE & 0.006$^{*}$ & 0.007$^{***}$ & 0.008$^{***}$ & 0.004$^{***}$ & 0.004$^{***}$ & 0.004$^{***}$ \\ 
+  & (0.003) & (0.003) & (0.003) & (0.001) & (0.001) & (0.001) \\ 
+  ROA & 0.097$^{***}$ & 0.112$^{***}$ & 0.122$^{***}$ & 0.020$^{**}$ & 0.025$^{***}$ & 0.026$^{***}$ \\ 
+  & (0.029) & (0.023) & (0.022) & (0.009) & (0.008) & (0.007) \\ 
  \hline \\[-1.8ex] 
 Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
 Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
-Observations & 16,254 & 18,293 & 18,793 & 16,254 & 18,293 & 18,793 \\ 
-Adjusted R$^{2}$ & 0.273 & 0.252 & 0.242 & 0.377 & 0.393 & 0.403 \\ 
+Observations & 18,778 & 21,251 & 21,880 & 18,778 & 21,251 & 21,880 \\ 
+Adjusted R$^{2}$ & 0.272 & 0.255 & 0.268 & 0.385 & 0.401 & 0.408 \\ 
 \hline 
 \hline \\[-1.8ex] 
 \multicolumn{7}{r}{} \\ 
@@ -789,7 +798,7 @@ ggsave("figures/parallel_trend2b.pdf",
 \centering
 \includegraphics[width = \linewidth]{figures/parallel_trend2a.pdf}
 \includegraphics[width = \linewidth]{figures/parallel_trend2b.pdf}
-\caption[Foreign-to-institution ownership and breadth between the treatment and control groups around brokerage closures]{\textbf{Foreign-to-institution ownership and breadth between the treatment and control groups around brokerage closures}\newline\scriptsize This figure presents the evolution of the mean of firm-quarter observations of foreign ownership (\textit{FOR\_OWN}) in Panel A and foreign breadth (\textit{FOR\_BREADTH}) in Panel B during the twelve quarters (i.e. three years) before and after an exogenous decrease in analyst coverage due to the 22 distinct brokerage closures listed by Kelly and Ljungqvist (2012). I impose a three-month gap over the events so that foreign ownership estimates are from quarters -13:-1 and 1:13, with the brokerage closure occurring in the quarter 0. The sample consists of 1603 distinct treated firms and 3521 control firms. Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). The firm-quarter observations of foreign ownership and foreign breadth are winsorized at the top and bottom 1\%. Sample period: 1997- 2010. Sources: CRSP, COMPUSTAT, 13F and IBES.}
+\caption[Foreign-to-institution ownership and breadth between the treatment and control groups around brokerage closures]{\textbf{Foreign-to-institution ownership and breadth between the treatment and control groups around brokerage closures}\newline\scriptsize This figure presents the evolution of the mean of firm-quarter observations of foreign ownership (\textit{FOR\_OWN}) in Panel A and foreign breadth (\textit{FOR\_BREADTH}) in Panel B during the twelve quarters (i.e. three years) before and after an exogenous decrease in analyst coverage due to the 22 distinct brokerage closures listed by \citet{kelly2012testing}. I impose a three-month gap over the events so that foreign ownership estimates are from quarters -13:-1 and 1:13, with the brokerage closure occurring in the quarter 0. The sample consists of 1603 distinct treated firms and 3521 control firms. Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). The firm-quarter observations of foreign ownership and foreign breadth are winsorized at the top and bottom 1\%. Sample period: 1997- 2010. Sources: CRSP, COMPUSTAT, 13F and IBES.}
 \label{fig_parallel_trend2}
 \end{figure}
 
@@ -866,23 +875,23 @@ stargazer(did_list, title = "\\textbf{Difference-in-differences regression analy
  & -1:1 years & -2:2 years & -3:3 years & -1:1 years & -2:2 years & -3:3 years \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6)\\ 
 \hline \\[-1.8ex] 
- AFTER & 0.007$^{**}$ & 0.010$^{*}$ & 0.013$^{***}$ & 0.005 & 0.009$^{**}$ & 0.014$^{***}$ \\ 
+ AFTER & 0.007$^{*}$ & 0.009 & 0.013$^{***}$ & 0.004 & 0.008$^{*}$ & 0.013$^{***}$ \\ 
   & (0.004) & (0.006) & (0.004) & (0.005) & (0.005) & (0.004) \\ 
-  TREATED & 0.0003 & 0.00005 & $-$0.001 & $-$0.001 & $-$0.001 & $-$0.001 \\ 
-  & (0.001) & (0.002) & (0.002) & (0.001) & (0.002) & (0.001) \\ 
-  AFTER\texttimes TREATED & $-$0.003$^{*}$ & $-$0.002 & $-$0.001 & 0.0003 & 0.0005 & 0.001 \\ 
-  & (0.002) & (0.002) & (0.002) & (0.001) & (0.002) & (0.001) \\ 
-  BM\_RATIO & 0.001 & 0.001 & $-$0.002 & 0.001 & $-$0.001 & $-$0.002 \\ 
-  & (0.003) & (0.002) & (0.002) & (0.001) & (0.002) & (0.002) \\ 
-  LEVERAGE & $-$0.007 & $-$0.004 & $-$0.003 & 0.002 & 0.002 & 0.002 \\ 
-  & (0.007) & (0.007) & (0.007) & (0.005) & (0.004) & (0.004) \\ 
-  ROA & $-$0.024 & $-$0.016 & $-$0.016 & $-$0.056$^{***}$ & $-$0.051$^{**}$ & $-$0.054$^{**}$ \\ 
-  & (0.035) & (0.031) & (0.028) & (0.019) & (0.020) & (0.021) \\ 
+  TREATED & $-$0.001 & $-$0.002 & $-$0.002 & $-$0.002 & $-$0.001 & $-$0.002 \\ 
+  & (0.001) & (0.002) & (0.002) & (0.001) & (0.001) & (0.001) \\ 
+  AFTER\texttimes TREATED & $-$0.001 & $-$0.001 & 0.0003 & 0.001 & 0.001 & 0.001 \\ 
+  & (0.002) & (0.003) & (0.002) & (0.002) & (0.002) & (0.002) \\ 
+  BM\_RATIO & $-$0.005$^{**}$ & $-$0.006$^{*}$ & $-$0.008$^{***}$ & 0.001 & $-$0.002 & $-$0.002 \\ 
+  & (0.002) & (0.003) & (0.003) & (0.002) & (0.002) & (0.002) \\ 
+  LEVERAGE & $-$0.006 & $-$0.003 & $-$0.0001 & 0.001 & 0.001 & 0.001 \\ 
+  & (0.006) & (0.006) & (0.006) & (0.004) & (0.003) & (0.003) \\ 
+  ROA & $-$0.034 & $-$0.035$^{*}$ & $-$0.045$^{**}$ & $-$0.065$^{***}$ & $-$0.069$^{***}$ & $-$0.069$^{***}$ \\ 
+  & (0.026) & (0.021) & (0.021) & (0.015) & (0.021) & (0.023) \\ 
  \hline \\[-1.8ex] 
 Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
 Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
-Observations & 16,254 & 18,293 & 18,793 & 16,254 & 18,293 & 18,793 \\ 
-Adjusted R$^{2}$ & 0.234 & 0.259 & 0.255 & 0.331 & 0.347 & 0.361 \\ 
+Observations & 18,778 & 21,251 & 21,880 & 18,778 & 21,251 & 21,880 \\ 
+Adjusted R$^{2}$ & 0.184 & 0.207 & 0.210 & 0.244 & 0.268 & 0.273 \\ 
 \hline 
 \hline \\[-1.8ex] 
 \multicolumn{7}{r}{} \\ 
@@ -919,10 +928,10 @@ did_regression_matched3 <- read_rds("results/did_regression_matched3.rds") %>%
   ungroup()
 
 did_regression_matched1_low_inst <- did_regression_matched1 %>% 
-  filter(inst_percent <= 0.5)
+  filter(inst_percent <= 0.25)
 
 did_regression_matched1_low_analyst <- did_regression_matched1 %>% 
-  filter(inst_percent >= 0.5)
+  filter(inst_percent >= 0.75)
 
 did_regression_matched1_low_both <- did_regression_matched1 %>% 
   filter(inst_percent <= 0.5 & analyst_percent <= 0.25)
@@ -1009,8 +1018,5 @@ Adjusted R$^{2}$ & 0.356 & 0.377 & 0.318 & 0.400 & 0.472 & 0.539 \\
 \end{tabular} 
 \end{table}
 
-\newpage
-
-
-# References
-
+\clearpage
+\addcontentsline{toc}{section}{References}
