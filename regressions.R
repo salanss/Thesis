@@ -222,10 +222,10 @@ ggplot(baseline_development, aes(year)) +
 
 did_regression_raw <- read_rds("data/did_regression_raw.rds") %>% 
   mutate(year = year(event_date)) %>% 
-  group_by(permno, event_date, treated) %>%
-  mutate(n = n_distinct(after)) %>%
-  ungroup() %>% 
-  filter(n > 1) %>%  # require for every permno to have before and after value for each event
+  # group_by(permno, event_date, treated) %>%
+  # mutate(n = n_distinct(after)) %>%
+  # ungroup() %>% 
+  # filter(n > 1) %>%  # require for every permno to have before and after value for each event
   arrange(event_date, quarter_index, treated) %>% 
   rename(FOR_OWN = foreign_own, FOR_TO_INST_OWN = 
            foreign_own2, FOR_BREADTH = foreign_breadth,  FOR_TO_INST_BREADTH = foreign_breadth2,
@@ -282,9 +282,9 @@ did_regression_matched_raw <- did_regression_matched_temp2 %>%
   left_join(did_regression_raw) %>% 
   rename(AFTER = after, TREATED = treated) %>% 
   group_by(permno, event_date, TREATED) %>% 
-  mutate(n = n_distinct(quarter_index[quarter_index <= 4 & quarter_index >= -4])) %>% 
+  mutate(n = n_distinct(quarter_index[quarter_index <= 12 & quarter_index >= -12])) %>% 
   ungroup() %>% 
-  filter(n == 8) 
+  filter(n == 24) 
 
 write_rds(did_regression_matched_raw, "results/did_regression_matched_raw.rds")
 
@@ -301,30 +301,30 @@ write_rds(did_regression_matched1, "results/did_regression_matched1.rds")
 
 did_regression_matched2 <- did_regression_matched_raw %>% 
   filter(quarter_index %in% c(-8:8)) %>% 
-  group_by(permno, event_date, TREATED) %>% 
-  mutate(n = n_distinct(quarter_index[quarter_index <= 4 & quarter_index >= -4])) %>% 
-  ungroup() %>% 
-  filter(n == 8) %>%
-  group_by(permno, event_date, year, TREATED, AFTER, sic_code) %>% 
-  summarise_at(columns_for_summarise, mean) %>% 
-  ungroup() %>% 
+  # group_by(permno, event_date, TREATED) %>% 
+  # mutate(n = n_distinct(quarter_index[quarter_index <= 4 & quarter_index >= -4])) %>% 
+  # ungroup() %>% 
+  # filter(n == 8) %>%
   group_by(permno, event_date, TREATED, AFTER) %>% 
   mutate(sic_code = last(sic_code)) %>% 
+  ungroup() %>% 
+  group_by(permno, event_date, year, TREATED, AFTER, sic_code) %>% 
+  summarise_at(columns_for_summarise, mean) %>% 
   ungroup()
 
 write_rds(did_regression_matched2, "results/did_regression_matched2.rds")
 
 did_regression_matched3 <- did_regression_matched_raw %>% 
   filter(quarter_index %in% c(-12:12)) %>% 
-  group_by(permno, event_date, TREATED) %>% 
-  mutate(n = n_distinct(quarter_index[quarter_index <= 4 & quarter_index >= -4])) %>% 
-  ungroup() %>% 
-  filter(n == 8) %>%
-  group_by(permno, event_date, year, TREATED, AFTER, sic_code) %>% 
-  summarise_at(columns_for_summarise, mean) %>% 
-  ungroup() %>% 
+  # group_by(permno, event_date, TREATED) %>% 
+  # mutate(n = n_distinct(quarter_index[quarter_index <= 4 & quarter_index >= -4])) %>% 
+  # ungroup() %>% 
+  # filter(n == 8) %>%
   group_by(permno, event_date, TREATED, AFTER) %>% 
   mutate(sic_code = last(sic_code)) %>% 
+  ungroup() %>% 
+  group_by(permno, event_date, year, TREATED, AFTER, sic_code) %>% 
+  summarise_at(columns_for_summarise, mean) %>% 
   ungroup()
 
 write_rds(did_regression_matched3, "results/did_regression_matched3.rds")
@@ -337,8 +337,8 @@ write_rds(did_regression_summary, "results/did_regression_summary.rds")
 
 # stargazer(did_regression_summary, title = "DiD summary statistics", out = "DiD_summary.html")
   
-did_model1 <- felm(FOR_OWN ~ AFTER + TREATED + TREATED * AFTER + BM_RATIO + 
-                     LEVERAGE + ROA|year + sic_code|0|year + sic_code, data = did_regression_matched1)
+did_model1 <- felm(ANALYST_COVERAGE ~ AFTER + TREATED + TREATED * AFTER|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched1)
 
 did_model2 <- felm(FOR_OWN ~ AFTER + TREATED + TREATED * AFTER + BM_RATIO + 
                      LEVERAGE + ROA|year + sic_code|0|year + sic_code, data = did_regression_matched2)
@@ -388,14 +388,10 @@ write_rds(did_list, "results/did_list.rds")
 #           out = "DiD H2 results.html")
 
 parallel_trend1 <- did_regression_matched_raw %>% 
-  mutate(treated = if_else(treated == 1, "treated", "control")) %>% 
-  group_by(treated, quarter_index) %>% 
-  summarise(`Foreign ownership` = mean(foreign_inst_percentage),
-            `Foreign ownership2` = mean(foreign_inst_percentage2),
-            `Foreign breadth` = mean(foreign_breadth),
-            `Foreign breadth2` = mean(foreign_breadth2)) %>% 
-  ungroup() %>% 
-  gather(measure_name, measure, `Foreign ownership`:`Foreign breadth2`)
+  mutate(TREATED = if_else(TREATED == 1, "treated", "control")) %>% 
+  group_by(TREATED, quarter_index) %>% 
+  summarise(ANALYST_COVERAGE = mean(ANALYST_COVERAGE)) %>% 
+  ungroup()
 
 `%nin%` = Negate(`%in%`)
 
@@ -429,8 +425,7 @@ parallel_trend2 <- parallel_trend1 %>%
   summarise_all(.funs = funs(mean)) %>% 
   ungroup()
 
-ggplot(parallel_trend1, aes(quarter_index, foreign_breadth_nonquasi, group = treated, color = treated)) +
-  ggtitle("Panel A: Foreign ownership") +
+ggplot(parallel_trend1, aes(quarter_index, ANALYST_COVERAGE, group = TREATED, color = TREATED)) +
   geom_line() +
   labs(x = "Event quarter") +
   geom_vline(xintercept=0) +
