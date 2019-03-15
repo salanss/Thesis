@@ -605,7 +605,7 @@ Control variables in Panel B provide mixed results. *BM_RATIO* is negative in se
 
 In this section, I report the general results of the quasi-natural experiment. First, I examine the evolution of the dependent variables foreign ownership (*FOR_OWN*) and foreign breadth (*FOR_BREADTH*) between the treatment and control groups in the twelve quarters (i.e. three years) before and after the brokerage closures that act as exogenous shock events of information asymmetry. The treated firms are firms that lose an analyst due to these brokerage closures. The control firms are selected using propensity score matching that matches each treatment firm to three control firms (nearest neighbor) on multiple covariates (twelve quarter before the event): logarithm of market capitalization, book-to-market ratio and analyst coverage. Figure \ref{fig_parallel_trend1} presents the results.
 
-``` {r parallel_trend1, message = FALSE, warning=FALSE, eval=FALSE}
+``` {r parallel_trend1, message = FALSE, warning=FALSE, eval=TRUE}
 
 library(tidyverse)
 
@@ -656,7 +656,7 @@ Panel B provides the results of the evolution of foreign breadth between the tre
 
 I extend the analysis of the quasi-experimental setting by implementing a difference-in-differences regression analysis of foreign ownership and foreign breadth. Compared to results in Figure \ref{fig_parallel_trend1}, this enables me to control for other variables and include year and industry fixed effects. Similar to Figure \ref{fig_parallel_trend1}, I identify treatment group as stocks that lose an analyst covering the firm due to the brokerage closures and control firms are matched using the propensity score matching. In addition, I impose a three-month gap before and after the event and therefore I calculate averages of the dependent and control variables over the quarters [-5;-1] and [1;5], [-9;-1] and [1;9] and [-13;-1] and [1;13], with the brokerage closure occurring in the quarter 0. When computing the averages, I require for each stock to have continuous observations of the dependent and control variables at least four quarters before and after the event. The explanatory variables are dummy variables indicating observations in the post-closure period (\textit{AFTER}), in the treatment group (\textit{TREATED}) and their interaction term (\textit{AFTER}\texttimes\textit{TREATED}). Table \ref{table_h2_1} reports the results.
 
-``` {r, results='asis', echo = FALSE, eval=FALSE}
+``` {r, results='asis', echo = FALSE, eval=TRUE}
 
 library(tidyverse)
 library(lfe)
@@ -757,7 +757,7 @@ The results of foreign breadth (*FOR_BREADTH*) are similarly reported in columns
 
 Overall, the results of Table \ref{table_h2_1} give little but not sufficient enough evidence of the negative causal effect of information asymmetry on foreign ownership. Nonetheless, even if there is a negative causal effect, the negative results of the interaction term in columns (1) and (4) implies that the dollar amount of foreign institutional holdings is more strongly affected than the number of foreign institutional investors by the exogenous shocks in asymmetric information.
 
-``` {r parallel_trend2, message = FALSE, warning=FALSE, eval=FALSE}
+``` {r parallel_trend2, message = FALSE, warning=FALSE, eval=TRUE}
 
 library(tidyverse)
 
@@ -803,7 +803,7 @@ ggsave("figures/parallel_trend2b.pdf",
 \end{figure}
 
 
-``` {r, results='asis', echo = FALSE, eval=FALSE}
+``` {r, results='asis', echo = FALSE, eval=TRUE}
 
 library(tidyverse)
 library(lfe)
@@ -928,10 +928,10 @@ did_regression_matched3 <- read_rds("results/did_regression_matched3.rds") %>%
   ungroup()
 
 did_regression_matched1_low_inst <- did_regression_matched1 %>% 
-  filter(inst_percent <= 0.25)
+  filter(analyst_percent <= 0.25)
 
 did_regression_matched1_low_analyst <- did_regression_matched1 %>% 
-  filter(inst_percent >= 0.75)
+  filter(analyst_percent >= 0.75)
 
 did_regression_matched1_low_both <- did_regression_matched1 %>% 
   filter(inst_percent <= 0.5 & analyst_percent <= 0.25)
