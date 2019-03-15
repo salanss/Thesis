@@ -125,7 +125,7 @@ did_temp1 <- ibes_did %>%
   filter(!is.na(permno)) %>% 
   arrange(permno) %>% 
   filter(!is.na(quarter_index)) %>% 
-  select(-cusip) %>% 
+  #select(-cusip) %>% 
   distinct(event_date, permno, treated, after, quarter_index, .keep_all = T)
 
 # retrieve data from thirteenf_crsp_compustat-data and do the interval filtering [-15;-3] and [3;15] for all measures
