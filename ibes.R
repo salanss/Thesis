@@ -139,9 +139,16 @@ control_firms <- bind_rows(control_firms_temp2, control_firms_temp3) %>%
 
 ## identified firms to either treatment group (treated = 1) or control group (treated = 0) for each event date
 
-ibes_did_raw <- bind_rows(treated_firms, control_firms) %>% 
+ibes_did_raw_temp <- bind_rows(treated_firms, control_firms) %>% 
   arrange(cusip, event_date)
 
+quarters <- tibble(quarter_index = c(-12:-1, 1:12),
+                   k = if_else(quarter_index < 0, 1, 2))
+
+ibes_did_raw <- ibes_did_raw_temp %>%
+  mutate(k = if_else(after == 0, 1, 2)) %>% 
+  left_join(quarters, by = "k") %>% 
+  select(-k)
 
 ## total analyst coverage, used for calculating number of distinct analysts
 
@@ -221,10 +228,12 @@ after_val <- map(quarter_index, ~map(events$event_date,
   mutate(after = 1) %>% 
   arrange(cusip, event_date, quarter_index)
 
-vals <- bind_rows(before_val, after_val)
+vals <- bind_rows(before_val, after_val) %>% 
+  select(-after)
 
 ibes_did <- ibes_did_raw %>% 
-  left_join(vals, by = c("cusip", "event_date", "after")) %>% 
-  distinct()
+  left_join(vals, by = c("cusip", "event_date", "quarter_index")) %>% 
+  distinct() %>% 
+  mutate(analyst_coverage =  if_else(is.na(analyst_coverage) == T, 0L, analyst_coverage))
 
 write_rds(ibes_did, "data/ibes_did.rds")
