@@ -4,8 +4,10 @@ library(DescTools)
 
 # baseline linking
 
-thirteenf <- read_rds("data/13f_output.rds") 
+thirteenf <- read_rds("data/13f_output.rds") %>% 
+  filter(report_date >= ymd("1997-06-30"))
 thirteenf_institutionals_quarterly <- read_rds("data/13f_institutionals_quarterly.rds") %>% 
+  filter(report_date >= ymd("1997-06-30")) %>% 
   transmute(report_date,
             total_institutions = institutional_numbers)
 
@@ -126,7 +128,7 @@ did_temp1 <- ibes_did %>%
   arrange(permno) %>% 
   filter(!is.na(quarter_index)) %>% 
   #select(-cusip) %>% 
-  distinct(event_date, permno, treated, after, quarter_index, .keep_all = T)
+  distinct(event_date, brokerage_name, permno, treated, after, quarter_index, .keep_all = T)
 
 # retrieve data from thirteenf_crsp_compustat-data and do the interval filtering [-15;-3] and [3;15] for all measures
 # and link that to ibes firms (treated, control, before and after events)
