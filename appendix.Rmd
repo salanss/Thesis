@@ -12,6 +12,7 @@ header-includes:
 - \usepackage{setspace}
 - \doublespacing
 - \usepackage{dcolumn}
+- \usepackage{amsmath,amsthm}
 - \usepackage{rotating}
 - \usepackage{booktabs}
 - \usepackage{longtable}
@@ -48,13 +49,17 @@ knitr::opts_chunk$set(echo = FALSE,
 ``` {r parallel_trend1_facet, message = FALSE, warning=FALSE, eval=FALSE}
 
 library(tidyverse)
+library(lubridate)
+
+Sys.setlocale("LC_TIME", "English")
 
 parallel_trend1_facet <- read_rds("results/did_regression_matched_raw.rds") %>% 
   mutate(TREATED = if_else(TREATED == 1, "Treated", "Control")) %>% 
-  group_by(event_date) %>% 
+  group_by(event_date, brokerage_name) %>% 
   mutate(sample = n()) %>% 
+  mutate(event_abbr = format(event_date, format = "%Y-%b")) %>% 
   ungroup() %>% 
-  mutate(facet_column = paste(event_date, ": N=", sample)) %>% 
+  mutate(facet_column = paste(event_abbr, " ", brokerage_name, ": N=", sample)) %>% 
   group_by(TREATED, quarter_index, facet_column) %>% 
   summarise(FOR_OWN = mean(FOR_OWN),
             FOR_BREADTH = mean(FOR_BREADTH)) %>% 
@@ -68,7 +73,8 @@ ggplot(parallel_trend1_facet, aes(quarter_index, FOR_OWN, color = TREATED)) +
   theme_classic() +
   theme(plot.title = element_text(size=9, face="italic")) +
   scale_color_grey(start = 0.55, end = 0) +
-  facet_wrap(. ~ facet_column, ncol = 4)
+  facet_wrap(. ~ facet_column, ncol = 4) +
+  theme(strip.text = element_text(size=4))
 
 ggsave("figures/parallel_trend1a_facet.pdf", 
        width = 8, height = 8, units = "in")
@@ -76,6 +82,80 @@ ggsave("figures/parallel_trend1a_facet.pdf",
 ```
 
 \section{Appendix}\label{appendix}
+
+\begin{table}[!htb]
+  \centering
+  \begin{threeparttable}[online]
+    \caption{Variables and Definitions}\label{table_variable_definitions}
+    \scriptsize
+    \begin{tabular}{lp{10.5cm}l}
+      \toprule
+      Variable & Definition & Source \\
+      \midrule
+      \multicolumn{3}{l}{\textit{Panel A: Ownership variables}} \\
+      \addlinespace
+     \textit{FOR\_OWN} & Number of a firm's shares held by foreign institutions divided by the firm’s total shares outstanding (CRSP) at the end of a quarter. & 13F and CRSP \\
+     \addlinespace
+      \textit{FOR\_BREADTH} & Number of a firm’s distinct foreign institutional shareholders divided by the total number of distinct institutional shareholders in 13F database at the end of a quarter. & 13F \\
+      \addlinespace
+      \textit{INST\_OWN} & Number of a firm's shares held by total institutions divided by the firm’s total shares outstanding (CRSP) at the end of a quarter. & 13F and CRSP \\
+      \addlinespace
+      \textit{INST\_BREADTH} & Number of a firm's distinct institutional shareholders divided by the total number of distinct institutional shareholders in 13F database at the end of a quarter. & 13F \\
+      \addlinespace
+      \textit{FOR\_TO\_INST\_OWN} & Number of firm’s shares held by foreign institutions divided by the firm’s shares held by total institutions at the end of a quarter. & 13F \\
+      \addlinespace
+      \textit{FOR\_TO\_INST\_BREADTH} & Number of a firm's distinct foreign institutional shareholders divided by the number of firm’s distinct total institutions at the end of a quarter. & 13F \\
+      \addlinespace
+      \midrule
+      \multicolumn{3}{l}{\textit{Panel B: Control variables}} \\
+      \addlinespace
+      \textit{LOG\_MKT\_CAP} & Logarithm of a firm's market capitalization calculated as market price multiplied by shares outstanding at the end of a quarter. & CRSP \\
+      \addlinespace
+      \textit{BM\_RATIO} & Firm's book value of equity divided by market capitalization at the end of a quarter. & COMPUSTAT \\
+      \addlinespace
+      \textit{LEVERAGE} & Firm's total debt divided by total assets at the end of a quarter. & COMPUSTAT \\
+      \addlinespace
+      \textit{ROA} & Firm's net income divided by total assets at the end of a quarter. & COMPUSTAT \\
+      \addlinespace
+      \midrule
+      \multicolumn{3}{l}{\textit{Panel C: Information asymmetry variables}} \\
+      \addlinespace
+      \textit{BA\_SPREAD} & annual average of firm-day observations of bid-ask spreads $\dfrac{\text{\textit{bid\textsubscript{i,t}}\textminus \textit{ask\textsubscript{i,t}}}}{\text{\textit{price\textsubscript{i,t}}}}$. & CRSP \\
+      \addlinespace
+      \textit{PIN\textsubscript{BHL}} & Firm-year observations of probability of informed trading estimated by Brown et al (2004). & author's website \\
+      \addlinespace
+      \textit{PIN\textsubscript{BH}} & Firm-year observations of probability of informed trading estimated by Brown and Hillegeist (2007). & author's website \\
+      \addlinespace
+      \textit{PIN\textsubscript{DY}} & Firm-year observations of probability of informed trading estimated by Duarte and Young (2009). & author's website \\
+      \addlinespace
+      \textit{PIN\textsubscript{DY\_ADJ}} & Firm-year observations of probability of informed trading cleaned of illiquidity effects estimated by Duarte and Young (2009). & author's website \\
+      \addlinespace
+      \textit{PSOS\textsubscript{DY}} & Firm-year observations of probability of symmetric order-flow shock (illiquidity measure) estimated by Duarte and Young (2009). & author's website \\
+      \addlinespace
+      \textit{PIN\textsubscript{EHO}} & Firm-year observations of probability of informed trading estimated by Easley et al. (2010). & author's website \\
+      \addlinespace
+      \textit{MIA} & Annual average of firm-day observations of multimarket information asymmetry measure estimated by Johnson and So (2017). & author's website \\
+      \addlinespace
+      \textit{VCV\textsubscript{USD}} & Fraction of the annual standard deviation of firm-day trading volumes divided by the annual average of firm-day trading volumes. Trading volume is in US dollars. It is defined as a firm's shares traded multiplied by the firm's closing price. & CRSP \\
+      \addlinespace
+      \textit{VCV\textsubscript{MKT}} & Fraction of the annual standard deviation of firm-day trading volumes divided by the annual average of firm-day trading volumes. Trading volume is a percentage of total market volume. It is defined as a firm's shares traded multiplied by the firm's closing price divided by total sum of trading volumes on the same day. & CRSP \\
+      \addlinespace
+      \textit{VCV\textsubscript{TO}} & Fraction of the annual standard deviation of firm-day trading volumes divided by the annual average of firm-day trading volumes. Trading volume is a daily turnover. It is defined as a firm's shares traded divided by the firm's shares outstanding. & CRSP \\
+      \addlinespace
+      \midrule
+      \multicolumn{3}{l}{\textit{Panel D: Variables of quasi-natural experiment}} \\
+      \addlinespace
+      \textit{AFTER} & Dummy variable which equals one for firm-day observations that occur after brokerage closures and zero otherwise. & IBES \\
+      \addlinespace
+      \textit{TREATED} & Dummy variable which equals one for firm-day observations if a firm is affected by the exogenous reduction in analyst coverage due to brokerage closures and zero otherwise. & IBES \\
+      \addlinespace
+      \textit{AFTER\texttimes TREATED} & Interaction term of the variables \textit{AFTER} and \textit{TREATED}. & IBES \\
+      \addlinespace
+      \textit{ANALYST\_COVERAGE} & Number of distinct analysts covering a firm in a given quarter. & IBES \\
+      \bottomrule
+    \end{tabular}
+  \end{threeparttable}
+\end{table}
 
 \begin{figure}[!htb]
 \centering
