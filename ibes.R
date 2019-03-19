@@ -73,11 +73,11 @@ detail_temp3 <- detail_temp2 %>%
 
 detail_temp4 <- detail_temp3 %>% 
   filter(!is.na(event_date)) %>% # have to have a closure date to be in treatment group
-  mutate(yearbefore = announce_date %within% interval(event_date %m-% months(12), event_date)) %>% 
+  mutate(yearbefore = announce_date %within% interval(event_date %m-% months(12), event_date %m+% months(3))) %>% 
   filter(yearbefore == T) %>%  # filter only analysts that actively "covers" the firm, see Derrien and Keckses (2013) p. 1411
-  mutate(announce_stop_date = if_else(is.na(announce_stop_date), event_date %m-% months(12), announce_stop_date)) %>% 
-  mutate(stopped_before = announce_stop_date %within% interval(announce_date, event_date %m-% months(1))) %>%  
-  filter(stopped_before == F)  # filter only firms of which analysts have not stopped before event_date (relax 3 months)
+  #mutate(announce_stop_date = if_else(is.na(announce_stop_date), event_date %m-% months(12), announce_stop_date)) %>% 
+  filter(announce_stop_date > event_date %m-% months(3) | is.na(announce_stop_date) == T)
+  #filter(stopped_before == F)  # filter only firms of which analysts have not stopped before event_date (relax 3 months)
                                     # otherwise endogenous "stoppings", i.e. decided to stop covering
 
 treated_firms_temp1 <- detail_temp4 %>% 
@@ -237,3 +237,32 @@ ibes_did <- ibes_did_raw %>%
   mutate(analyst_coverage =  if_else(is.na(analyst_coverage) == T, 0L, analyst_coverage))
 
 write_rds(ibes_did, "data/ibes_did.rds")
+
+i <- ibes_did %>% 
+  mutate(TREATED = if_else(treated == 1, "Treated", "Control")) %>%
+  group_by(TREATED, quarter_index, event_date) %>% 
+  summarise(analyst_coverage = mean(analyst_coverage)) %>% 
+  ungroup() %>% 
+  mutate(AFTER = if_else(quarter_index < 0, 0, 1))
+  
+j <- ibes_did %>% 
+  filter(quarter_index %in% c(-4:4)) %>% 
+  group_by(event_date, treated, after, cusip) %>% 
+  summarise(analyst_coverage_mean = mean(analyst_coverage),
+            analyst_coverage_med = median(analyst_coverage)) %>% 
+  ungroup() %>% 
+  mutate(year = lubridate::year(event_date))
+
+i %>% 
+  ggplot(aes(quarter_index, analyst_coverage, color = TREATED)) +
+  geom_line() +
+  labs(x = "Event quarter", color = "") +
+  geom_vline(xintercept=0) +
+  theme_classic() +
+  theme(plot.title = element_text(size=9, face="italic")) +
+  scale_color_grey(start = 0.55, end = 0) + 
+  facet_wrap(.~ event_date)
+
+library(lfe)
+f <- felm(analyst_coverage_med ~ treated + after + after*treated | year |0 | year, j)
+summary(f)
