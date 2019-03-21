@@ -117,9 +117,8 @@ In this section, I describe how I select and construct the variables of the base
 
 The baseline sample examined in this study included US listed firms during the period of 1997-2017. Data for foreign, domestic and institutional shareholdings is retrieved from Thomson Reuters institutional holdings (form 13F) database. To calculate the stock price related control variables, the information asymmetry proxies *BA_SPREAD*, *VCV* and foreign, domestic and institutional ownership measures, I gather stock price information from the Center for Research in Security Prices (CRSP). Accounting related control variables are collected from COMPUSTAT. The 13F data is merged with CRSP by matching the 8-digit CUSIP identifier from 13F to the 8-digit NCUSIP from CRSP. I use CRSP-COMPUSTAT Merged Database (CCM) to merge CRSP and COMPUSTAT datasets. Firm-year estimates of information asymmetry proxies *PIN~BHL~* [@brown2004conference], *PIN~BH~* [@brown2007disclosure], *PIN~EHO~* [@easley2010factoring], *PIN~DY~* [@duarte2009pin], *PIN~DY_ADJ~*, *PSOS~DY~* and firm-day estimates of *MIA* [@johnson2017simple] are collected from the cited authors’ websites [^1]. Information asymmetry measures are merged with the baseline sample by using the CRSP’s Permanent Issue Number (PERMNO) as a linking identifier. The baseline sample selection process ends up with firm-year observations.
 
-[^1]:Firm-year observations of *PIN~BH~*, *PIN~BHL~*, *PIN~EHO~* and *PIN~DY~* are made available
-by Søren Hvidkjær (https://sites.google.com/site/hvidkjaer/data), Stephen Brown (http://scholar.rhsmith.umd.edu/sbrown/pin-data) and Jefferson Duarte (http://www.owlnet.rice.edu/~jd10/),
-respectively. Daily firm-level observations of MIA are made available by Travis Johnson (http://travislakejohnson.com/data.html).
+[^1]:Firm-year observations of *PIN~BHL~*, *PIN~BH~*, *PIN~DY~*, *PIN~DY_ADJ~*, *PSOS~DY~* and *PIN~EHO~* are made available
+by Stephen Brown (http://scholar.rhsmith.umd.edu/sbrown/pin-data), Jefferson Duarte (http://www.owlnet.rice.edu/~jd10/) and Søren Hvidkjær (https://sites.google.com/site/hvidkjaer/data), respectively. Daily firm-level observations of *MIA* are made available by Travis Johnson (http://travislakejohnson.com/data.html).
 
 The quasi-natural sample includes US listed firms during the period of 1997-2010. Similar to baseline setting, I collect institutional ownership data from 13F, stock price related variables from CRSP and accounting related variables from COMPUSTAT. In addition, I use the list of brokerage closures in Appendix A of @kelly2012testing and analyst coverage data from Institutional Brokers’ Estimate System (IBES) to identify stocks that experience exogenous reductions in analyst coverage due to these brokerage closures. Since the quasi-natural sample does not involve information asymmetry measures, the sample selection process ends up with firm-quarter observations.
 
@@ -154,7 +153,7 @@ Since brokerage closures tend to extend over several months, the dates listed by
 
 In this section, I report the summary statistics of sample variables. Table \ref{table_summary_baseline} presents the summary statistics of sample variables used in baseline setting.  
 
-```{r, results='asis', message = FALSE, warning=FALSE, eval = TRUE}
+```{r, results='asis', message = FALSE, warning=FALSE, eval = FALSE}
 library(tidyverse)
 library(stargazer)
 library(kableExtra)
@@ -171,19 +170,170 @@ stargazer(baseline_regression_summary,
           header = F,
           label = "table_summary_baseline",
           median = T,
-          omit.summary.stat = c("p25", "p75"),
+          #omit.summary.stat = c("p25", "p75"),
           notes.label = "",
           notes.append = F,
           notes = "",
           font.size = "small",
-          column.sep.width = "10pt",
+          column.sep.width = "0pt",
           #no.space = T,
-          title = "\\textbf{Summary statistics of the baseline sample}\\newline\\small This table reports summary statistics of annual firm-level observations of baseline sample variables. Control variables are winsorized at the top and bottom 1\\%. Sample: 1997-2017. Sources: CRSP, COMPUSTAT, 13F and the cited authors’ websites.", 
+          title = "\\textbf{Summary statistics of the baseline sample}\\newline\\small This table reports summary statistics of annual firm-level observations of baseline sample variables. Control variables are winsorized at the top and bottom 1\\%. Table \\ref{table_variable_definitions} in Appendix provides a detailed list of variable definitions. Sample: 1997-2017. Sources: CRSP, COMPUSTAT, 13F and the cited authors’ websites.", 
           type = "latex")
 
 ```
 
+\begin{table}[!htbp] \centering 
+  \caption[Summary statistics of the baseline sample]{\textbf{Summary statistics of the baseline sample}\newline\small This table reports summary statistics of annual firm-level observations of baseline sample variables. Control variables are winsorized at the top and bottom 1\%. Table \ref{table_variable_definitions} in Appendix provides a detailed list of variable definitions. Sample: 1997-2017. Sources: CRSP, COMPUSTAT, 13F and the cited authors’ websites.} 
+  \label{table_summary_baseline} 
+\small 
+\begin{tabular}{@{\extracolsep{0pt}}lcccccccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+Statistic & \multicolumn{1}{c}{N} & \multicolumn{1}{c}{Mean} & \multicolumn{1}{c}{St. Dev.} & \multicolumn{1}{c}{Min} & \multicolumn{1}{c}{P25} & \multicolumn{1}{c}{Median} & \multicolumn{1}{c}{P75} & \multicolumn{1}{c}{Max} \\ 
+\hline \\[-1.8ex] 
+FOR\_OWN & 110,819 & 0.033 & 0.056 & 0.000 & 0.001 & 0.016 & 0.043 & 1.000 \\ 
+FOR\_BREADTH & 110,819 & 0.003 & 0.006 & 0.000 & 0.0005 & 0.001 & 0.004 & 0.060 \\ 
+INST\_OWN & 110,819 & 0.438 & 0.316 & 0.000 & 0.140 & 0.409 & 0.718 & 1.000 \\ 
+INST\_BREADTH & 110,819 & 0.040 & 0.060 & 0.000 & 0.006 & 0.021 & 0.049 & 0.673 \\ 
+FOR\_TO\_INST\_OWN & 109,907 & 0.077 & 0.122 & 0.000 & 0.009 & 0.043 & 0.089 & 1.000 \\ 
+FOR\_TO\_INST\_BREADTH & 109,907 & 0.085 & 0.089 & 0.000 & 0.038 & 0.067 & 0.106 & 1.000 \\ 
+LOG\_MKT\_CAP & 110,819 & 5.701 & 2.048 & 1.301 & 4.200 & 5.630 & 7.108 & 10.785 \\ 
+BM\_RATIO & 110,819 & 0.714 & 0.612 & 0.034 & 0.318 & 0.563 & 0.907 & 3.931 \\ 
+LEVERAGE & 110,819 & 0.529 & 0.261 & 0.035 & 0.316 & 0.534 & 0.743 & 1.140 \\ 
+ROA & 110,819 & $-$0.012 & 0.064 & $-$0.425 & $-$0.010 & 0.004 & 0.015 & 0.105 \\ 
+BA\_SPREAD & 110,819 & 0.046 & 0.162 & 0.002 & 0.024 & 0.037 & 0.059 & 52.868 \\ 
+PIN\_DY & 15,025 & 0.203 & 0.119 & 0.00000 & 0.121 & 0.167 & 0.244 & 1.000 \\ 
+PIN\_DY\_ADJ & 15,025 & 0.162 & 0.086 & 0.000 & 0.103 & 0.140 & 0.197 & 0.903 \\ 
+PSOS\_DY & 15,025 & 0.284 & 0.156 & 0.000 & 0.177 & 0.233 & 0.346 & 1.000 \\ 
+PIN\_EHO & 9,498 & 0.188 & 0.091 & 0.000 & 0.120 & 0.166 & 0.234 & 0.895 \\ 
+PIN\_BHL & 78,226 & 0.196 & 0.118 & 0.000 & 0.105 & 0.197 & 0.273 & 1.000 \\ 
+PIN\_BH & 78,335 & 0.233 & 0.134 & 0.000 & 0.131 & 0.202 & 0.304 & 1.000 \\ 
+MIA & 20,813 & 0.416 & 0.106 & 0.014 & 0.351 & 0.422 & 0.477 & 1.000 \\ 
+VCV\_USD & 94,888 & 1.319 & 0.934 & 0.240 & 0.704 & 1.081 & 1.614 & 13.870 \\ 
+VCV\_MKT & 94,888 & 1.297 & 0.946 & 0.172 & 0.675 & 1.062 & 1.598 & 14.011 \\ 
+VCV\_TO & 94,888 & 1.264 & 0.857 & 0.231 & 0.690 & 1.039 & 1.546 & 13.670 \\ 
+\hline \\[-1.8ex] 
+\multicolumn{9}{l}{} \\ 
+\end{tabular} 
+\end{table}
 
+```{r, results='asis', message = FALSE, warning=FALSE, eval = FALSE}
+library(tidyverse)
+
+thirteenf_crsp_compustat <- read_rds("results/thirteenf_crsp_compustat.rds")
+
+thirteenf_crsp_compustat %>% 
+  mutate(FOR_OWN = foreign_own) %>% 
+  group_by(report_date) %>% 
+  summarise(FOR_OWN = mean(FOR_OWN)) %>% 
+  ungroup() %>% 
+  ggplot(aes(x = report_date)) +
+  ggtitle("Panel A: Foreign ownership") +
+  geom_line(aes(y = FOR_OWN)) +
+  labs(x = "Report date", color = "") +
+  theme_classic() +
+  theme(plot.title = element_text(size=9, face="italic")) +
+  scale_color_grey(start = 0.55, end = 0)
+
+ggsave("figures/baseline_development_a.pdf", 
+       width = 8, height = 4, units = "in")
+
+thirteenf_crsp_compustat %>% 
+  mutate(INST_OWN = institutional_own) %>% 
+  group_by(report_date) %>% 
+  summarise(INST_OWN = mean(INST_OWN)) %>% 
+  ungroup() %>% 
+  ggplot(aes(x = report_date)) +
+  ggtitle("Panel B: Institutional ownership") +
+  geom_line(aes(y = INST_OWN)) +
+  labs(x = "Report date", color = "") +
+  theme_classic() +
+  theme(plot.title = element_text(size=9, face="italic")) +
+  scale_color_grey(start = 0.55, end = 0)
+
+ggsave("figures/baseline_development_b.pdf", 
+       width = 8, height = 4, units = "in")
+
+thirteenf_crsp_compustat %>% 
+  mutate(FOR_BREADTH = foreign_breadth) %>% 
+  group_by(report_date) %>% 
+  summarise(FOR_BREADTH = mean(FOR_BREADTH)) %>% 
+  ungroup() %>% 
+  ggplot(aes(x = report_date)) +
+  ggtitle("Panel C: Foreign breadth") +
+  geom_line(aes(y = FOR_BREADTH)) +
+  labs(x = "Report date", color = "") +
+  theme_classic() +
+  theme(plot.title = element_text(size=9, face="italic")) +
+  scale_color_grey(start = 0.55, end = 0)
+
+ggsave("figures/baseline_development_c.pdf", 
+       width = 8, height = 4, units = "in")
+
+```
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width = \linewidth]{figures/baseline_development_a.pdf}
+\includegraphics[width = \linewidth]{figures/baseline_development_b.pdf}
+\caption[Development of foreign and institutional ownership during baseline sample period]{\textbf{Development of foreign and institutional ownership during baseline sample period}\newline\scriptsize This figure presents the evolution of the mean of firm-quarter observations of foreign ownership (\textit{FOR\_OWN}) in Panel A and institutional ownership (\textit{INST\_OWN}) in Panel B during the baseline sample period of 1997-2017 Sources: CRSP and 13F.}
+\label{fig_parallel_trend1}
+\end{figure}
+
+
+```{r, results='asis', message = FALSE, warning=FALSE, eval = FALSE}
+library(tidyverse)
+library(stargazer)
+library(kableExtra)
+
+did_regression_matched_raw <- read_rds("results/did_regression_matched_raw.rds")
+
+did_regression_summary <- did_regression_matched_raw %>% 
+    select(FOR_OWN, FOR_BREADTH,  INST_OWN, INST_BREADTH, FOR_TO_INST_OWN, FOR_TO_INST_BREADTH,
+         LOG_MKT_CAP, BM_RATIO, LEVERAGE, ROA, ANALYST_COVERAGE) %>% 
+  as.data.frame()
+
+stargazer(did_regression_summary,
+          header = F,
+          label = "table_summary_did",
+          median = T,
+          #omit.summary.stat = c("p25", "p75"),
+          notes.label = "",
+          notes.append = F,
+          notes = "",
+          font.size = "small",
+          column.sep.width = "0pt",
+          #no.space = T,
+          title = "\\textbf{Summary statistics of the quasi-natural experiment sample}\\newline\\small This table reports summary statistics of firm-quarter observations of the quasi-natural experiment sample variables. Control variables are winsorized at the top and bottom 1\\%. Table \\ref{table_variable_definitions} in Appendix provides a detailed list of variable definitions. Sample: 1997-2010. Sources: CRSP, COMPUSTAT, 13F and IBES.", 
+          type = "latex")
+
+```
+
+\renewcommand\arraystretch{1}
+\begin{table}[!htbp] \centering 
+  \caption[Summary statistics of the quasi-natural experiment sample]{\textbf{Summary statistics of the quasi-natural experiment sample}\newline\small This table reports summary statistics of firm-quarter observations of the quasi-natural experiment sample variables. Control variables are winsorized at the top and bottom 1\%. Table \ref{table_variable_definitions} in Appendix provides a detailed list of variable definitions. Sample: 1997-2010. Sources: CRSP, COMPUSTAT, 13F and IBES.} 
+  \label{table_summary_did} 
+\small 
+\begin{tabular}{@{\extracolsep{0pt}}lcccccccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+Statistic & \multicolumn{1}{c}{N} & \multicolumn{1}{c}{Mean} & \multicolumn{1}{c}{St. Dev.} & \multicolumn{1}{c}{Min} & \multicolumn{1}{c}{P25} & \multicolumn{1}{c}{Median} & \multicolumn{1}{c}{P75} & \multicolumn{1}{c}{Max} \\ 
+\hline \\[-1.8ex] 
+FOR\_OWN & 231,318 & 0.047 & 0.044 & 0.000 & 0.020 & 0.040 & 0.061 & 1.000 \\ 
+FOR\_BREADTH & 231,318 & 0.007 & 0.007 & 0.000 & 0.002 & 0.004 & 0.010 & 0.054 \\ 
+INST\_OWN & 231,318 & 0.613 & 0.253 & 0.00000 & 0.437 & 0.652 & 0.812 & 1.000 \\ 
+INST\_BREADTH & 231,318 & 0.099 & 0.102 & 0.0003 & 0.036 & 0.068 & 0.124 & 0.684 \\ 
+FOR\_TO\_INST\_OWN & 231,318 & 0.079 & 0.075 & 0.000 & 0.039 & 0.065 & 0.096 & 1.000 \\ 
+FOR\_TO\_INST\_BREADTH & 231,318 & 0.069 & 0.046 & 0.000 & 0.044 & 0.061 & 0.083 & 1.000 \\ 
+LOG\_MKT\_CAP & 231,318 & 7.279 & 1.797 & 1.301 & 6.091 & 7.280 & 8.518 & 10.785 \\ 
+BM\_RATIO & 231,318 & 0.555 & 0.485 & 0.034 & 0.262 & 0.441 & 0.693 & 3.931 \\ 
+LEVERAGE & 231,318 & 0.530 & 0.250 & 0.035 & 0.330 & 0.537 & 0.722 & 1.000 \\ 
+ROA & 231,318 & 0.001 & 0.052 & $-$0.425 & 0.001 & 0.009 & 0.021 & 0.105 \\ 
+ANALYST\_COVERAGE & 231,318 & 10.038 & 8.133 & 0 & 4 & 8 & 15 & 50 \\ 
+\hline \\[-1.8ex] 
+\multicolumn{9}{l}{} \\ 
+\end{tabular} 
+\end{table}
 
 # 5 Methodology
 
@@ -1019,6 +1169,7 @@ stargazer(did_list, title = "\\textbf{Difference-in-differences regression analy
           type = 'latex',
           notes.label = "",
           notes.append = F,
+          column.sep.width = "1pt",
           notes = "",
           font.size = "scriptsize",
           no.space = T)
