@@ -96,6 +96,8 @@ thirteenf_crsp_compustat <- thirteenf_crsp_compustat_temp %>%
          log_market_cap, book_to_market:tobin_q) %>% 
   filter_at(vars(log_market_cap:tobin_q, sic_code), all_vars(!is.na(.))) # filter control variable NAs away, since going to be used in regression 
 
+write_rds(thirteenf_crsp_compustat, "results/thirteenf_crsp_compustat.rds")
+
 sic_temp <- thirteenf_crsp_compustat %>% 
   group_by(permno, year) %>% 
   summarise(sic_code = last(sic_code))
