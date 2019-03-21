@@ -46,6 +46,91 @@ knitr::opts_chunk$set(echo = FALSE,
 ```
 
 
+
+\section{Appendix}\label{appendix}
+
+\scriptsize
+  \begin{longtable}{lp{10cm}l}
+  \captionsetup{justification=raggedright,
+                           width=\linewidth,
+                           singlelinecheck=off}
+    \caption[Variables and Definitions]{\textbf{Variables and Definitions}}\label{table_variable_definitions} \\
+      \toprule
+      Variable & Definition & Source \\
+      \midrule
+      \multicolumn{3}{l}{\textit{Panel A: Ownership variables}} \\
+      \addlinespace
+     \textit{FOR\_OWN} & Number of a firm's shares held by foreign institutions divided by the firm’s total shares outstanding (CRSP) at the end of a quarter. & 13F and CRSP \\
+     \addlinespace
+      \textit{FOR\_BREADTH} & Number of a firm’s distinct foreign institutional shareholders divided by the total number of distinct institutional shareholders in 13F database at the end of a quarter. & 13F \\
+      \addlinespace
+      \textit{INST\_OWN} & Number of a firm's shares held by total institutions divided by the firm’s total shares outstanding (CRSP) at the end of a quarter. & 13F and CRSP \\
+      \addlinespace
+      \textit{INST\_BREADTH} & Number of a firm's distinct institutional shareholders divided by the total number of distinct institutional shareholders in 13F database at the end of a quarter. & 13F \\
+      \addlinespace
+      \textit{FOR\_TO\_INST\_OWN} & Number of firm’s shares held by foreign institutions divided by the firm’s shares held by total institutions at the end of a quarter. & 13F \\
+      \addlinespace
+      \textit{FOR\_TO\_INST\_BREADTH} & Number of a firm's distinct foreign institutional shareholders divided by the number of firm’s distinct total institutions at the end of a quarter. & 13F \\
+      \addlinespace
+      \midrule
+      \multicolumn{3}{l}{\textit{Panel B: Control variables}} \\
+      \addlinespace
+      \textit{LOG\_MKT\_CAP} & Logarithm of a firm's market capitalization calculated as market price multiplied by shares outstanding at the end of a quarter. & CRSP \\
+      \addlinespace
+      \textit{BM\_RATIO} & Firm's book value of equity divided by market capitalization at the end of a quarter. & COMPUSTAT \\
+      \addlinespace
+      \textit{LEVERAGE} & Firm's total debt divided by total assets at the end of a quarter. & COMPUSTAT \\
+      \addlinespace
+      \textit{ROA} & Firm's net income divided by total assets at the end of a quarter. & COMPUSTAT \\
+      \addlinespace
+      \midrule
+      \multicolumn{3}{l}{\textit{Panel C: Information asymmetry variables}} \\
+      \addlinespace
+      \textit{BA\_SPREAD} & annual average of firm-day observations of bid-ask spreads $\dfrac{\text{\textit{ask\textsubscript{i,t}}\textminus \textit{bid\textsubscript{i,t}}}}{\text{\textit{price\textsubscript{i,t}}}}$. & CRSP \\
+      \addlinespace
+      \textit{PIN\textsubscript{BHL}} & Firm-year observations of probability of informed trading estimated by Brown et al (2004). & author's website \protect\footnotemark \\
+       \footnotetext{Firm-year observations of
+  \emph{PIN\textsubscript{BHL}}, \emph{PIN\textsubscript{BH}},
+  \emph{PIN\textsubscript{DY}}, \emph{PIN\textsubscript{DY\_ADJ}},
+  \emph{PSOS\textsubscript{DY}} and \emph{PIN\textsubscript{EHO}} are
+  made available by Stephen Brown
+  (\url{http://scholar.rhsmith.umd.edu/sbrown/pin-data}), Jefferson
+  Duarte (\url{http://www.owlnet.rice.edu/~jd10/}) and Søren Hvidkjær
+  (\url{https://sites.google.com/site/hvidkjaer/data}), respectively.
+  Daily firm-level observations of \emph{MIA} are made available by
+  Travis Johnson (\url{http://travislakejohnson.com/data.html}).} \\
+      \addlinespace
+      \textit{PIN\textsubscript{BH}} & Firm-year observations of probability of informed trading estimated by Brown and Hillegeist (2007). & author's website \\
+      \addlinespace
+      \textit{PIN\textsubscript{DY}} & Firm-year observations of probability of informed trading estimated by Duarte and Young (2009). & author's website \\
+      \addlinespace
+      \textit{PIN\textsubscript{DY\_ADJ}} & Firm-year observations of probability of informed trading cleaned of illiquidity effects estimated by Duarte and Young (2009). & author's website \\
+      \addlinespace
+      \textit{PSOS\textsubscript{DY}} & Firm-year observations of probability of symmetric order-flow shock (illiquidity measure) estimated by Duarte and Young (2009). & author's website \\
+      \addlinespace
+      \textit{PIN\textsubscript{EHO}} & Firm-year observations of probability of informed trading estimated by Easley et al. (2010). & author's website \\
+      \addlinespace
+      \textit{MIA} & Annual average of firm-day observations of multimarket information asymmetry measure estimated by Johnson and So (2017). & author's website \\
+      \addlinespace
+      \textit{VCV\textsubscript{USD}} & Fraction of the annual standard deviation of firm-day trading volumes divided by the annual average of firm-day trading volumes. Trading volume is in US dollars. It is defined as a firm's shares traded multiplied by the firm's closing price. & CRSP \\
+      \addlinespace
+      \textit{VCV\textsubscript{MKT}} & Fraction of the annual standard deviation of firm-day trading volumes divided by the annual average of firm-day trading volumes. Trading volume is a percentage of total market volume. It is defined as a firm's shares traded multiplied by the firm's closing price divided by total sum of trading volumes on the same day. & CRSP \\
+      \addlinespace
+      \textit{VCV\textsubscript{TO}} & Fraction of the annual standard deviation of firm-day trading volumes divided by the annual average of firm-day trading volumes. Trading volume is a daily turnover. It is defined as a firm's shares traded divided by the firm's shares outstanding. & CRSP \\
+      \addlinespace
+      \midrule
+      \multicolumn{3}{l}{\textit{Panel D: Variables of quasi-natural experiment}} \\
+      \addlinespace
+      \textit{AFTER} & Dummy variable which equals one for firm-day observations that occur after brokerage closures and zero otherwise. & IBES \\
+      \addlinespace
+      \textit{TREATED} & Dummy variable which equals one for firm-day observations if a firm is affected by the exogenous reduction in analyst coverage due to brokerage closures and zero otherwise. & IBES \\
+      \addlinespace
+      \textit{AFTER\texttimes TREATED} & Interaction term of the variables \textit{AFTER} and \textit{TREATED}. & IBES \\
+      \addlinespace
+      \textit{ANALYST\_COVERAGE} & Number of distinct analysts covering a firm in a given quarter. & IBES \\
+      \bottomrule
+  \end{longtable}
+  
 ``` {r parallel_trend1_facet, message = FALSE, warning=FALSE, eval=FALSE}
 
 library(tidyverse)
@@ -81,83 +166,7 @@ ggsave("figures/parallel_trend1a_facet.pdf",
   
 ```
 
-\section{Appendix}\label{appendix}
-
-\begin{table}[!htb]
-  \centering
-  \begin{threeparttable}[online]
-    \caption{Variables and Definitions}\label{table_variable_definitions}
-    \scriptsize
-    \begin{tabular}{lp{10.5cm}l}
-      \toprule
-      Variable & Definition & Source \\
-      \midrule
-      \multicolumn{3}{l}{\textit{Panel A: Ownership variables}} \\
-      \addlinespace
-     \textit{FOR\_OWN} & Number of a firm's shares held by foreign institutions divided by the firm’s total shares outstanding (CRSP) at the end of a quarter. & 13F and CRSP \\
-     \addlinespace
-      \textit{FOR\_BREADTH} & Number of a firm’s distinct foreign institutional shareholders divided by the total number of distinct institutional shareholders in 13F database at the end of a quarter. & 13F \\
-      \addlinespace
-      \textit{INST\_OWN} & Number of a firm's shares held by total institutions divided by the firm’s total shares outstanding (CRSP) at the end of a quarter. & 13F and CRSP \\
-      \addlinespace
-      \textit{INST\_BREADTH} & Number of a firm's distinct institutional shareholders divided by the total number of distinct institutional shareholders in 13F database at the end of a quarter. & 13F \\
-      \addlinespace
-      \textit{FOR\_TO\_INST\_OWN} & Number of firm’s shares held by foreign institutions divided by the firm’s shares held by total institutions at the end of a quarter. & 13F \\
-      \addlinespace
-      \textit{FOR\_TO\_INST\_BREADTH} & Number of a firm's distinct foreign institutional shareholders divided by the number of firm’s distinct total institutions at the end of a quarter. & 13F \\
-      \addlinespace
-      \midrule
-      \multicolumn{3}{l}{\textit{Panel B: Control variables}} \\
-      \addlinespace
-      \textit{LOG\_MKT\_CAP} & Logarithm of a firm's market capitalization calculated as market price multiplied by shares outstanding at the end of a quarter. & CRSP \\
-      \addlinespace
-      \textit{BM\_RATIO} & Firm's book value of equity divided by market capitalization at the end of a quarter. & COMPUSTAT \\
-      \addlinespace
-      \textit{LEVERAGE} & Firm's total debt divided by total assets at the end of a quarter. & COMPUSTAT \\
-      \addlinespace
-      \textit{ROA} & Firm's net income divided by total assets at the end of a quarter. & COMPUSTAT \\
-      \addlinespace
-      \midrule
-      \multicolumn{3}{l}{\textit{Panel C: Information asymmetry variables}} \\
-      \addlinespace
-      \textit{BA\_SPREAD} & annual average of firm-day observations of bid-ask spreads $\dfrac{\text{\textit{bid\textsubscript{i,t}}\textminus \textit{ask\textsubscript{i,t}}}}{\text{\textit{price\textsubscript{i,t}}}}$. & CRSP \\
-      \addlinespace
-      \textit{PIN\textsubscript{BHL}} & Firm-year observations of probability of informed trading estimated by Brown et al (2004). & author's website \\
-      \addlinespace
-      \textit{PIN\textsubscript{BH}} & Firm-year observations of probability of informed trading estimated by Brown and Hillegeist (2007). & author's website \\
-      \addlinespace
-      \textit{PIN\textsubscript{DY}} & Firm-year observations of probability of informed trading estimated by Duarte and Young (2009). & author's website \\
-      \addlinespace
-      \textit{PIN\textsubscript{DY\_ADJ}} & Firm-year observations of probability of informed trading cleaned of illiquidity effects estimated by Duarte and Young (2009). & author's website \\
-      \addlinespace
-      \textit{PSOS\textsubscript{DY}} & Firm-year observations of probability of symmetric order-flow shock (illiquidity measure) estimated by Duarte and Young (2009). & author's website \\
-      \addlinespace
-      \textit{PIN\textsubscript{EHO}} & Firm-year observations of probability of informed trading estimated by Easley et al. (2010). & author's website \\
-      \addlinespace
-      \textit{MIA} & Annual average of firm-day observations of multimarket information asymmetry measure estimated by Johnson and So (2017). & author's website \\
-      \addlinespace
-      \textit{VCV\textsubscript{USD}} & Fraction of the annual standard deviation of firm-day trading volumes divided by the annual average of firm-day trading volumes. Trading volume is in US dollars. It is defined as a firm's shares traded multiplied by the firm's closing price. & CRSP \\
-      \addlinespace
-      \textit{VCV\textsubscript{MKT}} & Fraction of the annual standard deviation of firm-day trading volumes divided by the annual average of firm-day trading volumes. Trading volume is a percentage of total market volume. It is defined as a firm's shares traded multiplied by the firm's closing price divided by total sum of trading volumes on the same day. & CRSP \\
-      \addlinespace
-      \textit{VCV\textsubscript{TO}} & Fraction of the annual standard deviation of firm-day trading volumes divided by the annual average of firm-day trading volumes. Trading volume is a daily turnover. It is defined as a firm's shares traded divided by the firm's shares outstanding. & CRSP \\
-      \addlinespace
-      \midrule
-      \multicolumn{3}{l}{\textit{Panel D: Variables of quasi-natural experiment}} \\
-      \addlinespace
-      \textit{AFTER} & Dummy variable which equals one for firm-day observations that occur after brokerage closures and zero otherwise. & IBES \\
-      \addlinespace
-      \textit{TREATED} & Dummy variable which equals one for firm-day observations if a firm is affected by the exogenous reduction in analyst coverage due to brokerage closures and zero otherwise. & IBES \\
-      \addlinespace
-      \textit{AFTER\texttimes TREATED} & Interaction term of the variables \textit{AFTER} and \textit{TREATED}. & IBES \\
-      \addlinespace
-      \textit{ANALYST\_COVERAGE} & Number of distinct analysts covering a firm in a given quarter. & IBES \\
-      \bottomrule
-    \end{tabular}
-  \end{threeparttable}
-\end{table}
-
-\begin{figure}[!htb]
+\begin{figure}[H]
 \centering
 \includegraphics[width = \linewidth]{figures/parallel_trend1a_facet.pdf}
 \caption[Foreign ownership and breadth between the treatment and control groups around brokerage closures]{\textbf{Foreign ownership and breadth between the treatment and control groups around brokerage closures}\newline\scriptsize This figure presents the evolution of the mean of firm-quarter observations of foreign ownership (\textit{FOR\_OWN}) in Panel A and foreign breadth (\textit{FOR\_BREADTH}) in Panel B during the twelve quarters (i.e. three years) before and after an exogenous decrease in analyst coverage due to the 22 distinct brokerage closures listed by Kelly and Ljungqvist (2012). I impose a three-month gap over the events so that foreign ownership estimates are from quarters -13:-1 and 1:13, with the brokerage closure occurring in the quarter 0. The sample consists of 1240 distinct treated firms and 2524 control firms. Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). The firm-quarter observations of foreign ownership and foreign breadth are winsorized at the top and bottom 1\%. Sample period: 1997- 2010. Sources: CRSP, COMPUSTAT, 13F and IBES.}
