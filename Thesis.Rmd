@@ -352,7 +352,7 @@ ANALYST\_COVERAGE & 231,318 & 10.038 & 8.133 & 0 & 4 & 8 & 15 & 50 \\
 \end{tabular} 
 \end{table}
 
-As shown in Table \ref{table_summary_did}, 
+As shown in Table \ref{table_summary_did}, the mean and median of foreign institutional ownership (*FOR_OWN*) are 4.7% and 4.0%, respectively. The corresponding measures for total institutional ownership (*INST_OWN*) are 61.3% and 65.2%, respectively. The estimates are notably higher than in the baseline setting. This is largely explained by the fact that the exogenous reductions in analyst coverage are more affected by larger firms which have higher share of foreign ownership. Furthermore, the control firms are matched with a ratio of three by similar firm characteristics. Hence, it is consistent that *LOG_MKT_CAP* has higher mean, *BM_RATIO* lower mean and *ROA* higher mean than in the baseline setting. There is no essential difference in *LEVERAGE* between Tables \ref{table_summary_baseline} and \ref{table_summary_did}. *ANALYST_COVERAGE* has a mean of 10.038, with a minimum of 0 and a maximum of 50, indicating large variation between firm-quarter observations.
 
 # 5 Methodology
 
