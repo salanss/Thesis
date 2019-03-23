@@ -75,13 +75,15 @@ mia <- mia_raw %>%
 vcv_raw <- read_rds("data/vcv.rds")
 
 vcv <- vcv_raw %>% 
-  mutate(permno = as.character(permno))
+  mutate(permno = as.character(permno)) %>% 
+  mutate_at(vars(vcv1:vcv3),
+            funs(Winsorize(., probs = c(0.01, 0.99), na.rm = T)))
 
 ba_spread_raw <- read_rds("data/ba_spread.rds")
 
 ba_spread <- ba_spread_raw %>% 
   mutate(permno = as.character(permno),
-         bid_ask_spread = spread)
+         bid_ask_spread = Winsorize(spread, probs = c(0.01, 0.99), na.rm = T))
 
 information_asymmetry_measures <- pin_dy %>% 
   full_join(pin_eho, by = c("permno", "year")) %>% 
