@@ -378,8 +378,7 @@ Based on the first hypothesis, I want to test the effect of information asymmetr
 
 Next, based on the correlation results in Table \ref{table_cor_matrix}, I decide to exclude the logarithm of market capitazaliton (*LOG_MKT_CAP*), as it has approximately over -0.60 correlation between information asymmetry measures. Otherwise, there is a potential risk of multicollinearity, which may result in invalid coefficients of other explanatory variables and large standard errors. Other control variables have relatively small or moderate correlations with information asymmetry measures and are therefore kept in the regression model.
 
-I also decide to include fixed effects for year and industry to control for time variation and firm characteristics unrelated to information asymmetry or control variables. @baik2013liability find that foreign ownership increases substantially in the US markets between 1990 and 2007 and I find similar trend in my data set during 1997-2017. Also [@lof2018asymmetric]
-
+I also include fixed effects for year and industry to control for time variation and firm characteristics unrelated to information asymmetry or control variables. @baik2013liability find that foreign ownership increases substantially in the US markets between 1990 and 2007 and I find similar trend in my data set during 1997-2017. Also @duarte2017does and @lof2018asymmetric find that information asymmetry decreases over time. Thus, a pooled panel regression model does not not capture this time-specific variation and can lead to biased and inconsistent estimators due to omitted variable bias. Following a recent study of foreign ownership by @bena2017foreign, I include industry fixed effects to control for unobservable firm-specific characteristics.
 
 ## 5.2 The difference-in-differences regression model
 
