@@ -56,11 +56,15 @@ knitr::opts_chunk$set(echo = FALSE,
 \pagenumbering{roman}
 \setcounter{page}{3}
 \renewcommand*{\contentsname}{Table of Contents}
-\renewcommand{\cftfigfont}{Figure }
-\renewcommand{\cfttabfont}{Table }
 \tableofcontents
 \clearpage
+\renewcommand\cftlottitlefont{\normalsize\bfseries}
+\renewcommand\cfttabfont{\small Table }
+\renewcommand\cfttabpagefont{\small}
 \listoftables
+\renewcommand\cftloftitlefont{\normalsize\bfseries}
+\renewcommand{\cftfigfont}{\small Figure }
+\renewcommand{\cftfigpagefont}{\small}
 \listoffigures
 \clearpage
 \pagenumbering{arabic}
@@ -360,15 +364,22 @@ To empirically examine the first hypothesis of the thesis, I use a panel regress
 
 ## 5.1 The panel regression model
 
-I test the relation of foreign ownership and information asymmetry by using the following panel regression model of firm-year observations:
+I test the relation of foreign ownership and information asymmetry by using the following panel regression model (OLS) of firm-year observations with fixed effects:
 
 \begin{equation}\label{eq_baseline}
 \begin{aligned}
-FOREIGN\_OWNERSHIP_{i,t} &= \beta_0 + \beta_{1}INFORMATION\_ASYMMETRY_{i,t} + \beta_{3}BM\_RATIO_{i,t}\\ &+ \beta_{4}LEVERAGE_{i,t} + \beta_{5}ROA_{i,t}\\ &+ \sum_{t=1}^T YEAR_t + \sum_{n=1}^N INDUSTRY_n + \epsilon_{i,t}
+FOREIGN_{i,t} &= \beta_0 + \beta_{1}IA\_MEASURE_{i,t} + \beta_{3}BM\_RATIO_{i,t}\\ &+ \beta_{4}LEVERAGE_{i,t}+ \beta_{5}ROA_{i,t}\\ &+ YEAR_{t}+ INDUSTRY_{n} + \varepsilon_{i,t}
 \end{aligned}
 \end{equation}
 
-Foreign ownership is measured by either of the four variables: *FOR_OWN* (defined as shares of a firm held by foreign institution, as a percentage of the firm’s shares outstanding at the end of each year) and *FOR_BREADTH* (defined as the number of distinct foreign institutions holding shares in the firm, as a percentage of the total number of institutions in the 13F database at the end of each year [@chen2002breadth; @lof2018asymmetric]). Information asymmetry is, similarly, measured by one of the various proxy variables: *PIN~BHL~*, *PIN~BH~*, *PIN~EHO~*, *PIN~DY~*, *PIN~DY_ADJ~*, *MIA*, *VCV~USD~*, *VCV~MKT~* and *VCV~TO~*. *BM_RATIO* is the book value of equity divided by the market value at the end of each year. *LEVERAGE* is the total debt divided by total assets at the end of each year. *ROA* is the net income divided by total assets at the end of each year. I also include year and industry fixed effects.
+where *FOREIGN~i,t~* is measured by either of the four ownership-specific variables: *FOR_OWN*, *FOR_BREADTH*, *FOR_TO_INST_OWN* and *FOR_TO_INST_BREADTH*. *IA_MEASURE~i,t~* is, similarly, measured by one of the various proxy variables of information asymmetry: *BA_SPREAD*, *PIN~BHL~*, *PIN~BH~*, *PIN~EHO~*, *PIN~DY~*, *PIN~DY_ADJ~*, *MIA*, *VCV~USD~*, *VCV~MKT~* and *VCV~TO~*. *BM_RATIO~i,t~*, *LEVERAGE~i,t~* and *ROA~i,t~* are control variables of firm-characteristics. *YEAR~t~* and *INDUSTRY~n~* control for year and industry specific fixed effects and *\(\varepsilon\)~i,t~* is the residual term. The detailed list of variables and definitions is provided in Table \ref{table_variable_definitions} in Appendix.
+
+Based on the first hypothesis, I want to test the effect of information asymmetry on foreign ownership. Hence, I include an ownership-specific variable as the dependent variable and an information asymmetry measure as the main explanatory variable. The main challenge in the model specification of the baseline setting is to include control variables that explain variation in foreign ownership, but are not correlated with information asymmetry measures. Following previous studies of foreign and institutional ownership, I first filter the potential group of control variables by selecting only the most commonly used variables that explain variation in foreign or institutional ownership. @kang1997there, @dahlquist2001direct, @jiang2004foreign and @baik2013liability find in Japanese, Swedish and the US markets that foreign investors prefer firms with large market capitalization and low book-to-market ratio. Furthermore, @kang1997there and @jiang2004foreign find that leverage has a negative effect on foreign ownership, whereas return on assets (ROA) has positive.
+
+Next, based on the correlation results in Table \ref{table_cor_matrix}, I decide to exclude the logarithm of market capitazaliton (*LOG_MKT_CAP*), as it has approximately over -0.60 correlation between information asymmetry measures. Otherwise, there is a potential risk of multicollinearity, which may result in invalid coefficients of other explanatory variables and large standard errors. Other control variables have relatively small or moderate correlations with information asymmetry measures and are therefore kept in the regression model.
+
+I also decide to include fixed effects for year and industry to control for time variation and firm characteristics unrelated to information asymmetry or control variables. @baik2013liability find that foreign ownership increases substantially in the US markets between 1990 and 2007 and I find similar trend in my data set during 1997-2017. Also [@lof2018asymmetric]
+
 
 ## 5.2 The difference-in-differences regression model
 
@@ -377,7 +388,7 @@ I examine the effect of an exogenous increase in information asymmetry on foreig
 \begin{equation}
 \label{eq_didh2}
 \begin{aligned}
-FOREIGN\_OWNERSHIP_{i,t} &= \beta_0 + \beta_{1}TREATED_{i} + \beta_{2}AFTER_{t} + \beta_{3}AFTER\times TREATED_{i,t}\\ &+ \beta_{5}BM\_RATIO_{i,t} + \beta_{6}LEVERAGE_{i,t} + \beta_{7}ROA_{i,t}\\ &+ \sum_{t=1}^T YEAR_t + \sum_{n=1}^N INDUSTRY_n + \epsilon_{i,t}
+FOREIGN\_OWNERSHIP_{i,t} &= \beta_0 + \beta_{1}TREATED_{i} + \beta_{2}AFTER_{t} + \beta_{3}AFTER\times TREATED_{i,t}\\ &+ \beta_{5}BM\_RATIO_{i,t} + \beta_{6}LEVERAGE_{i,t} + \beta_{7}ROA_{i,t}\\ &+ YEAR_{t}+ INDUSTRY_{n} + \epsilon_{i,t}
 \end{aligned}
 \end{equation}
 
