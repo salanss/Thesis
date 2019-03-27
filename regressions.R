@@ -239,12 +239,16 @@ did_regression_raw <- read_rds("data/did_regression_raw.rds") %>%
            foreign_own2, FOR_BREADTH = foreign_breadth,  FOR_TO_INST_BREADTH = foreign_breadth2,
          INST_OWN = institutional_own, INST_BREADTH = institutional_breadth,
          LOG_MKT_CAP = log_market_cap, BM_RATIO = book_to_market, LEVERAGE = leverage, ROA = roa,
-         ANALYST_COVERAGE = analyst_coverage)
+         ANALYST_COVERAGE = analyst_coverage) %>% 
+  mutate(FOR_OWN_NONQUASI = FOR_OWN - foreign_own_quasi,
+         FOR_OWN_DEDICATED = foreign_own_dedicated,
+         FOR_OWN_TRANSIENT = foreign_own_transient)
 
 # stargazer(cor_matrix, title = "correlation matrix", out = "correlation_matrix_did.html")
 
 columns_for_summarise <- c("FOR_OWN", "FOR_TO_INST_OWN", "FOR_BREADTH", 
                            "FOR_TO_INST_BREADTH","INST_OWN", "INST_BREADTH", 
+                           "FOR_OWN_NONQUASI", "FOR_OWN_DEDICATED", "FOR_OWN_TRANSIENT",
                            "LOG_MKT_CAP", "BM_RATIO", "LEVERAGE", 
                            "ROA", "ANALYST_COVERAGE")
 
@@ -366,7 +370,8 @@ write_rds(did_regression_summary, "results/did_regression_summary.rds")
 
 # stargazer(did_regression_summary, title = "DiD summary statistics", out = "DiD_summary.html")
   
-did_model1 <- felm(ANALYST_COVERAGE ~ AFTER + TREATED + TREATED * AFTER|year + sic_code|0|year + sic_code,
+did_model1 <- felm(FOR_OWN ~ AFTER + TREATED + TREATED * AFTER + LOG_MKT_CAP + BM_RATIO + 
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
                    data = did_regression_matched1)
 
 did_model2 <- felm(FOR_OWN ~ AFTER + TREATED + TREATED * AFTER + BM_RATIO + 
