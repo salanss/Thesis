@@ -42,6 +42,9 @@ header-includes:
 - \usepackage{tocloft}
 - \usepackage{appendix}
 - \usepackage{hyperref}
+- \usepackage{graphicx}
+- \usepackage{subcaption}
+- \usepackage{mwe}
 ---
 
 \captionsetup{labelfont=bf}
@@ -143,7 +146,8 @@ I gather control variables data from COMPUSTAT quarter fundamentals and CRSP mon
 For the quasi-natural experiment, I limit the time period of the baseline sample to 1997-2010 to cover the time period of 22 distinct brokerage closures from June 2000 until November 2007 listed in Appendix A of @kelly2012testing plus three years of pre- and
 post-treatment periods. I identify stocks that lose an analyst covering the firm because of the brokerage closures which provide a source of exogenous variation for the analyst coverage. The list is matched with an analyst coverage data retrieved from the Institutional Brokers’ Estimate System (IBES) detail file. 
 
-The identification strategy of the quasi-experimental setting by @kelly2012testing is based on argument that in addition to genuine financial distress reasons, brokerage firms respond to adverse changes in revenue making by downsizing or closing their research operations. Hence, the decisions to close research department is driven by business strategy rather than by the characteristics of the firms covered by their analysts. Therefore, the brokerage closure events provide a robust quasi-experimental setting of exogenous reductions in analyst coverage. @kelly2012testing include also events of the brokerage mergers which involve a thorough data processing to eliminate endogeneity problems. Dealing with these endogeneity issues is crucial in order to use merger events as a source of exogenous variation. Due to data availability and potential endogeneity issues, I limit my sample of events to include only brokerage closures.
+The identification strategy of the quasi-experimental setting by @kelly2012testing is based on argument that in addition to genuine financial distress reasons, brokerage firms respond to adverse changes in revenue making by downsizing or closing their research operations. Hence, the decisions to close research department is driven by business strategy rather than by the characteristics of the firms covered by their analysts. Therefore, the brokerage closure events provide a robust quasi-experimental setting of exogenous reductions in analyst coverage. I also rely on the findings of @kelly2012testing and @derrien2013real that an exogenous decrease in analyst coverage causes an increase in information asymmetry
+of the covered firm. @kelly2012testing include also events of the brokerage mergers which involve a thorough data processing to eliminate endogeneity problems. Dealing with these endogeneity issues is crucial in order to use merger events as a source of exogenous variation. Due to data availability and potential endogeneity issues, I limit my sample of events to include only brokerage closures.
 
 To construct the sample of treated firms, I filter out firms that are not covered by analysts employed in the brokerage houses listed in Appendix A of @kelly2012testing. Following @derrien2013real, I require for the treated firms to be covered by an analyst at least one year before the disappearance dates to filter out firms that are not actively covered by the analysts. Furthermore, following @kelly2012testing and @derrien2013real, I only retain firms for which the analyst has not “stopped” his estimate before the corresponding broker disappearance date to eliminate the potential endogeneity problem. For instance, if an analyst terminates the coverage of firms unrelated to the brokerage closure before the disappearance date (e.g. anticipating changes in corporate policies), the decision is endogenous. I collect the data for stopped estimates from IBES stop file. 
 
@@ -300,6 +304,81 @@ ggsave("figures/baseline_development_c.pdf",
 
 As shown in Panel A, the mean of foreign ownership increases from under 2% in 1997 to almost 6% in 2009, which is followed by a steep decline to approximately 3%. After 2009, foreign ownership increases steadily to ca. 5% in 2017. In Panel B, the mean of institutional ownership increases from 30% in 1997 to approximately 55% in 2008, which is followed by a slight downturn. After 2011, institutional ownership increases steadily to over 55%. Interestingly in Panel A, there is an abrupt drop in foreign ownership during the last quarter of 2003 and a immediate bounce back in the next quarter. In Panel B, there is a similar but relatively much smaller drop during the same quarter. This finding, as well as the overall trend, is in line with the results of @glushkov2009institutional. They present the time series development of the mean of institutional ownership classified into five different size quintiles. The drop in the last quarter of 2003 is more affected in the largest bin of stocks, which is consistent with my findings that foreign investors invest more in larger firms.
 
+Nest, I examine the relation between the sample variables used in baseline setting by a correlation matrix. Table \ref{table_cor_matrix} reports correlations of annual firm-level estimates between the variables used in baseline setting. Each value is a time-series average of within-year correlations (Pearson), which mitigates the effect of potential time series trends between variables. The total sample time period extends from 1997 to 2017. However, this holds true for all variables except *PIN~BH~* (1997-2010), *PIN~DY_ADJ~* (1997-2004), *PIN~EHO~* (1997-2001) and *MIA* (1997-2015).
+
+Variable *FOR_OWN* is negatively correlated with all information asymmetry measures, which is consistent with the first hypothesis. The negative relation is the strongest with the different probability of informed trading measures and the least strong with *MIA*. Moreover, the correlations of *FOR_OWN* with the control variables of different firm characteristics is intuitive and in line with the existing literature. Foreign investors tend to own firms with larger market capitalization, greater profitability and smaller book-to-market ratios (i.e. value stocks). However, foreign ownership has a positive relation with leverage, implying a preference of more in-debt firms. The relation between foreign ownership and total institutional ownership is positive, indicating that foreign investors have similar stockholdings with institutional investors in general. Accordingly, *FOR_BREADTH* has similar but stronger correlations with other variables as *FOR_OWN*. 
+
+\begingroup
+\renewcommand\arraystretch{2.5}
+\renewcommand\captionsetup{justification=raggedright,
+                           width=\linewidth}
+```{r, results='asis', message = FALSE, warning=FALSE, eval = TRUE}
+library(tidyverse)
+library(stargazer)
+library(kableExtra)
+library(huxtable)
+baseline_regression_raw <- read_rds("results/baseline_regression_raw.rds")
+cor_raw <- baseline_regression_raw %>% 
+  select(year, FOR_OWN, FOR_TO_INST_OWN, FOR_BREADTH, FOR_TO_INST_BREADTH, INST_OWN, INST_BREADTH,
+         LOG_MKT_CAP:ROA, BA_SPREAD, PIN_BH, PIN_DY_ADJ, PIN_EHO, MIA, VCV_USD) %>%
+  mutate(year = as.integer(year))
+
+years <- cor_raw %>% transmute(year = as.integer(year)) %>% distinct() %>% flatten_chr()
+
+filter1 <- function (df, years){
+  df %>% 
+    filter(year == years) %>% 
+    select(-year)
+}
+
+cor_dfs_raw <- map(years, ~filter1(cor_raw, .x))
+
+map_na_function <- function(df){
+  df %>% 
+  map(~.x) %>% 
+    discard(~all(is.na(.x))) %>%
+    map_df(~.x)
+}
+
+cor_dfs <- map(cor_dfs_raw, ~map_na_function(.x))
+
+cor_matrices <- map(cor_dfs_raw, ~cor(.x, use = "pairwise.complete.obs"))
+
+arr <- array(unlist(cor_matrices), c(dim(cor_matrices[[1]]), length(cor_matrices)))
+
+cor_matrices_mean <- round(rowMeans(x = arr, dims = 2, na.rm = T), 2)
+
+cols <- cor_raw %>% select(-year) %>% colnames()
+
+rownames(cor_matrices_mean) <- cols
+
+colnames(cor_matrices_mean) <- cols
+
+cor_matrices_mean[upper.tri(cor_matrices_mean)] <- ""
+
+cor_matrix <- cor_matrices_mean
+
+rownames(cor_matrix) <- c("FOR\\_OWN", "FOR\\_TO\\_INST\\_OWN",
+                          "FOR\\_BREADTH","FOR\\_TO\\_INST\\_BREADTH",
+                          "INST\\_OWN", "INST\\_BREADTH", "LOG\\_MKT\\_CAP", "BM\\_RATIO", "LEVERAGE",
+                          "ROA", "BA\\_SPREAD", "PIN\\textsubscript{BH}", "PIN\\textsubscript{DY\\_ADJ}",
+                          "PIN\\textsubscript{EHO}", "MIA", "VCV\\textsubscript{USD}")
+
+kable(cor_matrix, "latex", linesep = "", caption.short = "Correlations between baseline sample variables", caption = "\\textbf{Correlations between baseline sample variables}\\newline\\scriptsize This table reports the correlations between different ownership-specific, information asymmetry and firm-characteristic control variables of the baseline sample. Each correlation estimate is the annual average of the within-year of (Pearson) correlations. Of the information asymmetry measures, I include PIN\\textsubscript{BH}, PIN\\textsubscript{DY\\_ADJ}, PIN\\textsubscript{EHO}, MIA and VCV\\textsubscript{USD}. Ownership-specific variables are winsorized at the top to a maximum of 1 and control variables are winsorized at the top and bottom 1\\%. Table \\ref{table_variable_definitions} in Appendix provides a detailed list of variable definitions. Sample: 1997-2017. Sources: CRSP, COMPUSTAT, 13F and the cited authors' websites. \\label{table_cor_matrix}",
+      booktabs = T, align = "c",
+      col.names = c("FOR\\_OWN", "FOR\\_TO\\_INST\\_OWN", "FOR\\_BREADTH", "FOR\\_TO\\_INST\\_BREADTH",
+                    "INST\\_OWN", "INST\\_BREADTH", "LOG\\_MKT\\_CAP", "BM\\_RATIO", "LEVERAGE",
+                    "ROA", "BA\\_SPREAD", "PIN\\textsubscript{BH}", "PIN\\textsubscript{DY\\_ADJ}",
+                    "PIN\\textsubscript{EHO}", "MIA", "VCV\\textsubscript{USD}"),
+      row.names = T,
+      escape = F) %>%
+  kable_styling(latex_options = c("scale_down", "hold position"), position = "left") %>%
+  landscape()
+```
+\endgroup
+
+Information asymmetry measures are strongly positively correlated with each other, which is consistent and implies that they capture similar explanatory characteristics. All control variables except *LOG_MKT_CAP* have relatively weak correlations with the information asymmetry measures, which enables me to use them as explanatory in a regression model with a low risk of multicollinearity. As a result, I choose to exclude *LOG_MKT_CAP* from subsequent regression models due to a potential risk of multicollinearity. 
+
 Finally, I present the summary statistics of sample variables used in the quasi-natural experiment. Table \ref{table_summary_did} presents the summary statistics of sample variables used in the quasi-natural experiment. I report the mean, standard deviation, minimum, first quartile, median, third quartile and maximum of firm-quarter observations of ownership-specific, control and analyst coverage variables. 
 
 ```{r, results='asis', message = FALSE, warning=FALSE, eval = FALSE}
@@ -387,13 +466,13 @@ I examine the effect of an exogenous increase in information asymmetry on foreig
 \begin{equation}
 \label{eq_didh2}
 \begin{aligned}
-FOREIGN_{i,t} &= \beta_0 + \beta_{1}TREATED_{i} + \beta_{2}AFTER_{t} + \beta_{3}AFTER\times TREATED_{i,t}\\ &+ \beta_{5}BM\_RATIO_{i,t} + \beta_{6}LEVERAGE_{i,t} + \beta_{7}ROA_{i,t}\\ &+ YEAR_{t}+ INDUSTRY_{n} + \varepsilon_{i,t}
+FOREIGN_{i,t} &= \beta_0 + \beta_{1}TREATED_{i} + \beta_{2}AFTER_{t} + \beta_{3}AFTER\times TREATED_{i,t}\\ &+ \beta_{4}LOG\_MKT\_CAP_{i,t} + \beta_{5}BM\_RATIO_{i,t} + \beta_{6}LEVERAGE_{i,t}\\ &+ \beta_{7}ROA_{i,t} + YEAR_{t}+ INDUSTRY_{n} + \varepsilon_{i,t}
 \end{aligned}
 \end{equation}
 
-where *FOREIGN~i,t~* is, similarly as in Equation \ref{eq_baseline}, measured by either of the four ownership-specific variables: *FOR_OWN*, *FOR_BREADTH*, *FOR_TO_INST_OWN* and *FOR_TO_INST_BREADTH*. *FOR_OWN* and *FOR_BREADTH*. *TREATED* is a dummy variable indicating observations of firms that are in the treatment group. *AFTER* is defined as a dummy variable for observations that occur after each brokerage closure event. The variable of interest is the interaction term of these two variables *AFTER\texttimes TREATED* or the difference-in-differences estimator which captures the effect of treatment. I include same control variables of firm-characteristics *BM_RATIO~i,t~*, *LEVERAGE~i,t~* and *ROA~i,t~*, as in the baseline setting. *YEAR~t~* and *INDUSTRY~n~* control for brokerage closure year and industry specific fixed effects and *\(\varepsilon\)~i,t~* is the residual term. The detailed list of variables and definitions is provided in Table \ref{table_variable_definitions} in Appendix.
+where *FOREIGN~i,t~* is, similarly as in Equation \ref{eq_baseline}, measured by either of the four ownership-specific variables: *FOR_OWN*, *FOR_BREADTH*, *FOR_TO_INST_OWN* and *FOR_TO_INST_BREADTH*. *FOR_OWN* and *FOR_BREADTH*. *TREATED* is a dummy variable indicating observations of firms that are in the treatment group. *AFTER* is defined as a dummy variable for observations that occur after each brokerage closure event. The variable of interest is the interaction term of these two variables *AFTER\texttimes TREATED* or the difference-in-differences estimator which captures the effect of treatment. I include same control variables of firm-characteristics *BM_RATIO~i,t~*, *LEVERAGE~i,t~* and *ROA~i,t~*, as in the baseline setting and logarithm of market capitalization (*LOG_MKT_CAP*). Since there is no potential risk of multicollinearity due to information asymmetry measure as an explanatory variable, I decide to include *LOG_MKT_CAP* to the model. *YEAR~t~* and *INDUSTRY~n~* control for brokerage closure year and industry specific fixed effects and *\(\varepsilon\)~i,t~* is the residual term. The detailed list of variables and definitions is provided in Table \ref{table_variable_definitions} in Appendix.
 
-Since I want to test the causal effect of information asymmetry in hypotheses 2 and 3, I choose a difference-in-differences approach in the model specification. It ensures that the difference in foreign ownership between treatment and control groups is not due to cross-sectional heterogeneity or time series patterns affecting both groups. Rather, the model enables to examine whether the changes in foreign ownership are caused by exogenous shocks in asymmetric information, if the treatment and control groups are similar before the event. The crucial assumption here is the pre-treatment parallel trend between the groups, which I examine along with the results in Section 6.
+Since I want to test the causal effect of information asymmetry in hypotheses 2 and 3, I choose a difference-in-differences approach in the model specification. It ensures that the difference in foreign ownership between treatment and control groups is not due to cross-sectional heterogeneity or time series patterns affecting both groups. Rather, the model enables to examine whether the changes in foreign ownership are caused by exogenous shocks in asymmetric information, if the treatment and control groups are similar before the event. The crucial assumption here is the pre-treatment parallel trend between the groups, which I examine along with the results in Section 6. I also rely on the findings of @kelly2012testing and @derrien2013real that an exogenous decrease in analyst coverage due to the brokerage closures causes an increase in information asymmetry of the covered firm.
 
 # 6 Results
 
@@ -401,84 +480,7 @@ In this section, I report the empirical results of the effect of information asy
 
 ## 6.1 The results of the baseline setting
 
-In this section, I report the results of the baseline setting. First, I examine the relation between the variables used in baseline setting by a correlation matrix. Table \ref{table_cor_matrix} reports the results of annual firm-level correlations between the variables used in baseline panel regression model (Equation \ref{eq_baseline}). Each value is a time-series average of within-year correlations (Pearson). The total sample time period extends from 1997 to 2017. However, this holds true for all variables except *PIN~DY~* (1997-2004), *PIN~DY_ADJ~* (1997-2004), *PSOS~DY~* (1997-2004),
-*PIN~EHO~* (1997-2001), *PIN~BHL~* (1997-2010), *PIN~BH~* (1997-2010), MIA (1997-2015).
-
-Variable *FOR_OWN* is negatively correlated with all information asymmetry measures, which is consistent with the first hypothesis. The negative relation is the strongest with the different probability of informed trading measures and the least strong with *MIA*. Moreover, the correlations of *FOR_OWN* with the control variables of different firm characteristics is intuitive and in line with the existing literature. Foreign investors tend to own firms with larger market capitalization, greater profitability and smaller book-to-market ratios (i.e. value stocks). However, foreign ownership has a positive relation with leverage, implying a preference of more in-debt firms. The relation between foreign ownership and total institutional ownership is positive, indicating that foreign investors have similar stockholdings with institutional investors in general. Accordingly, *FOR_BREADTH* has similar but stronger correlations with other variables as *FOR_OWN*. 
-
-Information asymmetry measures are strongly positively correlated with each other, which is consistent and implies that they capture similar explanatory characteristics. Only *PSOS~DY~* has a negative correlation with another information asymmetry measure *MIA* and largely explained by the fact that it is a measure of illiquidity unrelated to asymmetric information [@duarte2009pin]. All control variables except *LOG_MKT_CAP* have relatively weak correlations with the information asymmetry measures, which enables me to use them as explanatory in a regression model with a low risk of multicollinearity. As a result, I choose to exclude *LOG_MKT_CAP* from subsequent regression models due to a potential risk of multicollinearity. 
-
-\begingroup
-\renewcommand\arraystretch{2.5}
-\renewcommand\captionsetup{justification=raggedright,
-                           width=\linewidth}
-```{r, results='asis', message = FALSE, warning=FALSE, eval = TRUE}
-library(tidyverse)
-library(stargazer)
-library(kableExtra)
-library(huxtable)
-baseline_regression_raw <- read_rds("results/baseline_regression_raw.rds")
-cor_raw <- baseline_regression_raw %>% 
-  select(year, FOR_OWN, FOR_TO_INST_OWN, FOR_BREADTH, FOR_TO_INST_BREADTH, INST_OWN, INST_BREADTH,
-         LOG_MKT_CAP:ROA, BA_SPREAD, PIN_BH, PIN_DY_ADJ, PIN_EHO, MIA, VCV_USD) %>%
-  mutate(year = as.integer(year))
-
-years <- cor_raw %>% transmute(year = as.integer(year)) %>% distinct() %>% flatten_chr()
-
-filter1 <- function (df, years){
-  df %>% 
-    filter(year == years) %>% 
-    select(-year)
-}
-
-cor_dfs_raw <- map(years, ~filter1(cor_raw, .x))
-
-map_na_function <- function(df){
-  df %>% 
-  map(~.x) %>% 
-    discard(~all(is.na(.x))) %>%
-    map_df(~.x)
-}
-
-cor_dfs <- map(cor_dfs_raw, ~map_na_function(.x))
-
-cor_matrices <- map(cor_dfs_raw, ~cor(.x, use = "pairwise.complete.obs"))
-
-arr <- array(unlist(cor_matrices), c(dim(cor_matrices[[1]]), length(cor_matrices)))
-
-cor_matrices_mean <- round(rowMeans(x = arr, dims = 2, na.rm = T), 2)
-
-cols <- cor_raw %>% select(-year) %>% colnames()
-
-rownames(cor_matrices_mean) <- cols
-
-colnames(cor_matrices_mean) <- cols
-
-cor_matrices_mean[upper.tri(cor_matrices_mean)] <- ""
-
-cor_matrix <- cor_matrices_mean
-
-rownames(cor_matrix) <- c("FOR\\_OWN", "FOR\\_TO\\_INST\\_OWN",
-                          "FOR\\_BREADTH","FOR\\_TO\\_INST\\_BREADTH",
-                          "INST\\_OWN", "INST\\_BREADTH", "LOG\\_MKT\\_CAP", "BM\\_RATIO", "LEVERAGE",
-                          "ROA", "BA\\_SPREAD", "PIN\\textsubscript{BH}", "PIN\\textsubscript{DY\\_ADJ}",
-                          "PIN\\textsubscript{EHO}", "MIA", "VCV\\textsubscript{USD}")
-
-kable(cor_matrix, "latex", linesep = "", caption.short = "Correlations between sample variables", caption = "\\textbf{Correlations between sample variables}\\newline\\scriptsize This table reports the correlations between different institutional ownership, information asymmetry and accounting related control variables of the baseline sample. Each correlation estimate is the annual average of the within-year of (Pearson) correlations. \\textit{FOR\\_OWN} and \\textit{INST\\_OWN} are the annual averages of the firm's shares held by (foreign) institutions at the end of each quarter of the year divided by the firm's total shares outstanding at the end of each quarter. \\textit{FOR\\_BREADTH} and \\textit{INST\\_BREADTH} are the annual averages of the number of the firm's distinct (foreign) institutional shareholders at the end of each quarter divided by the total number of distinct institutional shareholders in 13F database at the end of each quarter (Chen et al., 2002; Lof and Bommel, 2018). The annual firm-levels of information asymmetry are mainly estimated by various researchers. \\textit{BA\\_SPREAD} is the annual average of the daily firm-level observations of bid-ask spreads (i.e. the difference of ask and bid price divided by the closing price). \\textit{PIN\\textsubscript{BHL}} is estimated by Brown et al (2004). \\textit{PIN\\textsubscript{BH}} is estimated by Brown and Hillegeist (2007). \\textit{PIN\\textsubscript{EHO}} is estimated by Easley et al. (2010). \\textit{PIN\\textsubscript{DY}}, \\textit{PIN\\textsubscript{DY\\_ADJ}} and the illiquidity measure \\textit{PSOS\\textsubscript{DY}} are estimated by Duarte and Young (2009). \\textit{MIA} is the annual average of the firm-day observations estimated by Johnson and So (2017). \\textit{VCV\\textsubscript{USD}}, \\textit{VCV\\textsubscript{MKT}} and \\textit{VCV\\textsubscript{TO}} are the fractions of the annual standard deviation of daily firm-level trading volumes and the annual average of daily firm-level trading volumes Lof and Bommel (2018). Trading volumes for \\textit{VCV\\textsubscript{USD}}, \\textit{VCV\\textsubscript{MKT}} and \\textit{VCV\\textsubscript{TO}} are calculated in US dollars, as a fraction of total market volume on the same day and as a daily turnover, respectively. The accounting related variables are \\textit{LOG\\_MKT\\_CAP} (the annual average of the firm-quarter observations of logarithm of market capitalization) \\textit{BM\\_RATIO} (the annual average of the firm-quarter observations of book equity divided by market capitalization), \\textit{LEVERAGE} (the annual average of the firm-quarter observations of debt divided by total assets) and \\textit{ROA} (the annual average of the firm-quarter observations of net income divided by total assets. All institutional ownership and breadth variables and control variables are winsorized at the top and bottom 1\\%. Sample: 1997-2017. Sources: CRSP, COMPUSTAT, 13F and the cited authors' websites. \\label{table_cor_matrix}",
-      booktabs = T, align = "c",
-      col.names = c("FOR\\_OWN", "FOR\\_TO\\_INST\\_OWN", "FOR\\_BREADTH", "FOR\\_TO\\_INST\\_BREADTH",
-                    "INST\\_OWN", "INST\\_BREADTH", "LOG\\_MKT\\_CAP", "BM\\_RATIO", "LEVERAGE",
-                    "ROA", "BA\\_SPREAD", "PIN\\textsubscript{BH}", "PIN\\textsubscript{DY\\_ADJ}",
-                    "PIN\\textsubscript{EHO}", "MIA", "VCV\\textsubscript{USD}"),
-      row.names = T,
-      escape = F) %>%
-  kable_styling(latex_options = c("scale_down", "hold_position"), position = "left") %>%
-  landscape()
-```
-\endgroup
-
-
-I extend the analysis of the correlation matrix by examining the effect of information asymmetry on foreign ownership in a panel regression setting The dependent variable in every regression model FOR_OWN is the annual average of the foreign ownership for each stock. Different information asymmetry measures are used separately as explanatory variables. The control variables are different measures of firm characteristics. I also include industry and year fixed effects. Table \ref{table_h1_base} reports the results.
+In this section, I report the results of the baseline setting. First, I examine the effect of information asymmetry on foreign ownership in a panel regression setting The dependent variable in every regression model FOR_OWN is the annual average of the foreign ownership for each stock. Different information asymmetry measures are used separately as explanatory variables. The control variables are different measures of firm characteristics. I also include industry and year fixed effects. Table \ref{table_h1_base} reports the results.
 
 Similar to the findings of correlations in Table \ref{table_cor_matrix}, the empirical results of the panel regression models in Table \ref{table_h1_base} support Hypothesis 1 and the findings by @jiang2004foreign, @baik2013liability and @batten2015foreign of the negative relation between foreign ownership and asymmetric information. In Panel A, The regression coefficients of information asymmetry measures are negative in all models and statistically significant at the 1% level in all regression models except with bid-ask spread as the information asymmetry measure. Based on column (3), a 1 percentage point increase in information asymmetry (PIN~DY_ADJ~) leads to a decrease of about 0.10% in foreign ownership *ceteris paribus*. Based on all models, a 1 percentage point increase in information asymmetry results, on average, in a decrease of about 0.05% in foreign ownership *ceteris paribus*. Overall, the negative relation is stronger with the probability of informed trading measures than with bid-ask spread, multimarket information asymmetry or volume coefficient of variation. Based on the results of adjusted R^2^, models with different probability of informed trading measures and MIA have the best explanatory power.
 
@@ -568,12 +570,12 @@ starpolishr::star_tex_write(a, file = "my_tex_file2.tex", headers = TRUE)
 
 
 \begingroup
-\renewcommand\arraystretch{0.55}
+\renewcommand\arraystretch{0.65}
 \begin{landscape}
 \captionsetup{width=1.02\linewidth}
 \scriptsize
 \begin{longtable}{@{\extracolsep{5pt}}lccccccccccc}
-  \caption[Panel regression analysis of foreign ownership and foreign breadth]{\textbf{Panel regression analysis of foreign ownership and foreign breadth}\newline\scriptsize This table reports the results of the annual firm-level panel regression models. In Panel A, the dependent variable (\textit{FOR\_OWN}) is the annual average of the firm's shares held by foreign institutions at the end of each quarter divided by the firm's total shares outstanding at the end of each quarter. In Panel B, the dependent variable (\textit{FOR\_BREADTH}) is the annual average of the number of the firm's distinct foreign institutional shareholders at the end of each quarter divided by the total number of distinct institutional shareholders in 13F database at the end of each quarter (Chen et al., 2002; Lof and Bommel, 2018). The explanatory variables of interest are the various annual firm-level estimates of information asymmetry. \textit{BA\_SPREAD} is the annual average of the daily firm-level observations of bid-ask spreads (i.e. the difference of ask and bid price divided by the closing price). \textit{PIN\textsubscript{BHL}} is estimated by Brown et al (2004). \textit{PIN\textsubscript{BH}} is estimated by Brown and Hillegeist (2007). \textit{PIN\textsubscript{EHO}} is estimated by Easley et al. (2010). \textit{PIN\textsubscript{DY}}, \textit{PIN\textsubscript{DY\_ADJ}} and the illiquidity measure \textit{PSOS\textsubscript{DY}} are estimated by Duarte and Young (2009). \textit{MIA} is the annual average of the firm-day observations estimated by Johnson and So (2017). \textit{VCV\textsubscript{USD}}, \textit{VCV\textsubscript{MKT}} and \textit{VCV\textsubscript{TO}} are the fractions of the annual standard deviation of daily firm-level trading volumes and the annual average of daily firm-level trading volumes Lof and Bommel (2018). Trading volumes for \textit{VCV\textsubscript{USD}}, \textit{VCV\textsubscript{MKT}} and \textit{VCV\textsubscript{TO}} are calculated in US dollars, as a fraction of total market volume on the same day and as a daily turnover, respectively. The control variables are \textit{BM\_RATIO} (the annual average of the firm-quarter observations of book equity divided by market capitalization), \textit{LEVERAGE} (the annual average of the firm-quarter observations of debt divided by total assets) and \textit{ROA} (the annual average of the firm-quarter observations of net income divided by total assets. I include industry and year fixed effects in all regressions. Standard errors are clustered by the industry and year level and reported in parentheses. All institutional ownership, breadth and control variables are winsorized at the top and bottom 1\%. *, ** and *** denote the statistical significance at the 10\%, 5\% and 1\% level, respectively. Sample: 1997-2017. Sources: CRSP, COMPUSTAT, 13F and the cited authors' websites.}
+  \caption[Panel regression analysis of foreign ownership and foreign breadth]{\textbf{Panel regression analysis of foreign ownership and foreign breadth}\newline\scriptsize This table reports the results of the annual firm-level panel regression models. In Panel A, the dependent variable is foreign ownership (\textit{FOR\_OWN}). In Panel B, the dependent variable is foreign breadth (\textit{FOR\_BREADTH}). The explanatory variables of main interest are the various annual firm-level estimates of information asymmetry. Other explanatory variables are firm-characteristic control variables. Ownership-specific variables are winsorized at the top to a maximum of 1. Control variables are winsorized at the top and bottom by 1\%. Table \ref{table_variable_definitions} in Appendix provides a detailed list of variable definitions. I include industry and year fixed effects in all regressions. Standard errors are clustered by the industry and year level and reported in parentheses. *, ** and *** denote the statistical significance at the 10\%, 5\% and 1\% level, respectively. Sample: 1997-2017. Sources: CRSP, COMPUSTAT, 13F and the cited authors' websites.}
    \label{table_h1_base} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
@@ -759,12 +761,12 @@ starpolishr::star_tex_write(a, file = "my_tex_file3.tex", headers = TRUE)
 ```
 
 \begingroup
-\renewcommand\arraystretch{0.54}
+\renewcommand\arraystretch{0.65}
 \begin{landscape}
 \captionsetup{width=1.02\linewidth}
 \scriptsize
 \begin{longtable}{@{\extracolsep{5pt}}lccccccccccc}
-  \caption[Panel regression analysis of foreign-to-institution ownership and breadth ratios]{\textbf{Panel regression analysis of foreign-to-institution ownership and breadth ratios}\newline\scriptsize This table reports the results of the annual firm-level panel regression models. In Panel A, the dependent variable (\textit{FOR\_TO\_INST\_OWN}) is the annual average of the firm's shares held by foreign institutions at the end of each quarter divided by the firm's shares held by institutions in total at the end of each quarter. In Panel B, the dependent variable (\textit{FOR\_TO\_INST\_BREADTH}) is the annual average of the distinct number of the firm's foreign institutional investors at the end of each quarter divided by the distinct number of the firm's institutional investors in total at the end of each quarter. The explanatory variables of interest are the various annual firm-level estimates of information asymmetry. \textit{BA\_SPREAD} is the annual average of the daily firm-level observations of bid-ask spreads (i.e. the difference of ask and bid price divided by the closing price). \textit{PIN\textsubscript{BHL}} is estimated by Brown et al (2004). \textit{PIN\textsubscript{BH}} is estimated by Brown and Hillegeist (2007). \textit{PIN\textsubscript{EHO}} is estimated by Easley et al. (2010). \textit{PIN\textsubscript{DY}}, \textit{PIN\textsubscript{DY\_ADJ}} and the illiquidity measure \textit{PSOS\textsubscript{DY}} are estimated by Duarte and Young (2009). \textit{MIA} is the annual average of the firm-day observations estimated by Johnson and So (2017). \textit{VCV\textsubscript{USD}}, \textit{VCV\textsubscript{MKT}} and \textit{VCV\textsubscript{TO}} are the fractions of the annual standard deviation of daily firm-level trading volumes and the annual average of daily firm-level trading volumes Lof and Bommel (2018). Trading volumes for \textit{VCV\textsubscript{USD}}, \textit{VCV\textsubscript{MKT}} and \textit{VCV\textsubscript{TO}} are calculated in US dollars, as a fraction of total market volume on the same day and as a daily turnover, respectively. The control variables are \textit{BM\_RATIO} (the annual average of the firm-quarter observations of book equity divided by market capitalization), \textit{LEVERAGE} (the annual average of the firm-quarter observations of debt divided by total assets) and \textit{ROA} (the annual average of the firm-quarter observations of net income divided by total assets. I include industry and year fixed effects in all regressions. Standard errors are clustered by the industry and year level and reported in parentheses. Foreign ownership and breadth and control variables are winsorized at the top and bottom 1\%. *, ** and *** denote the statistical significance at the 10\%, 5\% and 1\% level, respectively. Sample: 1997-2017. Sources: CRSP, COMPUSTAT, 13F and the cited authors' websites.}
+  \caption[Panel regression analysis of foreign-to-institution ownership and breadth ratios]{\textbf{Panel regression analysis of foreign-to-institution ownership and breadth ratios}\newline\scriptsize This table reports the results of the annual firm-level panel regression models. In Panel A, the dependent variable is foreign-to-institution ownership (\textit{FOR\_TO\_INST\_OWN}). In Panel B, the dependent variable is foreign-to-institution breadth (\textit{FOR\_TO\_INST\_BREADTH}). The explanatory variables of main interest are the various annual firm-level estimates of information asymmetry. Other explanatory variables are firm-characteristic control variables. Ownership-specific variables are winsorized at the top to a maximum of 1. Control variables are winsorized at the top and bottom by 1\%. Table \ref{table_variable_definitions} in Appendix provides a detailed list of variable definitions. I include industry and year fixed effects in all regressions. Standard errors are clustered by the industry and year level and reported in parentheses. *, ** and *** denote the statistical significance at the 10\%, 5\% and 1\% level, respectively. Sample: 1997-2017. Sources: CRSP, COMPUSTAT, 13F and the cited authors' websites.}
   \label{table_h1_for_to_inst} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
@@ -1061,8 +1063,26 @@ ggsave("figures/parallel_trend2b.pdf",
 
 \begin{figure}[!htb]
 \centering
-\includegraphics[width = \linewidth]{figures/parallel_trend2a.pdf}
-\includegraphics[width = \linewidth]{figures/parallel_trend2b.pdf}
+\begin{subfigure}{.475\textwidth}
+  \centering
+  \includegraphics[width=\textwidth]{figures/parallel_trend1a.pdf}
+\end{subfigure}
+\hfill
+\begin{subfigure}{.475\textwidth}
+  \centering
+  \includegraphics[width=\textwidth]{figures/parallel_trend1b.pdf}
+\end{subfigure}
+\hfill
+\begin{subfigure}{.475\textwidth}
+  \centering
+  \includegraphics[width=\textwidth]{figures/parallel_trend2a.pdf}
+\end{subfigure}
+\hfill
+\begin{subfigure}{.475\textwidth}
+  \centering
+  \includegraphics[width=\textwidth]{figures/parallel_trend2b.pdf}
+\end{subfigure}
+\hfill
 \caption[Foreign-to-institution ownership and breadth between the treatment and control groups around brokerage closures]{\textbf{Foreign-to-institution ownership and breadth between the treatment and control groups around brokerage closures}\newline\scriptsize This figure presents the evolution of the mean of firm-quarter observations of foreign ownership (\textit{FOR\_OWN}) in Panel A and foreign breadth (\textit{FOR\_BREADTH}) in Panel B during the twelve quarters (i.e. three years) before and after an exogenous decrease in analyst coverage due to the 22 distinct brokerage closures listed by \citet{kelly2012testing}. I impose a three-month gap over the events so that foreign ownership estimates are from quarters -13:-1 and 1:13, with the brokerage closure occurring in the quarter 0. The sample consists of 1603 distinct treated firms and 3521 control firms. Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). The firm-quarter observations of foreign ownership and foreign breadth are winsorized at the top and bottom 1\%. Sample period: 1997- 2010. Sources: CRSP, COMPUSTAT, 13F and IBES.}
 \label{fig_parallel_trend2}
 \end{figure}
@@ -1165,6 +1185,8 @@ Adjusted R$^{2}$ & 0.166 & 0.175 & 0.178 & 0.213 & 0.233 & 0.247 \\
 
 ## 6.3 The results of the quasi-natural experiment by institutional ownership and analyst coverage
 
+In this section, I test the causal effect of asymmetric information on foreign ownership in a subset analysis. As hypothesized in Hypothesis 3, I state that the negative causal effect should be stronger in firms with low institutional ownership or low analyst coverage. I test this with the similar model as in Section 6.2, but sample divided to the lowest and highest quartiles of analyst coverage and institutional ownership. Table \ref{table_h3_1} reports the results of foreign ownership (*FOR_OWN*) and breadth (*FOR_BREADTH*).
+
 ``` {r, results='asis', echo = FALSE, eval=TRUE}
 
 library(tidyverse)
@@ -1216,17 +1238,17 @@ did_regression_matched1_low_analyst <- did_regression_matched1 %>%
 did_regression_matched1_high_analyst <- did_regression_matched1 %>% 
   filter(analyst_percent >= 0.75)
 
-did_model1 <- felm(DOM_TO_INST_OWN ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+did_model1 <- felm(FOR_OWN ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
                      LEVERAGE + ROA|year + sic_code|0|year + sic_code,
-                   data = did_regression_matched1)
+                   data = did_regression_matched1_low_inst)
 
-did_model2 <- felm(DOM_TO_INST_OWN ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+did_model2 <- felm(FOR_OWN ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
                      LEVERAGE + ROA|year + sic_code|0|year + sic_code,
-                   data = did_regression_matched2)
+                   data = did_regression_matched1_high_inst)
 
-did_model3 <- felm(DOM_TO_INST_OWN ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+did_model3 <- felm(FOR_OWN ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
                      LEVERAGE + ROA|year + sic_code|0|year + sic_code,
-                   data = did_regression_matched3)
+                   data = did_regression_matched1_low_analyst)
 
 did_model4 <- felm(FOR_OWN ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
                      LEVERAGE + ROA|year + sic_code|0|year + sic_code,
@@ -1252,7 +1274,7 @@ did_list <- list(did_model1, did_model2, did_model3, did_model4,
                  did_model5, did_model6, did_model7, did_model8)
 
 stargazer(did_list, title = "\\textbf{Difference-in-differences regression analysis of foreign ownership and breadth by institutional ownership and analyst coverage}\\newline\\small This table reports the results",
-          label = "table_h2_2",
+          label = "table_h3_1",
           header = F,
           dep.var.labels =c("FOR\\_OWN", "FOR\\_BREADTH"),
           column.labels = rep(c("IO < Q\\textsubscript{0.25}", "IO > Q\\textsubscript{0.75}", "AC < Q\\textsubscript{0.25}", "AC > Q\\textsubscript{0.75}"), times = 2),
@@ -1274,7 +1296,7 @@ stargazer(did_list, title = "\\textbf{Difference-in-differences regression analy
 \captionsetup{width=1.0\linewidth}
 \begin{table}[htbp]
   \caption[Difference-in-differences regression analysis of foreign ownership and breadth with low institutional ownership and analyst coverage]{\textbf{Difference-in-differences regression analysis of foreign ownership and breadth with low institutional ownership and analyst coverage}\newline\scriptsize This table reports the results of } 
-  \label{table_h2_2} 
+  \label{table_h3_1} 
 \scriptsize
 \begin{tabular}{@{\extracolsep{5pt}}lcccccc} 
 \\[-1.8ex]\hline 
@@ -1307,6 +1329,8 @@ Adjusted R$^{2}$ & 0.356 & 0.377 & 0.318 & 0.400 & 0.472 & 0.539 \\
 \multicolumn{7}{r}{} \\ 
 \end{tabular} 
 \end{table}
+
+
 
 \clearpage
 \addcontentsline{toc}{section}{References}
