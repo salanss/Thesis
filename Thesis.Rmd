@@ -482,7 +482,6 @@ In this section, I report the empirical results of the effect of information asy
 
 In this section, I report the results of the baseline setting. First, I examine the effect of information asymmetry on foreign ownership in a panel regression setting The dependent variable in every regression model FOR_OWN is the annual average of the foreign ownership for each stock. Different information asymmetry measures are used separately as explanatory variables. The control variables are different measures of firm characteristics. I also include industry and year fixed effects. Table \ref{table_h1_base} reports the results.
 
-Similar to the findings of correlations in Table \ref{table_cor_matrix}, the empirical results of the panel regression models in Table \ref{table_h1_base} support Hypothesis 1 and the findings by @jiang2004foreign, @baik2013liability and @batten2015foreign of the negative relation between foreign ownership and asymmetric information. In Panel A, The regression coefficients of information asymmetry measures are negative in all models and statistically significant at the 1% level in all regression models except with bid-ask spread as the information asymmetry measure. Based on column (3), a 1 percentage point increase in information asymmetry (PIN~DY_ADJ~) leads to a decrease of about 0.10% in foreign ownership *ceteris paribus*. Based on all models, a 1 percentage point increase in information asymmetry results, on average, in a decrease of about 0.05% in foreign ownership *ceteris paribus*. Overall, the negative relation is stronger with the probability of informed trading measures than with bid-ask spread, multimarket information asymmetry or volume coefficient of variation. Based on the results of adjusted R^2^, models with different probability of informed trading measures and MIA have the best explanatory power.
 
 ```{r, results='asis', message = FALSE, warning=FALSE, eval = FALSE}
 ## baseline regression table h1 panel a: FOR_OWN and panel b:FOR_BREADTH
@@ -570,7 +569,7 @@ starpolishr::star_tex_write(a, file = "my_tex_file2.tex", headers = TRUE)
 
 
 \begingroup
-\renewcommand\arraystretch{0.65}
+\renewcommand\arraystretch{0.63}
 \begin{landscape}
 \captionsetup{width=1.02\linewidth}
 \scriptsize
@@ -584,7 +583,7 @@ starpolishr::star_tex_write(a, file = "my_tex_file2.tex", headers = TRUE)
  & \multicolumn{11}{c}{FOR\_OWN} \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) & (9) & (10) & (11)\\ 
 \hline \\[-1.8ex] 
-\\[-2.0ex] \multicolumn{12}{@{} l}{Panel A: Foreign ownership}
+\\[-2.0ex] \multicolumn{12}{@{} l}{\textit{Panel A: Foreign ownership}}
  \\
  \\[-1.5ex]
 BA\_SPREAD & $-$0.265$^{***}$ &  &  &  &  &  &  &  &  &  &  \\ 
@@ -620,13 +619,14 @@ Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Y
 Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
 Observations & 109,907 & 15,021 & 15,021 & 15,021 & 9,496 & 78,009 & 78,118 & 20,717 & 94,298 & 94,298 & 94,298 \\ 
 Adjusted R$^{2}$ & 0.156 & 0.349 & 0.343 & 0.312 & 0.331 & 0.190 & 0.199 & 0.262 & 0.177 & 0.177 & 0.176 \\ 
+\hline \\[-1.8ex]
 \\[-1.83ex] 
  & \multicolumn{11}{c}{\textit{Dependent variable:}} \\ 
 \cline{2-12} 
  & \multicolumn{11}{c}{FOR\_BREADTH} \\ 
 \\[-1.83ex] & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) & (9) & (10) & (11)\\ 
 \hline \\[-1.83ex]
-\\[-2.0ex] \multicolumn{12}{@{} l}{Panel B: Foreign breadth}
+\\[-2.0ex] \multicolumn{12}{@{} l}{\textit{Panel B: Foreign breadth}}
  \\
  \\[-1.5ex]
  BA\_SPREAD & $-$0.036$^{***}$ &  &  &  &  &  &  &  &  &  &  \\ 
@@ -669,6 +669,8 @@ Adjusted R$^{2}$ & 0.267 & 0.406 & 0.426 & 0.342 & 0.449 & 0.375 & 0.365 & 0.488
 \end{landscape}
 \endgroup
 
+Similar to the findings of correlations in Table \ref{table_cor_matrix}, the empirical results of the panel regression models in Table \ref{table_h1_base} support Hypothesis 1 and the findings by @jiang2004foreign, @baik2013liability and @batten2015foreign of the negative relation between foreign ownership and asymmetric information. In Panel A, The regression coefficients of information asymmetry measures are negative in all models and statistically significant at the 1% level in all regression models except with bid-ask spread as the information asymmetry measure. Based on column (3), a 1 percentage point increase in information asymmetry (PIN~DY_ADJ~) leads to a decrease of about 0.10% in foreign ownership *ceteris paribus*. Based on all models, a 1 percentage point increase in information asymmetry results, on average, in a decrease of about 0.05% in foreign ownership *ceteris paribus*. Overall, the negative relation is stronger with the probability of informed trading measures than with bid-ask spread, multimarket information asymmetry or volume coefficient of variation. Based on the results of adjusted R^2^, models with different probability of informed trading measures and MIA have the best explanatory power.
+
 The control variables in Panel A are mainly statistically significant and in line with the existing literature. Book-to-market ratio (*BM_RATIO*) is negative and statistically significant at the 1% level in all regression models except in the model with MIA as the explanatory variable. This implies that foreign investors are driven way of the stocks with relatively high book-to-market ratio (i.e. value stocks). Book-to-market ratio is used as a measure of risk in many asset pricing models [e.g., @fama1993common; @carhart1997persistence; @pastor2003liquidity], which, in addition to my results, support the findings of @ko2007characteristics and @lin2003foreign that foreign investors avoid riskier firms with high book-to-market ratios. Moreover, the regression coefficients of ROA are positive and statistically significant at the 1% level in all models, implying that foreign investors prefer firms with positive probability. Based on column (1), an increase of 100 basis point in return on assets results in an increase of about 0.09 percentage points in foreign ownership *ceteris paribus*. The regression coefficients of leverage are mainly positive. LEVERAGE is positive and statistically significant in six out of eleven models, positive and statistically insignificant in four out of eleven models and negative and statistically significant once. Hence, an increase in leverage is mostly associated with an increase in foreign ownership. The results mostly contradicts the findings of foreign investors' preference on low debt ratio firms by @kang1997there and @dahlquist2001direct.
 
 Panel B reports the results of regressing foreign breadth on information asymmetry measures. The results follow similar pattern with foreign ownership results in Panel A. The regression coefficients of coefficients of information asymmetry are negative in all models and statistically significant at the 1% level in all models except with bid-ask spread as the information asymmetry measure. Based on column (8), a 100 basis point increase in information asymmetry (*MIA*) is associated with ca. 0.03 percentage points decrease in foreign breadth *ceteris paribus*. In general, a 1 percentage point increase in information asymmetry results in 0.001-0.03 percentage points decrease of foreign ownership. Based on adjusted R^2^, the explanatory power is, in general, better than with models in Panel A. Notably, the model with *MIA* clearly explains variation better than other models, which differs from the results in Panel A. 
@@ -676,6 +678,10 @@ Panel B reports the results of regressing foreign breadth on information asymmet
 In addition to information asymmetry measures, the control variables in Panel B follow similar pattern with Panel A. Book-to-market ratio is negative and statistically significant at the 1% level in all models, leverage is mainly positive and statistically significant and return on assets is positive and statistically significant at the 1% level in all models. Similar to Panel A, the results support the findings of @ko2007characteristics and @lin2003foreign that foreign investors seek stocks with comfortable characteristics except the results of leverage. In general, the results of Table \ref{table_h1_base} support strongly the first hypothesis of inverse relation between foreign ownership and information asymmetry.
 
 In addition to inspecting general market-level foreign ownership and breadth measures, I extend the analysis by comparing foreign ownership against institutional ownership for a given stock in a given time. In particular, I define a variable *FOR_TO_INST_OWN* which is a measure of the annual average of the firm's shares held by foreign institutions at the end of each quarter divided by the firm's shares held by total institutions at the end of each quarter. This enables me to examine whether foreign institutional shareholders have stronger or weaker dislike of information intensive stocks than institutional shareholders in general. Similarly, I define a variable *FOR_TO_INST_BREADTH* which is a measure of the annual average of the number of the firm's distinct foreign institutional shareholders at the end of each quarter divided by the number of the firm's of distinct institutional shareholders at the end of each quarter. I test the dependent variables with the same panel regression models as in Table \ref{table_h1_base}. Table \ref{table_h1_for_to_inst} reports the results.
+
+In Panel A, the regression coefficients of asymmetric information variables are all negative except the model with *PIN~EHO~* as the explanatory variable. The results are statistically significant at the 1% level in models with *MIA* and all *VCV* variables as explanatory variables. The results give more supporting evidence of the negative relation between foreign ownership and information asymmetry. Based on the results, foreign investors are more prone to avoid information intensive stocks compared to institutional investors on average. Based on column (8), a 1 percentage point increase in information asymmetry is associated with 0.05 percentage point decrease in ownership of foreign institutions against total institutions. The models with statistically significant results (*MIA* and *VCV*) have the best explanatory power according to the results of adjusted R^2^.
+
+The results of the control variable coefficients are mixed. Book-to-market ratio (*BM_RATIO*) is negative and statistically significant at the 1% level in all regression models except with *MIA* as the explanatory variable. The results are mainly in line with the previous results and existing literature, implying that foreign institutional investors prefer more non-value stocks compared to institutional investors on average. The coefficients of *LEVERAGE* are mainly statistically insignificant, positive in five out eleven models and negative in six out of eleven models. Hence, the results of *LEVERAGE* provide nothing conclusive. The results of *ROA* are to some extent surprising. The coefficients are negative in all models except in *BA_SPREAD* as the explanatory variable and statistically significant at the 1% level in two models. The results imply that foreign institutional investors are more prone to hold less profitable stocks compared to institutional investors on average.
 
 
 ``` {r, results='asis', message = FALSE, warning=FALSE, eval = FALSE}
@@ -761,7 +767,7 @@ starpolishr::star_tex_write(a, file = "my_tex_file3.tex", headers = TRUE)
 ```
 
 \begingroup
-\renewcommand\arraystretch{0.65}
+\renewcommand\arraystretch{0.63}
 \begin{landscape}
 \captionsetup{width=1.02\linewidth}
 \scriptsize
@@ -775,7 +781,7 @@ starpolishr::star_tex_write(a, file = "my_tex_file3.tex", headers = TRUE)
  & \multicolumn{11}{c}{FOR\_TO\_INST\_OWN} \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) & (9) & (10) & (11)\\ 
 \hline \\[-1.8ex] 
-\\[-2.0ex] \multicolumn{12}{@{} l}{Panel A: Foreign-to-institution ownership ratio}
+\\[-2.0ex] \multicolumn{12}{@{} l}{\textit{Panel A: Foreign-to-institution ownership ratio}}
  \\
  \\[-1.5ex]
  BA\_SPREAD & $-$0.024 &  &  &  &  &  &  &  &  &  &  \\ 
@@ -811,13 +817,14 @@ Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Y
 Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
 Observations & 109,907 & 15,021 & 15,021 & 15,021 & 9,496 & 78,009 & 78,118 & 20,717 & 94,298 & 94,298 & 94,298 \\ 
 Adjusted R$^{2}$ & 0.086 & 0.083 & 0.083 & 0.083 & 0.101 & 0.087 & 0.086 & 0.209 & 0.100 & 0.100 & 0.101 \\ 
+\hline \\[-1.8ex]
 \\[-1.83ex] 
  & \multicolumn{11}{c}{\textit{Dependent variable:}} \\ 
 \cline{2-12} 
  & \multicolumn{11}{c}{FOR\_TO\_INST\_BREADTH} \\ 
 \\[-1.83ex] & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) & (9) & (10) & (11)\\ 
 \hline \\[-1.83ex]
-\\[-2.0ex] \multicolumn{12}{@{} l}{Panel B: Foreign-to-institution breadth ratio}
+\\[-2.0ex] \multicolumn{12}{@{} l}{\textit{Panel B: Foreign-to-institution breadth ratio}}
  \\
  \\[-1.5ex]
 BA\_SPREAD & $-$0.071 &  &  &  &  &  &  &  &  &  &  \\ 
@@ -860,17 +867,14 @@ Adjusted R$^{2}$ & 0.095 & 0.110 & 0.103 & 0.103 & 0.164 & 0.079 & 0.081 & 0.433
 \end{landscape}
 \endgroup
 
-In Panel A, the regression coefficients of asymmetric information variables are all negative except the model with *PIN~EHO~* as the explanatory variable. The results are statistically significant at the 1% level in models with *MIA* and all *VCV* variables as explanatory variables. The results give more supporting evidence of the negative relation between foreign ownership and information asymmetry. Based on the results, foreign investors are more prone to avoid information intensive stocks compared to institutional investors on average. Based on column (8), a 1 percentage point increase in information asymmetry is associated with 0.05 percentage point decrease in ownership of foreign institutions against total institutions. The models with statistically significant results (*MIA* and *VCV*) have the best explanatory power according to the results of adjusted R^2^.
-
-The results of the control variable coefficients are mixed. Book-to-market ratio (*BM_RATIO*) is negative and statistically significant at the 1% level in all regression models except with *MIA* as the explanatory variable. The results are mainly in line with the previous results and existing literature, implying that foreign institutional investors prefer more non-value stocks compared to institutional investors on average. The coefficients of *LEVERAGE* are mainly statistically insignificant, positive in five out eleven models and negative in six out of eleven models. Hence, the results of *LEVERAGE* provide nothing conclusive. The results of *ROA* are to some extent surprising. The coefficients are negative in all models except in *BA_SPREAD* as the explanatory variable and statistically significant at the 1% level in two models. The results imply that foreign institutional investors are more prone to hold less profitable stocks compared to institutional investors on average.
 
 In Panel B, the regression coefficients of asymmetric information variables provide mixed results. The coefficients are negative and statistically significant with models of *PIN~DY~*, *PIN~DY_ADJ~*, *PSOS~DY~* and *PIN~EHO~* and positive and statistically significant with models of *MIA*, *VCV~USD~*,  *VCV~MKT~* and *VCV~TO~*. Hence, it is difficult to derive solid conclusions of the results. However, according to adjusted R^2^, the models with *MIA* and different *VCV* measures as explanatory variables have better explanatory power. In particular, the model with *MIA* has adjusted R^2^ of 0.448 which is clearly better than any other model. Moreover, the sample size in models with *MIA* and *VCV* is notably larger than with *PIN~DY~*, *PIN~DY_ADJ~*, *PSOS~DY~* and *PIN~EHO~*. 
 
 Control variables in Panel B provide mixed results. *BM_RATIO* is negative in seven out of eleven models and statistically significant in five out of eleven models. It is positive and statistically significant in two out of eleven models. Hence, the results primarily suggests that foreign institutional investors are relatively more driven away of the value stocks than institutional investors in general. *LEVERAGE* is positive and statistically significant in five out of eleven models, implying foreign institutional investors' relatively larger tendency towards more levered stocks than institutional investors in general. This is counterintuitive in the light of the results by @kang1997there and @dahlquist2001direct that foreign investors prefer low debt ratio firms. The regression coefficients of *ROA* follow a similar negative and statistically significant pattern than in Panel B. This finding suggests that foreign institutional investors hold relatively less profitable stocks than institutional investors in general.
 
-## 6.2 The results of the quasi-natural experiment
+## 6.2 The main results of the quasi-natural experiment
 
-In this section, I report the general results of the quasi-natural experiment. First, I examine the evolution of the dependent variables foreign ownership (*FOR_OWN*) and foreign breadth (*FOR_BREADTH*) between the treatment and control groups in the twelve quarters (i.e. three years) before and after the brokerage closures that act as exogenous shock events of information asymmetry. The treated firms are firms that lose an analyst due to these brokerage closures. The control firms are selected using propensity score matching that matches each treatment firm to three control firms (nearest neighbor) on multiple covariates (twelve quarter before the event): logarithm of market capitalization, book-to-market ratio and analyst coverage. Figure \ref{fig_parallel_trend1} presents the results.
+In this section, I report the general results of the quasi-natural experiment. First, I examine the evolution of the dependent variables foreign ownership (*FOR_OWN*), foreign breadth (*FOR_BREADTH*), foreign-to-institution ownership (*FOR_TO_INST_OWN*) and foreign-to-institution breadth (*FOR_TO_INST_BREADTH*) between the treatment and control groups in the twelve quarters (i.e. three years) before and after the brokerage closures that act as exogenous shock events of information asymmetry. The treated firms are firms that lose an analyst due to these brokerage closures. The control firms are selected using propensity score matching that matches each treatment firm to three control firms (nearest neighbor) on multiple covariates (twelve quarter before the event): logarithm of market capitalization, book-to-market ratio and analyst coverage. Figure \ref{fig_parallel_trend1} presents the results.
 
 ``` {r parallel_trend1, message = FALSE, warning=FALSE, eval=FALSE}
 
@@ -880,7 +884,9 @@ parallel_trend1 <- read_rds("results/did_regression_matched_raw.rds") %>%
   mutate(TREATED = if_else(TREATED == 1, "Treated", "Control")) %>% 
   group_by(TREATED, quarter_index) %>% 
   summarise(FOR_OWN = mean(FOR_OWN),
-            FOR_BREADTH = mean(FOR_BREADTH)) %>% 
+            FOR_BREADTH = mean(FOR_BREADTH),
+            FOR_TO_INST_OWN = mean(FOR_TO_INST_OWN),
+            FOR_TO_INST_BREADTH = mean(FOR_TO_INST_BREADTH)) %>% 
   ungroup()
 
 ggplot(parallel_trend1, aes(quarter_index, FOR_OWN, color = TREATED)) +
@@ -893,7 +899,7 @@ ggplot(parallel_trend1, aes(quarter_index, FOR_OWN, color = TREATED)) +
   scale_color_grey(start = 0.55, end = 0)
 
 ggsave("figures/parallel_trend1a.pdf", 
-       width = 8, height = 4, units = "in")
+       width = 8, height = 6, units = "in")
 
 ggplot(parallel_trend1, aes(quarter_index, FOR_BREADTH, color = TREATED)) +
   ggtitle("Panel B: Foreign breadth") +
@@ -905,135 +911,7 @@ ggplot(parallel_trend1, aes(quarter_index, FOR_BREADTH, color = TREATED)) +
   scale_color_grey(start = 0.55, end = 0)
 
 ggsave("figures/parallel_trend1b.pdf", 
-       width = 8, height = 4, units = "in")
-  
-```
-
-\begin{figure}[!htb]
-\centering
-\includegraphics[width = \linewidth]{figures/parallel_trend1a.pdf}
-\includegraphics[width = \linewidth]{figures/parallel_trend1b.pdf}
-\caption[Foreign ownership and breadth between the treatment and control groups around brokerage closures]{\textbf{Foreign ownership and breadth between the treatment and control groups around brokerage closures}\newline\scriptsize This figure presents the evolution of the mean of firm-quarter observations of foreign ownership (\textit{FOR\_OWN}) in Panel A and foreign breadth (\textit{FOR\_BREADTH}) in Panel B during the twelve quarters (i.e. three years) before and after an exogenous decrease in analyst coverage due to the 22 distinct brokerage closures listed by \citet{kelly2012testing}. I impose a three-month gap over the events so that foreign ownership estimates are from quarters -13:-1 and 1:13, with the brokerage closure occurring in the quarter 0. The sample consists of 1240 distinct treated firms and 2524 control firms. Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). The firm-quarter observations of foreign ownership and foreign breadth are winsorized at the top and bottom 1\%. Sample period: 1997- 2010. Sources: CRSP, COMPUSTAT, 13F and IBES.}
-\label{fig_parallel_trend1}
-\end{figure}
-
-As shown in Panel A, foreign ownership between the treatment and control groups follow an increasing but parallel trend before the event. This validates the assumption of pre-treatment parallel trend between treatment and control groups. Foreign ownership of the control group increases quite prominently during the event occurring quarter and surpasses that of the treatment group after the event whereas the treatment group stays put during the event occurring quarter. However, there is no significant persistent decline in foreign ownership for the treatment group after the event. Hence, there is no robust evidence of a significant post-treatment difference in mean between the two groups. Foreign ownership of both groups continue increasing and are approximately at the same level constantly after the event. Abrupt changes in foreign ownership during the event quarters 5 and 10 are largely caused by changes in foreign ownership during 2003. These changes are further illustrated in Figure XX in Appendix XX with event-specific plots.
-
-Panel B provides the results of the evolution of foreign breadth between the treatment and control groups. Similar to Panel A, foreign breadth follows an increasing but parallel trend between the groups before the event, which validates the assumption of pre-treatment parallel trend. The increasing and parallel trend follows also after the event and there is a slightly larger decrease in foreign ownership for the treatment group, but the decrease is not significantly larger compared to the control group. Therefore, the results of Figure \ref{fig_parallel_trend1} do not give strong support for the second hypothesis that an exogenous increase in information asymmetry results in a decrease of foreign ownership. 
-
-I extend the analysis of the quasi-experimental setting by implementing a difference-in-differences regression analysis of foreign ownership and foreign breadth. Compared to results in Figure \ref{fig_parallel_trend1}, this enables me to control for other variables and include year and industry fixed effects. Similar to Figure \ref{fig_parallel_trend1}, I identify treatment group as stocks that lose an analyst covering the firm due to the brokerage closures and control firms are matched using the propensity score matching. In addition, I impose a three-month gap before and after the event and therefore I calculate averages of the dependent and control variables over the quarters [-5;-1] and [1;5], [-9;-1] and [1;9] and [-13;-1] and [1;13], with the brokerage closure occurring in the quarter 0. When computing the averages, I require for each stock to have continuous observations of the dependent and control variables at least four quarters before and after the event. The explanatory variables are dummy variables indicating observations in the post-closure period (\textit{AFTER}), in the treatment group (\textit{TREATED}) and their interaction term (\textit{AFTER}\texttimes\textit{TREATED}). Table \ref{table_h2_1} reports the results.
-
-``` {r, results='asis', echo = FALSE, eval=FALSE}
-
-library(tidyverse)
-library(lfe)
-library(stargazer)
-
-did_regression_matched1 <- read_rds("results/did_regression_matched1.rds") %>%
-  mutate(AFTER_TREATED = TREATED * AFTER)
-did_regression_matched2 <- read_rds("results/did_regression_matched2.rds") %>%
-  mutate(AFTER_TREATED = TREATED * AFTER)
-did_regression_matched3 <- read_rds("results/did_regression_matched3.rds") %>%
-  mutate(AFTER_TREATED = TREATED * AFTER)
-
-did_model1 <- felm(FOR_OWN ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO +
-                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
-                   data = did_regression_matched1)
-
-did_model2 <- felm(FOR_OWN ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO +
-                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
-                   data = did_regression_matched2)
-
-did_model3 <- felm(FOR_OWN ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO +
-                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
-                   data = did_regression_matched3)
-
-did_model7 <- felm(FOR_BREADTH ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO +
-                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
-                   data = did_regression_matched1)
-
-did_model8 <- felm(FOR_BREADTH ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO +
-                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
-                   data = did_regression_matched2)
-
-did_model9 <- felm(FOR_BREADTH ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO +
-                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
-                   data = did_regression_matched3)
-
-did_list <- list(did_model1, did_model2, did_model3, did_model7, did_model8, did_model9)
-
-stargazer(did_list, title = "\\textbf{Difference-in-differences regression analysis of foreign ownership and breadth}\\newline\\small This table reports the results of the difference-in-differences regression analysis of foreign ownership and breadth. The explanatory variables are \\textit{AFTER}.",
-          label = "table_h2_1",
-          header = F,
-          dep.var.labels =c("FOR\\_OWN", "FOR\\_BREADTH"),
-          column.labels = rep(c("-1:1 years", "-2:2 years", "-3:3 years"), times = 2),
-          covariate.labels = c("AFTER", "TREATED", "AFTER\\texttimes TREATED", "BM\\_RATIO", "LEVERAGE", "ROA"),
-          omit.stat = c("ser", "rsq"),
-          add.lines = list(c("Industry fixed effects", rep("Yes", times = 6)),
-                           c("Year fixed effects", rep("Yes", times = 6))),
-          type = 'latex',
-          notes.label = "",
-          notes.append = F,
-          notes = "",
-          font.size = "small",
-          no.space = T)
-
-```
-
-<!-- \renewcommand\arraystretch{1} -->
-\captionsetup{width=1.0\linewidth}
-\begin{table}[htbp]
-  \caption[Difference-in-differences regression analysis of foreign ownership and breadth]{\textbf{Difference-in-differences regression analysis of foreign ownership and breadth}\newline\scriptsize This table reports the results of the difference-in-differences regression analysis of foreign ownership and breadth. The treatment group is determined as stocks that lose a covering analyst due to 22 distinct brokerage closures listed by \citet{kelly2012testing}. Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). The sample consists of 2097 (1240 distinct) treated stocks and 5965 (2524 distinct) control firms. For all 8067 stocks, I compute averages of the dependent variables in columns (1) and (4) over the quarters [-5,-1] and over the quarters [1,5], with the brokerage closure occurring in quarter 0, resulting in a total observations of 16124. In columns (2) and  (5) the dependent variables are computed over the quarters [-9,-1] and [1,9] and in columns (3) and (6) over the quarters [-13,-1] and [1,13]. The explanatory variables are dummy variables indicating the treatment group (\textit{TREATED}), the post-event period (\textit{AFTER}) and their interaction (\textit{AFTER}\texttimes\textit{TREATED}). The control variables are \textit{BM\_RATIO} (pre- and post-event average of the firm-quarter observations of book equity divided by market capitalization), \textit{LEVERAGE} (pre- and post-event average of the firm-quarter observations of debt divided by total assets) and \textit{ROA} (pre- and post-event average the firm-quarter observations of net income divided by total assets. I include industry and year fixed effects in all regressions. Standard errors are clustered by the industry and year level and reported in parentheses. Foreign ownership and breadth and control variables are winsorized at the top and bottom 1\%. *, ** and *** denote the statistical significance at the 10\%, 5\% and 1\% level, respectively. Sample: 1997-2010. Sources: CRSP, COMPUSTAT, 13F and IBES.} 
-  \label{table_h2_1} 
-\small 
-\begin{tabular}{@{\extracolsep{5pt}}lcccccc} 
-\\[-1.8ex]\hline 
-\hline \\[-1.8ex] 
- & \multicolumn{6}{c}{\textit{Dependent variable:}} \\ 
-\cline{2-7} 
-\\[-1.8ex] & \multicolumn{3}{c}{FOR\_OWN} & \multicolumn{3}{c}{FOR\_BREADTH} \\ 
- & -1:1 years & -2:2 years & -3:3 years & -1:1 years & -2:2 years & -3:3 years \\ 
-\\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6)\\ 
-\hline \\[-1.8ex] 
- AFTER & 0.008$^{**}$ & 0.012$^{**}$ & 0.015$^{***}$ & 0.001$^{**}$ & 0.001$^{***}$ & 0.002$^{***}$ \\ 
-  & (0.003) & (0.005) & (0.003) & (0.0003) & (0.0003) & (0.0003) \\ 
-  TREATED & 0.001 & 0.001 & 0.0004 & 0.002$^{***}$ & 0.002$^{***}$ & 0.002$^{***}$ \\ 
-  & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) \\ 
-  AFTER\texttimes TREATED & $-$0.001 & $-$0.001 & $-$0.0001 & $-$0.0001 & $-$0.0001 & 0.0001 \\ 
-  & (0.001) & (0.002) & (0.002) & (0.0001) & (0.0002) & (0.0002) \\ 
-  BM\_RATIO & $-$0.005$^{***}$ & $-$0.004$^{***}$ & $-$0.005$^{***}$ & $-$0.002$^{***}$ & $-$0.002$^{***}$ & $-$0.002$^{***}$ \\ 
-  & (0.001) & (0.002) & (0.001) & (0.0002) & (0.0002) & (0.0002) \\ 
-  LEVERAGE & 0.003 & 0.004 & 0.004 & 0.002$^{***}$ & 0.003$^{***}$ & 0.003$^{***}$ \\ 
-  & (0.006) & (0.004) & (0.004) & (0.001) & (0.001) & (0.001) \\ 
-  ROA & 0.113$^{***}$ & 0.138$^{***}$ & 0.146$^{***}$ & 0.018$^{***}$ & 0.023$^{***}$ & 0.024$^{***}$ \\ 
-  & (0.025) & (0.027) & (0.024) & (0.006) & (0.006) & (0.006) \\ 
- \hline \\[-1.8ex] 
-Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
-Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
-Observations & 21,600 & 21,762 & 21,880 & 21,600 & 21,762 & 21,880 \\ 
-Adjusted R$^{2}$ & 0.221 & 0.246 & 0.257 & 0.358 & 0.362 & 0.368 \\ 
-\hline 
-\hline \\[-1.8ex] 
-\multicolumn{7}{r}{} \\ 
-\end{tabular} 
-\end{table}
-
-The difference-in-differences regression results of foreign ownership (*FOR_OWN*) for the one-year, two-year and three-year pre- and post-closure period are reported in columns (1)-(3), respectively. The regression coefficients of *AFTER* are positive and statistically significant at the 1% level in all three columns. In addition, the coefficient is the largest in the three-year window and the smallest in the one-year window. Although the regression models contain year fixed effects, these findings are consistent with the increasing trend of foreign ownership for both groups in Figure \ref{fig_parallel_trend1}, as the foreign ownership has an increasing pattern even within-year period. Moreover, the coefficients of *TREATED* are positive and statistically significant at the 1% level in all three columns, indicating that treated firms have larger foreign ownership on average. This is intuitive and consistent with the baseline results, since the treated firms are typically larger firms with more coverings analysts than smaller firms and hence more exposed to reductions in analyst coverage. The coefficients of the variable of main interest \textit{AFTER}\texttimes\textit{TREATED} are negative in all three columns, but statistically significant at the 10% level only in column (1). Hence, the results provide little but not strong support for the second hypothesis that an exogenous increase in information asymmetry causes a decline in foreign ownership. The control variables have similar results as in the baseline setting, with notably positive and statistically significant results for *ROA*. Based on adjusted R^2^, the models explain variation relatively well compared to the baseline results.
-
-The results of foreign breadth (*FOR_BREADTH*) are similarly reported in columns (4)-(6). The regression coefficients of *AFTER* and *TREATED* are similarly positive and statistically significant as in columns (1)-(3), although with slightly smaller estimates. In column (4), the coefficient of \textit{AFTER}\texttimes\textit{TREATED} is negative and statistically significant at the 10% level, but in columns (5) and (6), the coefficients of the interaction term are positive and statistically insignificant. Hence, the results do not provide strong support for the second hypothesis. The control variables positive and statistically significant for *LEVERAGE* and *ROA* in all three columns and negative and statistically significant for *BM_RATIO* in all three columns. These findings are in line with the baseline results and also with foreign ownership as the dependent variable in columns (1)-(3). Adjusted R^2^ is somewhat larger than in columns (1)-(3).
-
-Overall, the results of Table \ref{table_h2_1} give little but not sufficient enough evidence of the negative causal effect of information asymmetry on foreign ownership. Nonetheless, even if there is a negative causal effect, the negative results of the interaction term in columns (1) and (4) implies that the dollar amount of foreign institutional holdings is more strongly affected than the number of foreign institutional investors by the exogenous shocks in asymmetric information.
-
-``` {r parallel_trend2, message = FALSE, warning=FALSE, eval=FALSE}
-
-library(tidyverse)
-
-parallel_trend1 <- read_rds("results/did_regression_matched_raw.rds") %>% 
-  mutate(TREATED = if_else(TREATED == 1, "Treated", "Control")) %>% 
-  group_by(TREATED, quarter_index) %>% 
-  summarise(FOR_TO_INST_OWN = mean(FOR_TO_INST_OWN),
-            FOR_TO_INST_BREADTH = mean(FOR_TO_INST_BREADTH)) %>% 
-  ungroup()
+       width = 8, height = 6, units = "in")
 
 ggplot(parallel_trend1, aes(quarter_index, FOR_TO_INST_OWN, color = TREATED)) +
   ggtitle("Panel A: Foreign-to-institution ownership") +
@@ -1045,7 +923,7 @@ ggplot(parallel_trend1, aes(quarter_index, FOR_TO_INST_OWN, color = TREATED)) +
   scale_color_grey(start = 0.55, end = 0)
 
 ggsave("figures/parallel_trend2a.pdf", 
-       width = 8, height = 4, units = "in")
+       width = 8, height = 6, units = "in")
 
 ggplot(parallel_trend1, aes(quarter_index, FOR_TO_INST_BREADTH, color = TREATED)) +
   ggtitle("Panel B: Foreign-to-institution breadth") +
@@ -1057,7 +935,7 @@ ggplot(parallel_trend1, aes(quarter_index, FOR_TO_INST_BREADTH, color = TREATED)
   scale_color_grey(start = 0.55, end = 0)
 
 ggsave("figures/parallel_trend2b.pdf", 
-       width = 8, height = 4, units = "in")
+       width = 8, height = 6, units = "in")
   
 ```
 
@@ -1083,9 +961,193 @@ ggsave("figures/parallel_trend2b.pdf",
   \includegraphics[width=\textwidth]{figures/parallel_trend2b.pdf}
 \end{subfigure}
 \hfill
-\caption[Foreign-to-institution ownership and breadth between the treatment and control groups around brokerage closures]{\textbf{Foreign-to-institution ownership and breadth between the treatment and control groups around brokerage closures}\newline\scriptsize This figure presents the evolution of the mean of firm-quarter observations of foreign ownership (\textit{FOR\_OWN}) in Panel A and foreign breadth (\textit{FOR\_BREADTH}) in Panel B during the twelve quarters (i.e. three years) before and after an exogenous decrease in analyst coverage due to the 22 distinct brokerage closures listed by \citet{kelly2012testing}. I impose a three-month gap over the events so that foreign ownership estimates are from quarters -13:-1 and 1:13, with the brokerage closure occurring in the quarter 0. The sample consists of 1603 distinct treated firms and 3521 control firms. Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). The firm-quarter observations of foreign ownership and foreign breadth are winsorized at the top and bottom 1\%. Sample period: 1997- 2010. Sources: CRSP, COMPUSTAT, 13F and IBES.}
-\label{fig_parallel_trend2}
+\caption[Ownership-specific variables between the treatment and control groups]{\textbf{Ownership-specific variables between the treatment and control groups}\newline\scriptsize This figure presents the evolution of the mean of firm-quarter observations of ownership-specific variables during the twelve quarters (i.e. three years) before and after an exogenous decrease in analyst coverage due to the 22 distinct brokerage closures listed by \citet{kelly2012testing}. I impose a three-month gap over the events so that foreign ownership estimates are from quarters [-13;-1] and [1;13], with the brokerage closure occurring in the quarter 0. The sample consists of 1658 distinct treated firms and 3590 control firms. Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). Sample period: 1997- 2010. Sources: CRSP, COMPUSTAT, 13F and IBES.}
+\label{fig_parallel_trend1}
 \end{figure}
+
+As shown in Panel A, foreign ownership between the treatment and control groups follow an increasing but parallel trend before the event. This validates the assumption of pre-treatment parallel trend between treatment and control groups. Foreign ownership of the control group increases quite prominently during the event occurring quarter and surpasses that of the treatment group after the event whereas the treatment group stays put during the event occurring quarter. However, there is no significant persistent decline in foreign ownership for the treatment group after the event. Hence, there is no robust evidence of a significant post-treatment difference in mean between the two groups. Foreign ownership of both groups continue increasing and are approximately at the same level constantly after the event. Abrupt changes in foreign ownership during the event quarters 5 and 10 are largely caused by changes in foreign ownership during 2003. These changes are further illustrated in Figure \ref{fig_parallel_trend1_facet} in Appendix with event-specific plots.
+
+Panel B provides the results of the evolution of foreign breadth between the treatment and control groups. Similar to Panel A, foreign breadth follows an increasing but parallel trend between the groups before the event, which validates the assumption of pre-treatment parallel trend. The increasing and parallel trend follows also after the event and there is a slightly larger decrease in foreign ownership for the treatment group, but the decrease is not significantly larger compared to the control group. 
+
+Panels C and D provide evidence of the development of foreign institutional investors' ownership (*FOR_TO_INST_OWN*) and breadth (*FOR_TO_INST_BREADTH*) against total institutional investors between treatment and control groups. In both panels, the pre-treatment parallel trend is is mostly satisfied. In Panel C, there is a slight drop in ownership ratio in the treatment group after the quarter 0, but the decrease is not significantly larger compared to the control group. On the other hand, in Panel D, the breadth ratio of the treatment group increases more after the event compared to the control group. Based on overall results, the results of Figure \ref{fig_parallel_trend1} do not give strong support for the second hypothesis that an exogenous increase in information asymmetry results in a decrease of foreign ownership.
+
+I extend the analysis of the quasi-experimental setting by implementing a difference-in-differences regression analysis of foreign ownership and foreign breadth. Compared to results in Figure \ref{fig_parallel_trend1}, this enables me to control for other variables and include year and industry fixed effects. Similar to Figure \ref{fig_parallel_trend1}, I identify treatment group as stocks that lose an analyst covering the firm due to the brokerage closures and control firms are matched using the propensity score matching. In addition, I impose a three-month gap before and after the event and therefore I calculate averages of the dependent and control variables over the quarters [-5;-1] and [1;5], [-9;-1] and [1;9] and [-13;-1] and [1;13], with the brokerage closure occurring in the quarter 0. When computing the averages, I require for each stock to have at least one observation of the dependent and control variables before and after each event. The explanatory variables are dummy variables indicating observations in the post-closure period (\textit{AFTER}), in the treatment group (\textit{TREATED}) and their interaction term (\textit{AFTER}\texttimes\textit{TREATED}). Table \ref{table_h2_1} reports the results.
+
+``` {r, results='asis', echo = FALSE, eval=FALSE}
+
+library(tidyverse)
+library(lfe)
+library(stargazer)
+
+did_regression_matched1 <- read_rds("results/did_regression_matched1.rds") %>%
+  mutate(AFTER_TREATED = TREATED * AFTER)
+did_regression_matched2 <- read_rds("results/did_regression_matched2.rds") %>%
+  mutate(AFTER_TREATED = TREATED * AFTER)
+did_regression_matched3 <- read_rds("results/did_regression_matched3.rds") %>%
+  mutate(AFTER_TREATED = TREATED * AFTER)
+
+did_model1 <- felm(FOR_OWN ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched1)
+
+did_model2 <- felm(FOR_OWN ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched2)
+
+did_model3 <- felm(FOR_OWN ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched3)
+
+did_model7 <- felm(FOR_BREADTH ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched1)
+
+did_model8 <- felm(FOR_BREADTH ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched2)
+
+did_model9 <- felm(FOR_BREADTH ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched3)
+
+did_list <- list(did_model1, did_model2, did_model3, did_model7, did_model8, did_model9)
+
+stargazer(did_list, title = "\\textbf{Difference-in-differences regression analysis of foreign ownership and breadth}\\newline\\small This table reports the results of the difference-in-differences regression analysis of foreign ownership and breadth. The explanatory variables are \\textit{AFTER}.",
+          label = "table_h2_1",
+          header = F,
+          dep.var.labels =c("FOR\\_OWN", "FOR\\_BREADTH"),
+          column.labels = rep(c("[-1;1] years", "[-2;2] years", "[-3;3] years"), times = 2),
+          covariate.labels = c("AFTER", "TREATED", "AFTER\\texttimes TREATED", "LOG\\_MKT\\_CAP", "BM\\_RATIO", "LEVERAGE", "ROA"),
+          omit.stat = c("ser", "rsq"),
+          add.lines = list(c("Industry fixed effects", rep("Yes", times = 6)),
+                           c("Year fixed effects", rep("Yes", times = 6))),
+          type = 'latex',
+          notes.label = "",
+          notes.append = F,
+          notes = "",
+          font.size = "small",
+          no.space = T)
+
+did_model1 <- felm(FOR_TO_INST_OWN ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched1)
+
+did_model2 <- felm(FOR_TO_INST_OWN ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched2)
+
+did_model3 <- felm(FOR_TO_INST_OWN ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched3)
+
+did_model7 <- felm(FOR_TO_INST_BREADTH ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched1)
+
+did_model8 <- felm(FOR_TO_INST_BREADTH ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched2)
+
+did_model9 <- felm(FOR_TO_INST_BREADTH ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched3)
+
+did_list <- list(did_model1, did_model2, did_model3, did_model7, did_model8, did_model9)
+
+stargazer(did_list, title = "\\textbf{Difference-in-differences regression analysis of foreign ownership and breadth}\\newline\\small This table reports the results of the difference-in-differences regression analysis of foreign ownership and breadth. The explanatory variables are \\textit{AFTER}.",
+          label = "table_h2_1",
+          header = F,
+          dep.var.labels =c("FOR\\_TO\\_INST\\_OWN", "FOR\\_TO\\_INST\\_BREADTH"),
+          column.labels = rep(c("[-1;1] years", "[-2;2] years", "[-3;3] years"), times = 2),
+          covariate.labels = c("AFTER", "TREATED", "AFTER\\texttimes TREATED", "LOG\\_MKT\\_CAP", "BM\\_RATIO", "LEVERAGE", "ROA"),
+          omit.stat = c("ser", "rsq"),
+          add.lines = list(c("Industry fixed effects", rep("Yes", times = 6)),
+                           c("Year fixed effects", rep("Yes", times = 6))),
+          type = 'latex',
+          notes.label = "",
+          notes.append = F,
+          notes = "",
+          font.size = "small",
+          no.space = T)
+
+```
+
+\renewcommand\arraystretch{0.55}
+\captionsetup{width=1.0\linewidth}
+\small
+\begin{longtable}{@{\extracolsep{0pt}}lcccccc}
+  \caption{\textbf{Difference-in-differences regression analysis of foreign ownership and breadth}\newline\small This table reports the results of the difference-in-differences regression analysis of foreign ownership and breadth. The explanatory variables are \textit{AFTER}.} 
+  \label{table_h2_1} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{6}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-7} 
+\\[-1.8ex] & \multicolumn{3}{c}{FOR\_OWN} & \multicolumn{3}{c}{FOR\_BREADTH} \\ 
+ & [-1;1] years & [-2;2] years & [-3;3] years & [-1;1] years & [-2;2] years & [-3;3] years \\ 
+\\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6)\\ 
+\hline
+\multicolumn{6}{@{} l}{\textit{Panel A: Foreign ownership and breadth}}
+\\
+\\
+ AFTER & 0.008$^{**}$ & 0.011$^{**}$ & 0.014$^{***}$ & 0.001$^{***}$ & 0.001$^{***}$ & 0.001$^{***}$ \\ 
+  & (0.003) & (0.005) & (0.003) & (0.0002) & (0.0001) & (0.0001) \\ 
+  TREATED & $-$0.001 & $-$0.001 & $-$0.002 & 0.0003 & 0.0003 & 0.0002 \\ 
+  & (0.001) & (0.001) & (0.001) & (0.0004) & (0.0004) & (0.0004) \\ 
+  AFTER\texttimes TREATED & $-$0.001 & $-$0.0003 & 0.0003 & 0.00003 & 0.0002 & 0.0003 \\ 
+  & (0.001) & (0.002) & (0.002) & (0.0001) & (0.0002) & (0.0002) \\ 
+  LOG\_MKT\_CAP & 0.005$^{***}$ & 0.005$^{***}$ & 0.005$^{***}$ & 0.003$^{***}$ & 0.003$^{***}$ & 0.003$^{***}$ \\ 
+  & (0.001) & (0.001) & (0.001) & (0.0003) & (0.0003) & (0.0003) \\ 
+  BM\_RATIO & 0.001 & 0.001 & 0.001 & 0.002$^{***}$ & 0.002$^{***}$ & 0.001$^{***}$ \\ 
+  & (0.002) & (0.002) & (0.002) & (0.0003) & (0.0002) & (0.0002) \\ 
+  LEVERAGE & 0.002 & 0.002 & 0.002 & 0.001$^{***}$ & 0.001$^{***}$ & 0.001$^{***}$ \\ 
+  & (0.005) & (0.003) & (0.003) & (0.001) & (0.0005) & (0.0005) \\ 
+  ROA & 0.071$^{***}$ & 0.092$^{***}$ & 0.096$^{***}$ & $-$0.008$^{***}$ & $-$0.008$^{***}$ & $-$0.008$^{***}$ \\ 
+  & (0.014) & (0.016) & (0.012) & (0.002) & (0.002) & (0.002) \\ 
+ \hline \\[-1.8ex] 
+Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
+Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
+Observations & 21,600 & 21,762 & 21,880 & 21,600 & 21,762 & 21,880 \\ 
+Adjusted R$^{2}$ & 0.239 & 0.265 & 0.279 & 0.756 & 0.760 & 0.761 \\ 
+\hline \\[-1.8ex]
+\\[-1.83ex] 
+ & \multicolumn{6}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-7} 
+\\[-1.8ex] & \multicolumn{3}{c}{FOR\_TO\_INST\_OWN} & \multicolumn{3}{c}{FOR\_TO\_INST\_BREADTH} \\ 
+ & [-1;1] years & [-2;2] years & [-3;3] years & [-1;1] years & [-2;2] years & [-3;3] years \\ 
+\\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6)\\ 
+\hline \\[-1.8ex] 
+\multicolumn{6}{@{} l}{\textit{Panel B: Foreign-to-institution ownership and breadth}}
+\\
+\\
+ AFTER & 0.007$^{*}$ & 0.008 & 0.011$^{***}$ & 0.003 & 0.006 & 0.011$^{***}$ \\ 
+  & (0.004) & (0.006) & (0.004) & (0.004) & (0.004) & (0.004) \\ 
+  TREATED & $-$0.005$^{**}$ & $-$0.006$^{***}$ & $-$0.006$^{***}$ & $-$0.004$^{***}$ & $-$0.004$^{***}$ & $-$0.004$^{***}$ \\ 
+  & (0.002) & (0.002) & (0.002) & (0.001) & (0.001) & (0.001) \\ 
+  AFTER\texttimes TREATED & 0.0003 & 0.002 & 0.002 & 0.003$^{***}$ & 0.004$^{***}$ & 0.003$^{**}$ \\ 
+  & (0.001) & (0.002) & (0.002) & (0.001) & (0.001) & (0.001) \\ 
+  LOG\_MKT\_CAP & 0.003 & 0.003$^{*}$ & 0.003$^{*}$ & 0.0004 & 0.001 & 0.001 \\ 
+  & (0.002) & (0.001) & (0.001) & (0.002) & (0.002) & (0.002) \\ 
+  BM\_RATIO & $-$0.001 & $-$0.001 & $-$0.003 & 0.003 & 0.002 & 0.001 \\ 
+  & (0.002) & (0.002) & (0.002) & (0.002) & (0.002) & (0.002) \\ 
+  LEVERAGE & $-$0.007 & $-$0.008 & $-$0.006 & $-$0.0005 & $-$0.001 & $-$0.001 \\ 
+  & (0.007) & (0.006) & (0.006) & (0.003) & (0.003) & (0.003) \\ 
+  ROA & $-$0.043$^{**}$ & $-$0.035$^{**}$ & $-$0.032$^{*}$ & $-$0.039$^{***}$ & $-$0.041$^{***}$ & $-$0.039$^{**}$ \\ 
+  & (0.017) & (0.017) & (0.018) & (0.014) & (0.016) & (0.016) \\ 
+ \hline \\[-1.8ex] 
+Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
+Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
+Observations & 21,600 & 21,762 & 21,880 & 21,600 & 21,762 & 21,880 \\ 
+Adjusted R$^{2}$ & 0.169 & 0.181 & 0.183 & 0.215 & 0.237 & 0.248 \\ 
+\hline 
+\hline \\[-1.8ex] 
+\multicolumn{6}{r}{} \\ 
+\end{longtable}
+
+The difference-in-differences regression results of foreign ownership (*FOR_OWN*) for the one-year, two-year and three-year pre- and post-closure period are reported in columns (1)-(3), respectively. The regression coefficients of *AFTER* are positive and statistically significant at the 1% level in all three columns. In addition, the coefficient is the largest in the three-year window and the smallest in the one-year window. Although the regression models contain year fixed effects, these findings are consistent with the increasing trend of foreign ownership for both groups in Figure \ref{fig_parallel_trend1}, as the foreign ownership has an increasing pattern even within-year period. Moreover, the coefficients of *TREATED* are positive and statistically significant at the 1% level in all three columns, indicating that treated firms have larger foreign ownership on average. This is intuitive and consistent with the baseline results, since the treated firms are typically larger firms with more coverings analysts than smaller firms and hence more exposed to reductions in analyst coverage. The coefficients of the variable of main interest \textit{AFTER}\texttimes\textit{TREATED} are negative in all three columns, but statistically significant at the 10% level only in column (1). Hence, the results provide little but not strong support for the second hypothesis that an exogenous increase in information asymmetry causes a decline in foreign ownership. The control variables have similar results as in the baseline setting, with notably positive and statistically significant results for *ROA*. Based on adjusted R^2^, the models explain variation relatively well compared to the baseline results.
+
+The results of foreign breadth (*FOR_BREADTH*) are similarly reported in columns (4)-(6). The regression coefficients of *AFTER* and *TREATED* are similarly positive and statistically significant as in columns (1)-(3), although with slightly smaller estimates. In column (4), the coefficient of \textit{AFTER}\texttimes\textit{TREATED} is negative and statistically significant at the 10% level, but in columns (5) and (6), the coefficients of the interaction term are positive and statistically insignificant. Hence, the results do not provide strong support for the second hypothesis. The control variables positive and statistically significant for *LEVERAGE* and *ROA* in all three columns and negative and statistically significant for *BM_RATIO* in all three columns. These findings are in line with the baseline results and also with foreign ownership as the dependent variable in columns (1)-(3). Adjusted R^2^ is somewhat larger than in columns (1)-(3).
+
+Overall, the results of Table \ref{table_h2_1} give little but not sufficient enough evidence of the negative causal effect of information asymmetry on foreign ownership. Nonetheless, even if there is a negative causal effect, the negative results of the interaction term in columns (1) and (4) implies that the dollar amount of foreign institutional holdings is more strongly affected than the number of foreign institutional investors by the exogenous shocks in asymmetric information.
 
 
 ``` {r, results='asis', echo = FALSE, eval=FALSE}
@@ -1145,43 +1207,6 @@ stargazer(did_list, title = "\\textbf{Difference-in-differences regression analy
 
 ```
 
-<!-- \renewcommand\arraystretch{0.89} -->
-\captionsetup{width=1.0\linewidth}
-\begin{table}[htbp]
-  \caption[Difference-in-differences regression analysis of foreign-to-institution ownership and breadth]{\textbf{Difference-in-differences regression analysis of foreign-to-institution ownership and breadth}\newline\scriptsize This table reports the results of the difference-in-differences regression analysis of foreign-to-institution ownership and breadth. The sample consists of 1601 distinct treated stocks and 3500 distinct control firms, . The explanatory variables are \textit{AFTER}} 
-  \label{table_h2_2} 
-\small 
-\begin{tabular}{@{\extracolsep{5pt}}lcccccc} 
-\\[-1.8ex]\hline 
-\hline \\[-1.8ex] 
- & \multicolumn{6}{c}{\textit{Dependent variable:}} \\ 
-\cline{2-7} 
-\\[-1.8ex] & \multicolumn{3}{c}{FOR\_TO\_INST\_OWN} & \multicolumn{3}{c}{FOR\_TO\_INST\_BREADTH} \\ 
- & -1:1 years & -2:2 years & -3:3 years & -1:1 years & -2:2 years & -3:3 years \\ 
-\\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6)\\ 
-\hline \\[-1.8ex] 
- AFTER & 0.006 & 0.008 & 0.011$^{**}$ & 0.002 & 0.006 & 0.011$^{**}$ \\ 
-  & (0.004) & (0.007) & (0.005) & (0.005) & (0.005) & (0.004) \\ 
-  TREATED & $-$0.004$^{*}$ & $-$0.005$^{**}$ & $-$0.005$^{**}$ & $-$0.004$^{**}$ & $-$0.004$^{**}$ & $-$0.004$^{**}$ \\ 
-  & (0.002) & (0.002) & (0.002) & (0.002) & (0.002) & (0.002) \\ 
-  AFTER\texttimes TREATED & 0.001 & 0.002 & 0.002 & 0.003$^{***}$ & 0.004$^{**}$ & 0.003$^{**}$ \\ 
-  & (0.002) & (0.002) & (0.002) & (0.001) & (0.001) & (0.002) \\ 
-  BM\_RATIO & $-$0.004$^{*}$ & $-$0.004$^{*}$ & $-$0.006$^{**}$ & 0.002 & $-$0.00003 & $-$0.001 \\ 
-  & (0.002) & (0.002) & (0.002) & (0.002) & (0.002) & (0.002) \\ 
-  LEVERAGE & $-$0.006 & $-$0.006 & $-$0.005 & $-$0.0003 & $-$0.001 & $-$0.001 \\ 
-  & (0.007) & (0.006) & (0.006) & (0.004) & (0.004) & (0.004) \\ 
-  ROA & $-$0.017$^{**}$ & 0.001 & 0.004 & $-$0.031$^{**}$ & $-$0.031 & $-$0.026 \\ 
-  & (0.008) & (0.014) & (0.012) & (0.013) & (0.022) & (0.023) \\ 
- \hline \\[-1.8ex] 
-Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
-Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
-Observations & 21,612 & 21,774 & 21,896 & 21,612 & 21,774 & 21,896 \\ 
-Adjusted R$^{2}$ & 0.166 & 0.175 & 0.178 & 0.213 & 0.233 & 0.247 \\ 
-\hline 
-\hline \\[-1.8ex] 
-\multicolumn{7}{r}{} \\ 
-\end{tabular} 
-\end{table}
 
 ## 6.3 The results of the quasi-natural experiment by institutional ownership and analyst coverage
 
