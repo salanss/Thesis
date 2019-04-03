@@ -961,7 +961,7 @@ ggsave("figures/parallel_trend2b.pdf",
   \includegraphics[width=\textwidth]{figures/parallel_trend2b.pdf}
 \end{subfigure}
 \hfill
-\caption[Ownership-specific variables between the treatment and control groups]{\textbf{Ownership-specific variables between the treatment and control groups}\newline\scriptsize This figure presents the evolution of the mean of firm-quarter observations of ownership-specific variables during the twelve quarters (i.e. three years) before and after an exogenous decrease in analyst coverage due to the 22 distinct brokerage closures listed by \citet{kelly2012testing}. I impose a three-month gap over the events so that foreign ownership estimates are from quarters [-13;-1] and [1;13], with the brokerage closure occurring in the quarter 0. The sample consists of 1658 distinct treated firms and 3590 control firms. Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). Sample period: 1997- 2010. Sources: CRSP, COMPUSTAT, 13F and IBES.}
+\caption[Ownership-specific variables between the treatment and control groups]{\textbf{Ownership-specific variables between the treatment and control groups}\newline\scriptsize This figure presents the evolution of the mean of firm-quarter observations of ownership-specific variables during the twelve quarters (i.e. three years) before and after an exogenous decrease in analyst coverage due to the 22 distinct brokerage closures listed by \citet{kelly2012testing}. I impose a three-month gap over the events so that foreign ownership estimates are from quarters [-13,-1] and [1,13], with the brokerage closure occurring in the quarter 0. The sample consists of 1658 distinct treated firms and 3590 control firms. Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). Sample period: 1997- 2010. Sources: CRSP, COMPUSTAT, 13F and IBES.}
 \label{fig_parallel_trend1}
 \end{figure}
 
@@ -971,9 +971,9 @@ Panel B provides the results of the evolution of foreign breadth between the tre
 
 Panels C and D provide evidence of the development of foreign institutional investors' ownership (*FOR_TO_INST_OWN*) and breadth (*FOR_TO_INST_BREADTH*) against total institutional investors between treatment and control groups. In both panels, the pre-treatment parallel trend is is mostly satisfied. In Panel C, there is a slight drop in ownership ratio in the treatment group after the quarter 0, but the decrease is not significantly larger compared to the control group. On the other hand, in Panel D, the breadth ratio of the treatment group increases more after the event compared to the control group. Based on overall results, the results of Figure \ref{fig_parallel_trend1} do not give strong support for the second hypothesis that an exogenous increase in information asymmetry results in a decrease of foreign ownership.
 
-I extend the analysis of the quasi-experimental setting by implementing a difference-in-differences regression analysis of foreign ownership and foreign breadth. Compared to results in Figure \ref{fig_parallel_trend1}, this enables me to control for other variables and include year and industry fixed effects. Similar to Figure \ref{fig_parallel_trend1}, I identify treatment group as stocks that lose an analyst covering the firm due to the brokerage closures and control firms are matched using the propensity score matching. In addition, I impose a three-month gap before and after the event and therefore I calculate averages of the dependent and control variables over the quarters [-5;-1] and [1;5], [-9;-1] and [1;9] and [-13;-1] and [1;13], with the brokerage closure occurring in the quarter 0. When computing the averages, I require for each stock to have at least one observation of the dependent and control variables before and after each event. The explanatory variables are dummy variables indicating observations in the post-closure period (\textit{AFTER}), in the treatment group (\textit{TREATED}) and their interaction term (\textit{AFTER}\texttimes\textit{TREATED}). Table \ref{table_h2_1} reports the results.
+I extend the analysis of the quasi-experimental setting by implementing a difference-in-differences regression analysis of foreign ownership and foreign breadth. Compared to results in Figure \ref{fig_parallel_trend1}, this enables me to control for other variables and include year and industry fixed effects. Similar to Figure \ref{fig_parallel_trend1}, I identify treatment group as stocks that lose an analyst covering the firm due to the brokerage closures and control firms are matched using the propensity score matching. In addition, I impose a three-month gap before and after the event and therefore I calculate averages of the dependent and control variables over the quarters [-5,-1] and [1,5], [-9,-1] and [1,9] and [-13,-1] and [1,13], with the brokerage closure occurring in the quarter 0. When computing the averages, I require for each stock to have at least one observation of the dependent and control variables before and after each event. The explanatory variables are dummy variables indicating observations in the post-closure period (\textit{AFTER}), in the treatment group (\textit{TREATED}) and their interaction term (\textit{AFTER}\texttimes\textit{TREATED}). Table \ref{table_h2_1} reports the results.
 
-``` {r, results='asis', echo = FALSE, eval=FALSE}
+``` {r, results='asis', echo = FALSE, eval=TRUE}
 
 library(tidyverse)
 library(lfe)
@@ -1012,16 +1012,34 @@ did_model9 <- felm(FOR_BREADTH ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP +
 
 did_list <- list(did_model1, did_model2, did_model3, did_model7, did_model8, did_model9)
 
+treated_obs <- map_dbl(list(did_regression_matched1, did_regression_matched2, did_regression_matched3), ~  .x %>% filter(TREATED == 1) %>% 
+  group_by(TREATED) %>% summarise(n = n()) %>% ungroup() %>% pluck("n"))
+
+control_obs <- map_dbl(list(did_regression_matched1, did_regression_matched2, did_regression_matched3), ~  .x %>% filter(TREATED == 0) %>% 
+  group_by(TREATED) %>% summarise(n = n()) %>% ungroup() %>% pluck("n"))
+
+treated_distinct <- map_dbl(list(did_regression_matched1, did_regression_matched2, did_regression_matched3), ~  .x %>% filter(TREATED == 1) %>% 
+  group_by(TREATED) %>% summarise(n = n_distinct(permno)) %>% ungroup() %>% pluck("n"))
+
+control_distinct <- map_dbl(list(did_regression_matched1, did_regression_matched2, did_regression_matched3), ~  .x %>% filter(TREATED == 0) %>% 
+  group_by(TREATED) %>% summarise(n = n_distinct(permno)) %>% ungroup() %>% pluck("n"))
+
 stargazer(did_list, title = "\\textbf{Difference-in-differences regression analysis of foreign ownership and breadth}\\newline\\small This table reports the results of the difference-in-differences regression analysis of foreign ownership and breadth. The explanatory variables are \\textit{AFTER}.",
           label = "table_h2_1",
           header = F,
           dep.var.labels =c("FOR\\_OWN", "FOR\\_BREADTH"),
-          column.labels = rep(c("[-1;1] years", "[-2;2] years", "[-3;3] years"), times = 2),
+          column.labels = rep(c("[-1,1] years", "[-2,2] years", "[-3,3] years"), times = 2),
           covariate.labels = c("AFTER", "TREATED", "AFTER\\texttimes TREATED", "LOG\\_MKT\\_CAP", "BM\\_RATIO", "LEVERAGE", "ROA"),
           omit.stat = c("ser", "rsq"),
           add.lines = list(c("Industry fixed effects", rep("Yes", times = 6)),
-                           c("Year fixed effects", rep("Yes", times = 6))),
+                           c("Year fixed effects", rep("Yes", times = 6)),
+                           c("Treated firm obs.", rep(treated_obs, times = 2)),
+                           c("Control firm obs.", rep(control_obs, times = 2)),
+                           c("Distinct treated firms", rep(treated_distinct, times = 2)),
+                           c("Distinct control firms", rep(control_distinct, times = 2))),
           type = 'latex',
+          digit.separator = ",",
+          digit.separate = c(3,3),
           notes.label = "",
           notes.append = F,
           notes = "",
@@ -1058,11 +1076,15 @@ stargazer(did_list, title = "\\textbf{Difference-in-differences regression analy
           label = "table_h2_1",
           header = F,
           dep.var.labels =c("FOR\\_TO\\_INST\\_OWN", "FOR\\_TO\\_INST\\_BREADTH"),
-          column.labels = rep(c("[-1;1] years", "[-2;2] years", "[-3;3] years"), times = 2),
+          column.labels = rep(c("[-1,1] years", "[-2,2] years", "[-3,3] years"), times = 2),
           covariate.labels = c("AFTER", "TREATED", "AFTER\\texttimes TREATED", "LOG\\_MKT\\_CAP", "BM\\_RATIO", "LEVERAGE", "ROA"),
           omit.stat = c("ser", "rsq"),
           add.lines = list(c("Industry fixed effects", rep("Yes", times = 6)),
-                           c("Year fixed effects", rep("Yes", times = 6))),
+                           c("Year fixed effects", rep("Yes", times = 6)),
+                           c("Treated firm obs.", rep(treated_obs, times = 2)),
+                           c("Control firm obs.", rep(control_obs, times = 2)),
+                           c("Distinct treated firms", rep(treated_distinct, times = 2)),
+                           c("Distinct control firms", rep(control_distinct, times = 2))),
           type = 'latex',
           notes.label = "",
           notes.append = F,
@@ -1076,14 +1098,14 @@ stargazer(did_list, title = "\\textbf{Difference-in-differences regression analy
 \captionsetup{width=1.0\linewidth}
 \small
 \begin{longtable}{@{\extracolsep{0pt}}lcccccc}
-  \caption{\textbf{Difference-in-differences regression analysis of foreign ownership and breadth}\newline\small This table reports the results of the difference-in-differences regression analysis of foreign ownership and breadth. The explanatory variables are \textit{AFTER}.} 
+  \caption{\textbf{Difference-in-differences regression analysis of foreign ownership and breadth}\newline\small This table reports the results of the difference-in-differences regression analysis of ownership-specific variables. In Panel A, the dependent variables are foreign ownership (\textit{FOR\_OWN}) and foreign breadth (\textit{FOR\_BREADTH}). In Panel B, the dependent variables are foreign-to-institution ownership (\textit{FOR\_TO\_INST\_OWN}) and foreign-to-institution breadth (\textit{FOR\_TO\_INST\_BREADTH}). The treatment group is determined as stocks that lose a covering analyst due to 22 distinct brokerage closures listed by \citet{kelly2012testing}. Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). For all stocks, I compute averages of the dependent variables and control variables in columns (1) and (4) over the quarters [-5,-1] and over the quarters [1,5], with the brokerage closure occurring in quarter 0. In columns (2) and  (5) the dependent variables are computed over the quarters [-9,-1] and [1,9] and in columns (3) and (6) over the quarters [-13,-1] and [1,13]. The explanatory variables are dummy variables indicating the treatment group (\textit{TREATED}), the post-event period (\textit{AFTER}) and their interaction (\textit{AFTER}\texttimes\textit{TREATED}). The control variables are book-to-market ratio (\textit{BM\_RATIO}), leverage (\textit{LEVERAGE}) and return on assets (\textit{ROA}). I include industry and year fixed effects in all regressions. Standard errors are clustered by the industry and year level and reported in parentheses. \textit{FOR\_OWN} and \textit{FOR\_BREADTH} are winsorized at the top to a maximum of 1. Control variables are winsorized at the top and bottom 1\%. *, ** and *** denote the statistical significance at the 10\%, 5\% and 1\% level, respectively. Sample: 1997-2010. Sources: CRSP, COMPUSTAT, 13F and IBES.} 
   \label{table_h2_1} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
  & \multicolumn{6}{c}{\textit{Dependent variable:}} \\ 
 \cline{2-7} 
 \\[-1.8ex] & \multicolumn{3}{c}{FOR\_OWN} & \multicolumn{3}{c}{FOR\_BREADTH} \\ 
- & [-1;1] years & [-2;2] years & [-3;3] years & [-1;1] years & [-2;2] years & [-3;3] years \\ 
+ & [-1,1] years & [-2,2] years & [-3,3] years & [-1,1] years & [-2,2] years & [-3,3] years \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6)\\ 
 \hline
 \multicolumn{6}{@{} l}{\textit{Panel A: Foreign ownership and breadth}}
@@ -1113,7 +1135,7 @@ Adjusted R$^{2}$ & 0.239 & 0.265 & 0.279 & 0.756 & 0.760 & 0.761 \\
  & \multicolumn{6}{c}{\textit{Dependent variable:}} \\ 
 \cline{2-7} 
 \\[-1.8ex] & \multicolumn{3}{c}{FOR\_TO\_INST\_OWN} & \multicolumn{3}{c}{FOR\_TO\_INST\_BREADTH} \\ 
- & [-1;1] years & [-2;2] years & [-3;3] years & [-1;1] years & [-2;2] years & [-3;3] years \\ 
+ & [-1,1] years & [-2,2] years & [-3,3] years & [-1,1] years & [-2,2] years & [-3,3] years \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6)\\ 
 \hline \\[-1.8ex] 
 \multicolumn{6}{@{} l}{\textit{Panel B: Foreign-to-institution ownership and breadth}}
