@@ -1104,8 +1104,8 @@ stargazer(did_list, title = "\\textbf{Difference-in-differences regression analy
 
 \renewcommand\arraystretch{0.55}
 \captionsetup{width=1.0\linewidth}
-\small
-\begin{longtable}{@{\extracolsep{0pt}}lcccccc}
+\footnotesize
+\begin{longtable}{@{\extracolsep{5pt}}lcccccc}
   \caption[Difference-in-differences regression analysis of foreign ownership-specific variables]{\textbf{Difference-in-differences regression analysis of foreign ownership-specific variables}\newline\scriptsize This table reports the results of the difference-in-differences regression analysis of ownership-specific variables. In Panel A, the dependent variables are foreign ownership (\textit{FOR\_OWN}) and foreign breadth (\textit{FOR\_BREADTH}). In Panel B, the dependent variables are foreign-to-institution ownership (\textit{FOR\_TO\_INST\_OWN}) and foreign-to-institution breadth (\textit{FOR\_TO\_INST\_BREADTH}). The treatment group is determined as stocks that lose a covering analyst due to 22 distinct brokerage closures listed by \citet{kelly2012testing}. Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). For all stocks, I compute averages of the dependent variables and control variables in columns (1) and (4) over the quarters [-4,-1] and over the quarters [1,4], with the brokerage closure occurring in quarter 0. In columns (2) and  (5) the dependent variables are computed over the quarters [-8,-1] and [1,8] and in columns (3) and (6) over the quarters [-12,-1] and [1,12]. The explanatory variables are dummy variables indicating the treatment group (\textit{TREATED}), the post-event period (\textit{AFTER}) and their interaction (\textit{AFTER}\texttimes\textit{TREATED}). The control variables are book-to-market ratio (\textit{BM\_RATIO}), leverage (\textit{LEVERAGE}) and return on assets (\textit{ROA}). I include industry and year fixed effects in all regressions. Standard errors are clustered by the industry and year level and reported in parentheses. \textit{FOR\_OWN} and \textit{FOR\_BREADTH} are winsorized at the top to a maximum of 1. Control variables are winsorized at the top and bottom 1\%. Table \ref{table_variable_definitions} in Appendix provides a detailed list of variable definitions. *, ** and *** denote the statistical significance at the 10\%, 5\% and 1\% level, respectively. Sample period: 1997-2010. Sources: CRSP, COMPUSTAT, 13F and IBES.} 
   \label{table_h2_1} 
 \\[-1.8ex]\hline 
@@ -1190,6 +1190,10 @@ In Panel B, the regression coefficients of *AFTER* are positive for both *FOR_TO
 Overall, the results of Table \ref{table_h2_1} give no evidence of the negative causal effect of information asymmetry on foreign ownership. In fact, the results provide even some opposing evidence of positive causal effect of information asymmetry on the number of foreign institutional investors compared to domestic ones. Nonetheless, I do not find opposing results significant enough, when compared to the results in Panel A and of Figure \ref{fig_parallel_trend1}.
 
 
+## 6.3 The results of the quasi-natural experiment by institutional ownership and analyst coverage
+
+In this section, I test the causal effect of asymmetric information on foreign ownership in a subset analysis. As hypothesized in Hypothesis 3, I state that the negative causal effect should be stronger in firms with low institutional ownership or low analyst coverage. I test this with the similar model as in Section 6.2, but sample divided to the lowest and highest quartiles of analyst coverage and institutional ownership. Table \ref{table_h3_1} reports the results of foreign ownership (*FOR_OWN*) and breadth (*FOR_BREADTH*).
+
 ``` {r, results='asis', echo = FALSE, eval=FALSE}
 
 library(tidyverse)
@@ -1197,99 +1201,12 @@ library(lfe)
 library(stargazer)
 
 did_regression_matched1 <- read_rds("results/did_regression_matched1.rds") %>%
-  mutate(AFTER_TREATED = TREATED * AFTER)
-did_regression_matched2 <- read_rds("results/did_regression_matched2.rds") %>%
-  mutate(AFTER_TREATED = TREATED * AFTER)
-did_regression_matched3 <- read_rds("results/did_regression_matched3.rds") %>%
-  mutate(AFTER_TREATED = TREATED * AFTER)
-
-did_model1 <- felm(FOR_TO_INST_OWN ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO +
-                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
-                   data = did_regression_matched1)
-
-did_model2 <- felm(FOR_TO_INST_OWN ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO +
-                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
-                   data = did_regression_matched2)
-
-did_model3 <- felm(FOR_TO_INST_OWN ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO +
-                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
-                   data = did_regression_matched3)
-
-did_model7 <- felm(FOR_TO_INST_BREADTH ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO +
-                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
-                   data = did_regression_matched1)
-
-did_model8 <- felm(FOR_TO_INST_BREADTH ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO +
-                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
-                   data = did_regression_matched2)
-
-did_model9 <- felm(FOR_TO_INST_BREADTH ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO +
-                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
-                   data = did_regression_matched3)
-
-did_list <- list(did_model1, did_model2, did_model3, did_model7, did_model8, did_model9)
-
-stargazer(did_list, title = "\\textbf{Difference-in-differences regression analysis of foreign-to-institutions ownership and breadth}\\newline\\small This table reports the results of the difference-in-differences regression analysis of foreign-to-institution ownership and breadth. The explanatory variables are \\textit{AFTER}.",
-          label = "table_h2_2",
-          header = F,
-          dep.var.labels =c("FOR\\_TO\\_INST\\_OWN", "FOR\\_TO\\_INST\\_BREADTH"),
-          column.labels = rep(c("-1:1 years", "-2:2 years", "-3:3 years"), times = 2),
-          covariate.labels = c("AFTER", "TREATED", "AFTER\\texttimes TREATED", "BM\\_RATIO", "LEVERAGE", "ROA"),
-          omit.stat = c("ser", "rsq"),
-          add.lines = list(c("Industry fixed effects", rep("Yes", times = 6)),
-                           c("Year fixed effects", rep("Yes", times = 6))),
-          type = 'latex',
-          notes.label = "",
-          notes.append = F,
-          notes = "",
-          font.size = "small",
-          no.space = T)
-
-```
-
-
-## 6.3 The results of the quasi-natural experiment by institutional ownership and analyst coverage
-
-In this section, I test the causal effect of asymmetric information on foreign ownership in a subset analysis. As hypothesized in Hypothesis 3, I state that the negative causal effect should be stronger in firms with low institutional ownership or low analyst coverage. I test this with the similar model as in Section 6.2, but sample divided to the lowest and highest quartiles of analyst coverage and institutional ownership. Table \ref{table_h3_1} reports the results of foreign ownership (*FOR_OWN*) and breadth (*FOR_BREADTH*).
-
-``` {r, results='asis', echo = FALSE, eval=TRUE}
-
-library(tidyverse)
-library(lfe)
-library(stargazer)
-
-did_regression_matched1 <- read_rds("results/did_regression_matched1.rds") %>%
   #group_by(event_date) %>% 
-  mutate(AFTER_TREATED = TREATED * AFTER,
-         DOM_OWN = INST_OWN - FOR_OWN,
-         DOM_TO_INST_OWN = (INST_OWN - FOR_OWN)/INST_OWN,
-         DOM_BREADTH = INST_BREADTH - FOR_BREADTH,
-         DOM_TO_INST_BREADTH = (INST_BREADTH - FOR_BREADTH)/INST_BREADTH) %>%
+  mutate(AFTER_TREATED = TREATED * AFTER) %>%
   mutate(inst_percent = percent_rank(INST_OWN),
          analyst_percent = percent_rank(ANALYST_COVERAGE)) %>%
   ungroup()
 
-did_regression_matched2 <- read_rds("results/did_regression_matched2.rds") %>%
-  #group_by(event_date) %>% 
-  mutate(AFTER_TREATED = TREATED * AFTER,
-         DOM_OWN = INST_OWN - FOR_OWN,
-         DOM_TO_INST_OWN = (INST_OWN - FOR_OWN)/INST_OWN,
-         DOM_BREADTH = INST_BREADTH - FOR_BREADTH,
-         DOM_TO_INST_BREADTH = (INST_BREADTH - FOR_BREADTH)/INST_BREADTH) %>%
-  mutate(inst_percent = percent_rank(INST_OWN),
-         analyst_percent = percent_rank(ANALYST_COVERAGE)) %>%
-  ungroup()
-
-did_regression_matched3 <- read_rds("results/did_regression_matched3.rds") %>%
-  #group_by(event_date) %>% 
-  mutate(AFTER_TREATED = TREATED * AFTER,
-         DOM_OWN = INST_OWN - FOR_OWN,
-         DOM_TO_INST_OWN = (INST_OWN - FOR_OWN)/INST_OWN,
-         DOM_BREADTH = INST_BREADTH - FOR_BREADTH,
-         DOM_TO_INST_BREADTH = (INST_BREADTH - FOR_BREADTH)/INST_BREADTH) %>%
-  mutate(inst_percent = percent_rank(INST_OWN),
-         analyst_percent = percent_rank(ANALYST_COVERAGE)) %>%
-  ungroup()
 
 did_regression_matched1_low_inst <- did_regression_matched1 %>% 
   filter(inst_percent <= 0.25)
@@ -1343,7 +1260,7 @@ stargazer(did_list, title = "\\textbf{Difference-in-differences regression analy
           header = F,
           dep.var.labels =c("FOR\\_OWN", "FOR\\_BREADTH"),
           column.labels = rep(c("IO < Q\\textsubscript{0.25}", "IO > Q\\textsubscript{0.75}", "AC < Q\\textsubscript{0.25}", "AC > Q\\textsubscript{0.75}"), times = 2),
-          covariate.labels = c("AFTER", "TREATED", "AFTER\\texttimes TREATED", "LOGMKTCAP", "BM\\_RATIO", "LEVERAGE", "ROA"),
+          covariate.labels = c("AFTER", "TREATED", "AFTER\\texttimes TREATED", "LOG\\_MKT\\_CAP", "BM\\_RATIO", "LEVERAGE", "ROA"),
           omit.stat = c("ser", "rsq"),
           add.lines = list(c("Industry fixed effects", rep("Yes", times = 8)),
                            c("Year fixed effects", rep("Yes", times = 8))),
@@ -1352,48 +1269,135 @@ stargazer(did_list, title = "\\textbf{Difference-in-differences regression analy
           notes.append = F,
           column.sep.width = "1pt",
           notes = "",
-          font.size = "scriptsize",
+          font.size = "footnotesize",
+          no.space = T)
+
+did_model1 <- felm(FOR_TO_INST_OWN ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched1_low_inst)
+
+did_model2 <- felm(FOR_TO_INST_OWN ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched1_high_inst)
+
+did_model3 <- felm(FOR_TO_INST_OWN ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched1_low_analyst)
+
+did_model4 <- felm(FOR_TO_INST_OWN ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched1_high_analyst)
+
+did_model5 <- felm(FOR_TO_INST_BREADTH ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched1_low_inst)
+
+did_model6 <- felm(FOR_TO_INST_BREADTH ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched1_high_inst)
+
+did_model7 <- felm(FOR_TO_INST_BREADTH ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched1_low_analyst)
+
+did_model8 <- felm(FOR_TO_INST_BREADTH ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched1_high_analyst)
+
+did_list <- list(did_model1, did_model2, did_model3, did_model4,
+                 did_model5, did_model6, did_model7, did_model8)
+
+stargazer(did_list, title = "\\textbf{Difference-in-differences regression analysis of foreign ownership and breadth by institutional ownership and analyst coverage}\\newline\\small This table reports the results",
+          label = "table_h3_1",
+          header = F,
+          dep.var.labels =c("FOR\\_TO\\_INST\\_OWN", "FOR\\_TO\\_INST\\_BREADTH"),
+          column.labels = rep(c("IO < Q\\textsubscript{0.25}", "IO > Q\\textsubscript{0.75}", "AC < Q\\textsubscript{0.25}", "AC > Q\\textsubscript{0.75}"), times = 2),
+          covariate.labels = c("AFTER", "TREATED", "AFTER\\texttimes TREATED", "LOG\\_MKT\\_CAP", "BM\\_RATIO", "LEVERAGE", "ROA"),
+          omit.stat = c("ser", "rsq"),
+          add.lines = list(c("Industry fixed effects", rep("Yes", times = 8)),
+                           c("Year fixed effects", rep("Yes", times = 8))),
+          type = 'latex',
+          notes.label = "",
+          notes.append = F,
+          column.sep.width = "1pt",
+          notes = "",
+          font.size = "footnotesize",
           no.space = T)
 
 ```
 
-\renewcommand\arraystretch{0.85}
+\renewcommand\arraystretch{0.77}
+\begin{landscape}
 \captionsetup{width=1.0\linewidth}
-\begin{table}[htbp]
-  \caption[Difference-in-differences regression analysis of foreign ownership and breadth with low institutional ownership and analyst coverage]{\textbf{Difference-in-differences regression analysis of foreign ownership and breadth with low institutional ownership and analyst coverage}\newline\scriptsize This table reports the results of } 
+\footnotesize
+\begin{longtable}{@{\extracolsep{15pt}}lcccccccc} 
+  \caption[juu]{\textbf{Difference-in-differences regression analysis of foreign ownership and breadth by institutional ownership and analyst coverage}\newline\small This table reports the results} 
   \label{table_h3_1} 
-\scriptsize
-\begin{tabular}{@{\extracolsep{5pt}}lcccccc} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
- & \multicolumn{6}{c}{\textit{Dependent variable:}} \\ 
-\cline{2-7} 
-\\[-1.8ex] & \multicolumn{3}{c}{FOR\_OWN} & \multicolumn{3}{c}{FOR\_BREADTH} \\ 
- & Inst. ownership < Q\textsubscript{1} & Coverage < Q\textsubscript{1} & Both < Q\textsubscript{1} & Inst. ownership < Q\textsubscript{1} & Coverage < Q\textsubscript{1} & Both < Q\textsubscript{1} \\ 
-\\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6)\\ 
+ & \multicolumn{8}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-9} 
+\\[-1.8ex] & \multicolumn{4}{c}{FOR\_OWN} & \multicolumn{4}{c}{FOR\_BREADTH} \\ 
+ & IO < Q\textsubscript{0.25} & IO > Q\textsubscript{0.75} & AC < Q\textsubscript{0.25} & AC > Q\textsubscript{0.75} & IO < Q\textsubscript{0.25} & IO > Q\textsubscript{0.75} & AC < Q\textsubscript{0.25} & AC > Q\textsubscript{0.75} \\ 
+\\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8)\\ 
 \hline \\[-1.8ex] 
- AFTER & 0.006$^{***}$ & 0.009$^{***}$ & 0.005$^{***}$ & 0.0004 & 0.0001 & 0.00002 \\ 
-  & (0.001) & (0.002) & (0.001) & (0.0003) & (0.0002) & (0.0001) \\ 
-  TREATED & $-$0.0004 & 0.003 & 0.001 & 0.001$^{*}$ & $-$0.0001 & $-$0.0002 \\ 
-  & (0.002) & (0.002) & (0.003) & (0.001) & (0.0002) & (0.0002) \\ 
-  AFTER\texttimes TREATED & $-$0.0005 & $-$0.003 & $-$0.002 & $-$0.0002 & 0.0002$^{***}$ & 0.0002$^{*}$ \\ 
-  & (0.001) & (0.002) & (0.003) & (0.0003) & (0.0001) & (0.0001) \\ 
-  BM\_RATIO & $-$0.002 & $-$0.007$^{***}$ & $-$0.004$^{*}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ \\ 
-  & (0.002) & (0.002) & (0.002) & (0.0003) & (0.0003) & (0.0002) \\ 
-  LEVERAGE & $-$0.005 & 0.0002 & $-$0.015$^{***}$ & 0.001 & 0.001$^{**}$ & $-$0.001 \\ 
-  & (0.008) & (0.007) & (0.006) & (0.001) & (0.0004) & (0.001) \\ 
-  ROA & 0.037$^{*}$ & 0.063$^{**}$ & 0.013 & 0.010 & 0.005$^{***}$ & $-$0.0001 \\ 
-  & (0.021) & (0.026) & (0.026) & (0.008) & (0.002) & (0.001) \\ 
+\multicolumn{6}{@{} l}{\textit{Panel A: Foreign ownership and breadth}}
+\\
+\\
+ AFTER & 0.003$^{***}$ & 0.008 & 0.008$^{***}$ & 0.011$^{***}$ & 0.0003$^{**}$ & 0.0003 & 0.0003$^{***}$ & 0.001$^{**}$ \\ 
+  & (0.0005) & (0.006) & (0.002) & (0.003) & (0.0001) & (0.0003) & (0.0001) & (0.0005) \\ 
+  TREATED & $-$0.0005 & $-$0.0005 & $-$0.002 & $-$0.001 & 0.00000 & 0.0002 & $-$0.0001 & 0.0004 \\ 
+  & (0.002) & (0.003) & (0.002) & (0.002) & (0.0002) & (0.0003) & (0.0001) & (0.0002) \\ 
+  AFTER\texttimes TREATED & 0.001 & $-$0.001 & $-$0.0002 & $-$0.004$^{***}$ & 0.0002$^{***}$ & 0.0001 & 0.0004$^{***}$ & $-$0.0002 \\ 
+  & (0.001) & (0.004) & (0.001) & (0.001) & (0.00004) & (0.0001) & (0.0001) & (0.0002) \\ 
+  LOG\_MKT\_CAP & 0.004$^{***}$ & 0.002 & 0.006$^{***}$ & 0.001 & 0.001$^{***}$ & 0.004$^{***}$ & 0.001$^{***}$ & 0.005$^{***}$ \\ 
+  & (0.001) & (0.001) & (0.002) & (0.002) & (0.0001) & (0.0004) & (0.0001) & (0.0003) \\ 
+  BM\_RATIO & 0.0005 & 0.001 & $-$0.001 & 0.003 & 0.001$^{***}$ & 0.001$^{***}$ & 0.001$^{***}$ & 0.002$^{***}$ \\ 
+  & (0.001) & (0.003) & (0.001) & (0.005) & (0.0001) & (0.0004) & (0.0001) & (0.0004) \\ 
+  LEVERAGE & 0.002 & $-$0.009 & 0.003 & $-$0.002 & 0.001$^{***}$ & 0.0003 & 0.001$^{***}$ & 0.0003 \\ 
+  & (0.004) & (0.006) & (0.004) & (0.009) & (0.0004) & (0.001) & (0.0001) & (0.001) \\ 
+  ROA & 0.009$^{*}$ & 0.012 & 0.060$^{***}$ & 0.060$^{*}$ & $-$0.003$^{*}$ & $-$0.008$^{***}$ & $-$0.003$^{***}$ & $-$0.008$^{**}$ \\ 
+  & (0.005) & (0.064) & (0.011) & (0.034) & (0.001) & (0.002) & (0.001) & (0.003) \\ 
  \hline \\[-1.8ex] 
-Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
-Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
-Observations & 3,231 & 3,381 & 1,357 & 3,231 & 3,381 & 1,357 \\ 
-Adjusted R$^{2}$ & 0.356 & 0.377 & 0.318 & 0.400 & 0.472 & 0.539 \\ 
+Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
+Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
+Observations & 5,400 & 5,400 & 5,417 & 5,342 & 5,400 & 5,400 & 5,417 & 5,342 \\ 
+Adjusted R$^{2}$ & 0.327 & 0.274 & 0.224 & 0.393 & 0.651 & 0.776 & 0.627 & 0.814 \\ 
+\hline \\[-1.8ex]
+\\[-1.83ex] 
+ & \multicolumn{8}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-9} 
+\\[-1.8ex] & \multicolumn{4}{c}{FOR\_TO\_INST\_OWN} & \multicolumn{4}{c}{FOR\_TO\_INST\_BREADTH} \\ 
+ & IO < Q\textsubscript{0.25} & IO > Q\textsubscript{0.75} & AC < Q\textsubscript{0.25} & AC > Q\textsubscript{0.75} & IO < Q\textsubscript{0.25} & IO > Q\textsubscript{0.75} & AC < Q\textsubscript{0.25} & AC > Q\textsubscript{0.75} \\ 
+\\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8)\\ 
+\hline \\[-1.8ex] 
+\multicolumn{6}{@{} l}{\textit{Panel B: Foreign-to-institution ownership and breadth}}
+\\
+\\
+ AFTER & 0.004 & 0.008 & 0.007$^{**}$ & 0.012$^{***}$ & $-$0.004 & 0.005 & $-$0.005 & 0.011$^{**}$ \\ 
+  & (0.004) & (0.005) & (0.003) & (0.004) & (0.004) & (0.005) & (0.005) & (0.005) \\ 
+  TREATED & $-$0.009$^{*}$ & 0.0004 & $-$0.012$^{***}$ & $-$0.003 & $-$0.010$^{***}$ & 0.001 & $-$0.007$^{*}$ & $-$0.00004 \\ 
+  & (0.005) & (0.003) & (0.004) & (0.003) & (0.002) & (0.003) & (0.004) & (0.001) \\ 
+  AFTER\texttimes TREATED & 0.004 & $-$0.001 & 0.005 & $-$0.007$^{***}$ & 0.009$^{***}$ & 0.001 & 0.008$^{***}$ & $-$0.003$^{**}$ \\ 
+  & (0.003) & (0.004) & (0.005) & (0.002) & (0.002) & (0.002) & (0.002) & (0.001) \\ 
+  LOG\_MKT\_CAP & 0.006$^{**}$ & 0.005$^{***}$ & 0.005$^{**}$ & 0.004 & $-$0.001 & 0.009$^{***}$ & $-$0.002 & $-$0.001 \\ 
+  & (0.003) & (0.001) & (0.002) & (0.003) & (0.002) & (0.003) & (0.002) & (0.002) \\ 
+  BM\_RATIO & $-$0.004 & 0.003 & $-$0.007$^{**}$ & 0.012 & 0.003 & 0.003 & 0.001 & $-$0.0003 \\ 
+  & (0.004) & (0.002) & (0.003) & (0.008) & (0.004) & (0.002) & (0.004) & (0.002) \\ 
+  LEVERAGE & 0.020 & $-$0.012$^{**}$ & 0.004 & $-$0.018 & 0.003 & 0.001 & 0.003 & $-$0.003 \\ 
+  & (0.014) & (0.006) & (0.009) & (0.020) & (0.006) & (0.004) & (0.004) & (0.009) \\ 
+  ROA & $-$0.056$^{**}$ & 0.007 & $-$0.051 & $-$0.031 & $-$0.004 & $-$0.082$^{***}$ & $-$0.029 & $-$0.062$^{***}$ \\ 
+  & (0.028) & (0.066) & (0.048) & (0.056) & (0.005) & (0.030) & (0.019) & (0.018) \\ 
+ \hline \\[-1.8ex] 
+Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
+Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
+Observations & 5,400 & 5,400 & 5,417 & 5,342 & 5,400 & 5,400 & 5,417 & 5,342 \\ 
+Adjusted R$^{2}$ & 0.213 & 0.245 & 0.140 & 0.314 & 0.219 & 0.448 & 0.163 & 0.504 \\ 
 \hline 
 \hline \\[-1.8ex] 
-\multicolumn{7}{r}{} \\ 
-\end{tabular} 
-\end{table}
+\multicolumn{9}{r}{} \\ 
+\end{longtable}
+\end{landscape}
 
 
 
