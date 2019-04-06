@@ -20,14 +20,19 @@ df_institutions <- df_institutions_raw %>%
   ungroup() %>% 
   filter(!is.na(country))
 
-institutions_types <- read_rds("data/investors_types.rds")
+institutions_types <- read_rds("data/investors_types.rds") %>% 
+  mutate(institutional_code = str_squish(institutional_code))
 
 df_institutions_final <- df_institutions %>% 
   group_by(mgrno, report_date, country) %>% 
   summarise(file_date = min(file_date)) %>% 
   ungroup() %>% 
   mutate(report_year = year(report_date)) %>% 
-  left_join(institutions_types, by = c("report_year" = "year", "mgrno" = "institutional_code"))
+  left_join(institutions_types, by = c("report_year" = "year", "mgrno" = "institutional_code")) %>% 
+  group_by(mgrno) %>% 
+  fill(investor_type, .direction = "down") %>% 
+  fill(investor_type, .direction = "up") %>% 
+  ungroup()
 
 write_rds(df_institutions_final, "data/13f_institutions.rds")
 
