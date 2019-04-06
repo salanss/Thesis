@@ -9,4 +9,6 @@ investor_types <- investor_types_raw %>%
             investor_type = case_when(X6 == "  ." ~ NA_character_,
                                       TRUE ~ X6))
 
+investor_types
+
 write_rds(investor_types, "data/investors_types.rds")
