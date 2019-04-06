@@ -240,16 +240,34 @@ did_regression_raw <- read_rds("data/did_regression_raw.rds") %>%
          INST_OWN = institutional_own, INST_BREADTH = institutional_breadth,
          LOG_MKT_CAP = log_market_cap, BM_RATIO = book_to_market, LEVERAGE = leverage, ROA = roa,
          ANALYST_COVERAGE = analyst_coverage) %>% 
-  mutate(FOR_OWN_NONQUASI = FOR_OWN - foreign_own_quasi,
+  mutate(FOR_OWN_QUASI =  foreign_own_quasi,
+         FOR_OWN_NONQUASI = FOR_OWN - foreign_own_quasi,
          FOR_OWN_DEDICATED = foreign_own_dedicated,
-         FOR_OWN_TRANSIENT = foreign_own_transient)
+         FOR_OWN_TRANSIENT = foreign_own_transient,
+         FOR_BREADTH_QUASI = foreign_breadth_quasi,
+         FOR_BREADTH_NONQUASI = FOR_BREADTH - foreign_breadth_quasi,
+         FOR_BREADTH_DEDICATED = foreign_breadth_dedicated,
+         FOR_BREADTH_TRANSIENT = foreign_breadth_transient,
+         FOR_TO_INST_OWN_QUASI = foreign_own_quasi/INST_OWN,
+         FOR_TO_INST_OWN_NONQUASI = (FOR_OWN - foreign_own_quasi)/INST_OWN,
+         FOR_TO_INST_OWN_DEDICATED = foreign_own_dedicated/INST_OWN,
+         FOR_TO_INST_OWN_TRANSIENT = foreign_own_transient/INST_OWN,
+         FOR_TO_INST_BREADTH_QUASI = foreign_breadth_quasi/INST_BREADTH,
+         FOR_TO_INST_BREADTH_NONQUASI = (FOR_BREADTH - foreign_breadth_quasi)/INST_BREADTH,
+         FOR_TO_INST_BREADTH_DEDICATED = foreign_breadth_dedicated/INST_BREADTH,
+         FOR_TO_INST_BREADTH_TRANSIENT = foreign_breadth_transient/INST_BREADTH)
 
 # stargazer(cor_matrix, title = "correlation matrix", out = "correlation_matrix_did.html")
 
 columns_for_summarise <- c("FOR_OWN", "FOR_TO_INST_OWN", "FOR_BREADTH", 
                            "FOR_TO_INST_BREADTH","INST_OWN", "INST_BREADTH", 
-                           "FOR_OWN_NONQUASI", "FOR_OWN_DEDICATED", "FOR_OWN_TRANSIENT",
-                           "LOG_MKT_CAP", "BM_RATIO", "LEVERAGE", 
+                           "FOR_OWN_QUASI", "FOR_OWN_NONQUASI", "FOR_OWN_DEDICATED",
+                           "FOR_OWN_TRANSIENT", "FOR_BREADTH_QUASI", "FOR_BREADTH_NONQUASI",
+                           "FOR_BREADTH_DEDICATED", "FOR_BREADTH_TRANSIENT", "FOR_TO_INST_OWN_QUASI",
+                           "FOR_TO_INST_OWN_NONQUASI", "FOR_TO_INST_OWN_DEDICATED", 
+                           "FOR_TO_INST_OWN_TRANSIENT", "FOR_TO_INST_BREADTH_QUASI", 
+                           "FOR_TO_INST_BREADTH_NONQUASI", "FOR_TO_INST_BREADTH_DEDICATED", 
+                           "FOR_TO_INST_BREADTH_TRANSIENT", "LOG_MKT_CAP", "BM_RATIO", "LEVERAGE", 
                            "ROA", "ANALYST_COVERAGE")
 
 did_regression <- did_regression_raw %>% 
