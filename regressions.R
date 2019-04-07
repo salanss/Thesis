@@ -279,6 +279,47 @@ did_regression <- did_regression_raw %>%
   summarise_at(columns_for_summarise, mean) %>% 
   ungroup()
 
+did_regression_nonmatched1 <- did_regression_raw %>% 
+  rename(AFTER = after, TREATED = treated) %>% 
+  filter(quarter_index %in% c(-4:4)) %>% 
+  group_by(permno, event_date, brokerage_name, TREATED, AFTER) %>% 
+  mutate(sic_code = last(sic_code)) %>% 
+  ungroup() %>% 
+  group_by(permno, event_date, brokerage_name, year, TREATED, AFTER, sic_code) %>% 
+  summarise_at(columns_for_summarise, mean) %>% 
+  ungroup() %>% 
+  group_by(permno, event_date, brokerage_name, TREATED) %>%
+  mutate(n = n_distinct(AFTER)) %>%
+  ungroup() %>%
+  filter(n > 1)
+
+write_rds(did_regression_nonmatched1, "results/did_regression_nonmatched1.rds")
+
+did_regression_nonmatched2 <- did_regression_raw %>% 
+  rename(AFTER = after, TREATED = treated) %>% 
+  filter(quarter_index %in% c(-8:8)) %>% 
+  group_by(permno, event_date, brokerage_name, TREATED, AFTER) %>% 
+  mutate(sic_code = last(sic_code)) %>% 
+  ungroup() %>% 
+  group_by(permno, event_date, brokerage_name, year, TREATED, AFTER, sic_code) %>% 
+  summarise_at(columns_for_summarise, mean) %>% 
+  ungroup() %>% 
+  group_by(permno, event_date, brokerage_name, TREATED) %>%
+  mutate(n = n_distinct(AFTER)) %>%
+  ungroup() %>%
+  filter(n > 1)
+
+write_rds(did_regression_nonmatched2, "results/did_regression_nonmatched2.rds")
+
+did_regression_nonmatched3 <- did_regression %>% 
+  rename(AFTER = after, TREATED = treated) %>% 
+  group_by(permno, event_date, brokerage_name, TREATED) %>%
+  mutate(n = n_distinct(AFTER)) %>%
+  ungroup() %>%
+  filter(n > 1)
+
+write_rds(did_regression_nonmatched3, "results/did_regression_nonmatched3.rds")
+
 did_regression_matched_temp1 <- did_regression %>% 
   filter(after == 0) %>% # match only based on before values during [-3;0] years
   group_by(permno, event_date, brokerage_name, treated) %>% 
