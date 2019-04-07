@@ -72,6 +72,15 @@ mia <- mia_raw %>%
   summarise(mia = mean(mia_daily)) %>% 
   ungroup()
 
+mia_quarter <- mia_raw %>%
+  transmute(permno = PERMNO, 
+            date = mdy(DATE),
+            quarter_date = ceiling_date(date, "quarter") - days(1),
+            mia_daily = as.numeric(MIA)) %>% 
+  group_by(permno, quarter_date) %>% 
+  summarise(mia = mean(mia_daily)) %>% 
+  ungroup()
+
 vcv_raw <- read_rds("data/vcv.rds")
 
 vcv <- vcv_raw %>% 
