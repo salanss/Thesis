@@ -169,6 +169,383 @@ ggsave("figures/parallel_trend1a_facet.pdf",
 \begin{figure}[H]
 \centering
 \includegraphics[width = \linewidth]{figures/parallel_trend1a_facet.pdf}
-\caption[Foreign ownership and breadth between the treatment and control groups around brokerage closures]{\textbf{Foreign ownership and breadth between the treatment and control groups around brokerage closures}\newline\scriptsize This figure presents the evolution of the mean of firm-quarter observations of foreign ownership (\textit{FOR\_OWN}) in Panel A and foreign breadth (\textit{FOR\_BREADTH}) in Panel B during the twelve quarters (i.e. three years) before and after an exogenous decrease in analyst coverage due to the 22 distinct brokerage closures listed by Kelly and Ljungqvist (2012). I impose a three-month gap over the events so that foreign ownership estimates are from quarters -13:-1 and 1:13, with the brokerage closure occurring in the quarter 0. The sample consists of 1240 distinct treated firms and 2524 control firms. Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). The firm-quarter observations of foreign ownership and foreign breadth are winsorized at the top and bottom 1\%. Sample period: 1997- 2010. Sources: CRSP, COMPUSTAT, 13F and IBES.}
+\caption[Foreign ownership and breadth between the treatment and control groups around brokerage closures]{\textbf{Foreign ownership and breadth between the treatment and control groups around brokerage closures}\newline\scriptsize This figure presents the evolution of the mean of firm-quarter observations of foreign ownership (\textit{FOR\_OWN}) in Panel A and foreign breadth (\textit{FOR\_BREADTH}) in Panel B during the twelve quarters (i.e. three years) before and after an exogenous decrease in analyst coverage due to the 22 distinct brokerage closures listed by Kelly and Ljungqvist (2012). I impose a three-month gap over the events so that foreign ownership estimates are from quarters [-12,-1] and [1,12], with the brokerage closure occurring in the quarter 0. The sample consists of 1240 distinct treated firms and 2524 control firms. Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). The firm-quarter observations of foreign ownership and foreign breadth are winsorized at the top and bottom 1\%. Sample period: 1997- 2010. Sources: CRSP, COMPUSTAT, 13F and IBES.}
 \label{fig_parallel_trend1_facet}
 \end{figure}
+
+
+``` {r, results='asis', message = FALSE, warning=FALSE, eval=FALSE}
+
+library(tidyverse)
+library(lubridate)
+library(lfe)
+library(stargazer)
+
+did_regression_matched1 <- read_rds("results/did_regression_matched1.rds") %>%
+  mutate(AFTER_TREATED = TREATED * AFTER,
+         LOG_ANALYST_COVERAGE = log(1 + ANALYST_COVERAGE))
+
+did_regression_matched2 <- read_rds("results/did_regression_matched2.rds") %>%
+  mutate(AFTER_TREATED = TREATED * AFTER,
+         LOG_ANALYST_COVERAGE = log(1 + ANALYST_COVERAGE))
+
+did_regression_matched3 <- read_rds("results/did_regression_matched3.rds") %>%
+  mutate(AFTER_TREATED = TREATED * AFTER,
+         LOG_ANALYST_COVERAGE = log(1 + ANALYST_COVERAGE))
+
+did_model1 <- felm(ANALYST_COVERAGE ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA |year + sic_code|0|year + sic_code,
+                   data = did_regression_matched1)
+
+did_model2 <- felm(ANALYST_COVERAGE ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched2)
+
+did_model3 <- felm(ANALYST_COVERAGE ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched3)
+
+did_list <- list(did_model1, did_model2, did_model3)
+
+treated_obs <- map_dbl(list(did_regression_matched1, did_regression_matched2, did_regression_matched3), ~  .x %>% filter(TREATED == 1) %>% 
+  group_by(TREATED) %>% summarise(n = n()) %>% ungroup() %>% pluck("n")) %>% 
+  format(big.mark = ",")
+
+control_obs <- map_dbl(list(did_regression_matched1, did_regression_matched2, did_regression_matched3), ~  .x %>% filter(TREATED == 0) %>% 
+  group_by(TREATED) %>% summarise(n = n()) %>% ungroup() %>% pluck("n")) %>% 
+  format(big.mark = ",")
+
+treated_distinct <- map_dbl(list(did_regression_matched1, did_regression_matched2, did_regression_matched3), ~  .x %>% filter(TREATED == 1) %>% 
+  group_by(TREATED) %>% summarise(n = n_distinct(permno)) %>% ungroup() %>% pluck("n")) %>% 
+  format(big.mark = ",")
+
+control_distinct <- map_dbl(list(did_regression_matched1, did_regression_matched2, did_regression_matched3), ~  .x %>% filter(TREATED == 0) %>% 
+  group_by(TREATED) %>% summarise(n = n_distinct(permno)) %>% ungroup() %>% pluck("n")) %>%
+  format(big.mark = ",")
+
+obs <- map_dbl(list(did_regression_matched1, did_regression_matched2, did_regression_matched3), ~  .x %>%
+ summarise(n = n()) %>% ungroup() %>% pluck("n")) %>% 
+  format(big.mark = ",")
+
+stargazer(did_list, title = "\\textbf{Difference-in-differences regression analysis of analyst coverage}\\newline\\scriptsize This table reports the results of the difference-in-differences regression analysis of the logarithm of analyst coverage.",
+          label = "table_h2_1",
+          header = F,
+          dep.var.labels =c("LOG\\_ANALYST\\_COVERAGE"),
+          column.labels = rep(c("[-1,1] years", "[-2,2] years", "[-3,3] years"), times = 1),
+          covariate.labels = c("AFTER", "TREATED", "AFTER\\texttimes TREATED", "LOG\\_MKT\\_CAP", "BM\\_RATIO", "LEVERAGE", "ROA"),
+          omit.stat = c("ser", "rsq", "n"),
+          add.lines = list(c("Industry fixed effects", rep("Yes", times = 3)),
+                           c("Year fixed effects", rep("Yes", times = 3)),
+                           c("Treated firm obs.", rep(treated_obs, times = 1)),
+                           c("Control firm obs.", rep(control_obs, times = 1)),
+                           c("Distinct treated firms", rep(treated_distinct, times = 1)),
+                           c("Distinct control firms", rep(control_distinct, times = 1)),
+                           c("Observations", rep(obs, times = 1))),
+          type = 'latex',
+          notes.label = "",
+          column.sep.width = "15pt",
+          notes.append = F,
+          notes = "",
+          font.size = "small",
+          no.space = T)
+
+```
+
+\begin{table}[!htbp] \centering 
+\caption{\textbf{Difference-in-differences regression analysis of analyst coverage}\newline\scriptsize This           table reports the results of the difference-in-differences regression analysis of the logarithm            of analyst coverage.} 
+\label{table_h2_1} 
+\footnotesize 
+\begin{tabular}{@{\extracolsep{5pt}}lccc} 
+  \\[-1.8ex]\hline 
+  \hline \\[-1.8ex] 
+  & \multicolumn{3}{c}{\textit{Dependent variable:}} \\ 
+  \cline{2-4} 
+  \\[-1.8ex] & \multicolumn{3}{c}{LOG\_ANALYST\_COVERAGE} \\ 
+  & [-1,1] years & [-2,2] years & [-3,3] years \\ 
+  \\[-1.8ex] & (1) & (2) & (3)\\ 
+  \hline \\[-1.8ex] 
+  AFTER & $-$0.006 & 0.005 & 0.007 \\ 
+  & (0.019) & (0.023) & (0.022) \\ 
+  TREATED & 0.140$^{***}$ & 0.095$^{***}$ & 0.073$^{***}$ \\ 
+  & (0.020) & (0.015) & (0.015) \\ 
+  AFTER\texttimes TREATED & $-$0.044 & $-$0.001 & 0.020 \\ 
+  & (0.031) & (0.046) & (0.050) \\ 
+  LOG\_MKT\_CAP & 0.356$^{***}$ & 0.358$^{***}$ & 0.359$^{***}$ \\ 
+  & (0.014) & (0.013) & (0.012) \\ 
+  BM\_RATIO & 0.127$^{***}$ & 0.107$^{***}$ & 0.096$^{***}$ \\ 
+  & (0.031) & (0.025) & (0.024) \\ 
+  LEVERAGE & 0.032 & 0.080 & 0.089 \\ 
+  & (0.087) & (0.080) & (0.072) \\ 
+  ROA & $-$0.455 & $-$0.109 & 0.059 \\ 
+  & (0.311) & (0.261) & (0.216) \\ 
+  \hline \\[-1.8ex] 
+  Industry fixed effects & Yes & Yes & Yes \\ 
+  Year fixed effects & Yes & Yes & Yes \\ 
+  Treated firm obs. & 5,424 & 5,444 & 5,470 \\ 
+  Control firm obs. & 16,176 & 16,318 & 16,410 \\ 
+  Distinct treated firms & 1,651 & 1,657 & 1,658 \\ 
+  Distinct control firms & 3,558 & 3,577 & 3,590 \\ 
+  Observations & 21,600 & 21,762 & 21,880 \\ 
+  Adjusted R$^{2}$ & 0.605 & 0.612 & 0.611 \\ 
+  \hline 
+  \hline \\[-1.8ex] 
+  \multicolumn{4}{r}{} \\ 
+  \end{tabular} 
+\end{table}
+
+``` {r parallel_trend1, message = FALSE, warning=FALSE, eval=FALSE}
+
+library(tidyverse)
+
+parallel_trend1 <- read_rds("results/did_regression_matched_raw.rds") %>% 
+  mutate(TREATED = if_else(TREATED == 1, "Treated", "Control")) %>% 
+  group_by(TREATED, quarter_index) %>% 
+  summarise(LOG_ANALYST_COVERAGE = mean(log(1+ANALYST_COVERAGE)),
+            ANALYST_COVERAGE = mean(ANALYST_COVERAGE)) %>% 
+  ungroup()
+
+ggplot(parallel_trend1, aes(quarter_index, LOG_ANALYST_COVERAGE, color = TREATED)) +
+  ggtitle("Panel A: Logarithm of analyst coverage") +
+  geom_line() +
+  labs(x = "Event quarter", color = "") +
+  geom_vline(xintercept=0) +
+  theme_classic() +
+  theme(plot.title = element_text(size=9, face="italic")) +
+  scale_color_grey(start = 0.55, end = 0)
+
+ggsave("figures/parallel_trend_analyst_a.pdf", 
+       width = 8, height = 6, units = "in")
+
+ggplot(parallel_trend1, aes(quarter_index, ANALYST_COVERAGE, color = TREATED)) +
+  ggtitle("Panel B: Analyst coverage") +
+  geom_line() +
+  labs(x = "Event quarter", color = "") +
+  geom_vline(xintercept=0) +
+  theme_classic() +
+  theme(plot.title = element_text(size=9, face="italic")) +
+  scale_color_grey(start = 0.55, end = 0)
+
+ggsave("figures/parallel_trend_analyst_b.pdf", 
+       width = 8, height = 6, units = "in")
+  
+```
+
+\begin{figure}[H]
+\centering
+\includegraphics[width = \linewidth]{figures/parallel_trend_analyst_b.pdf}
+\caption[Analyst coverage between the treatment and control groups during brokerage closures]{\textbf{Analyst coverage between the treatment and control groups during brokerage closures}\newline\scriptsize This figure presents the evolution of the mean of firm-quarter observations of analyst coverage (\textit{ANALYST\_COVERAGE}) during the twelve quarters (i.e. three years) before and after an exogenous decrease in analyst coverage due to the 22 distinct brokerage closures listed by Kelly and Ljungqvist (2012). I impose a three-month gap over the events so that foreign ownership estimates are from quarters [-12,-1] and [1,12], with the brokerage closure occurring in the quarter 0. The sample consists of 1240 distinct treated firms and 2524 control firms. Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). The firm-quarter observations of foreign ownership and foreign breadth are winsorized at the top and bottom 1\%. Sample period: 1997- 2010. Sources: CRSP, COMPUSTAT, 13F and IBES.}
+\label{fig_parallel_trend_analyst}
+\end{figure}
+
+
+``` {r, results='asis', message = FALSE, warning=FALSE, eval=FALSE}
+
+library(tidyverse)
+library(lubridate)
+library(lfe)
+library(stargazer)
+
+did_regression_nonmatched1 <- read_rds("results/did_regression_nonmatched1.rds") %>%
+  mutate(AFTER_TREATED = TREATED * AFTER)
+
+did_regression_nonmatched2 <- read_rds("results/did_regression_nonmatched2.rds") %>%
+  mutate(AFTER_TREATED = TREATED * AFTER)
+
+did_regression_nonmatched3 <- read_rds("results/did_regression_nonmatched3.rds") %>%
+  mutate(AFTER_TREATED = TREATED * AFTER)
+
+did_model1 <- felm(FOR_OWN ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_nonmatched1)
+
+did_model2 <- felm(FOR_OWN ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_nonmatched2)
+
+did_model3 <- felm(FOR_OWN ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_nonmatched3)
+
+did_model7 <- felm(FOR_BREADTH ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_nonmatched1)
+
+did_model8 <- felm(FOR_BREADTH ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_nonmatched2)
+
+did_model9 <- felm(FOR_BREADTH ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_nonmatched3)
+
+did_list <- list(did_model1, did_model2, did_model3, did_model7, did_model8, did_model9)
+
+treated_obs <- map_dbl(list(did_regression_nonmatched1, did_regression_nonmatched2, did_regression_nonmatched3), ~  .x %>% filter(TREATED == 1) %>% 
+  group_by(TREATED) %>% summarise(n = n()) %>% ungroup() %>% pluck("n")) %>% 
+  format(big.mark = ",")
+
+control_obs <- map_dbl(list(did_regression_nonmatched1, did_regression_nonmatched2, did_regression_nonmatched3), ~  .x %>% filter(TREATED == 0) %>% 
+  group_by(TREATED) %>% summarise(n = n()) %>% ungroup() %>% pluck("n")) %>% 
+  format(big.mark = ",")
+
+treated_distinct <- map_dbl(list(did_regression_nonmatched1, did_regression_nonmatched2, did_regression_nonmatched3), ~  .x %>% filter(TREATED == 1) %>% 
+  group_by(TREATED) %>% summarise(n = n_distinct(permno)) %>% ungroup() %>% pluck("n")) %>% 
+  format(big.mark = ",")
+
+control_distinct <- map_dbl(list(did_regression_nonmatched1, did_regression_nonmatched2, did_regression_nonmatched3), ~  .x %>% filter(TREATED == 0) %>% 
+  group_by(TREATED) %>% summarise(n = n_distinct(permno)) %>% ungroup() %>% pluck("n")) %>%
+  format(big.mark = ",")
+
+obs <- map_dbl(list(did_regression_nonmatched1, did_regression_nonmatched2, did_regression_nonmatched3), ~  .x %>%
+ summarise(n = n()) %>% ungroup() %>% pluck("n")) %>% 
+  format(big.mark = ",")
+
+stargazer(did_list, title = "\\textbf{Difference-in-differences regression analysis of foreign ownership and breadth}\\newline\\small This table reports the results of the difference-in-differences regression analysis of foreign ownership and breadth. The explanatory variables are \\textit{AFTER}.",
+          label = "table_h2_1",
+          header = F,
+          dep.var.labels =c("FOR\\_OWN", "FOR\\_BREADTH"),
+          column.labels = rep(c("[-1,1] years", "[-2,2] years", "[-3,3] years"), times = 2),
+          covariate.labels = c("AFTER", "TREATED", "AFTER\\texttimes TREATED", "LOG\\_MKT\\_CAP", "BM\\_RATIO", "LEVERAGE", "ROA"),
+          omit.stat = c("ser", "rsq", "n"),
+          add.lines = list(c("Industry fixed effects", rep("Yes", times = 6)),
+                           c("Year fixed effects", rep("Yes", times = 6)),
+                           c("Treated firm obs.", rep(treated_obs, times = 2)),
+                           c("Control firm obs.", rep(control_obs, times = 2)),
+                           c("Distinct treated firms", rep(treated_distinct, times = 2)),
+                           c("Distinct control firms", rep(control_distinct, times = 2)),
+                           c("Observations", rep(obs, times = 2))),
+          type = 'latex',
+          notes.label = "",
+          notes.append = F,
+          notes = "",
+          font.size = "small",
+          no.space = T)
+
+did_model1 <- felm(FOR_TO_INST_OWN ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_nonmatched1)
+
+did_model2 <- felm(FOR_TO_INST_OWN ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_nonmatched2)
+
+did_model3 <- felm(FOR_TO_INST_OWN ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_nonmatched3)
+
+did_model7 <- felm(FOR_TO_INST_BREADTH ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_nonmatched1)
+
+did_model8 <- felm(FOR_TO_INST_BREADTH ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_nonmatched2)
+
+did_model9 <- felm(FOR_TO_INST_BREADTH ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_nonmatched3)
+
+did_list <- list(did_model1, did_model2, did_model3, did_model7, did_model8, did_model9)
+
+stargazer(did_list, title = "\\textbf{Difference-in-differences regression analysis of foreign ownership and breadth}\\newline\\small This table reports the results of the difference-in-differences regression analysis of foreign ownership and breadth. The explanatory variables are \\textit{AFTER}.",
+          label = "table_h2_1",
+          header = F,
+          dep.var.labels =c("FOR\\_TO\\_INST\\_OWN", "FOR\\_TO\\_INST\\_BREADTH"),
+          column.labels = rep(c("[-1,1] years", "[-2,2] years", "[-3,3] years"), times = 2),
+          covariate.labels = c("AFTER", "TREATED", "AFTER\\texttimes TREATED", "LOG\\_MKT\\_CAP", "BM\\_RATIO", "LEVERAGE", "ROA"),
+          omit.stat = c("ser", "rsq", "n"),
+          add.lines = list(c("Industry fixed effects", rep("Yes", times = 6)),
+                           c("Year fixed effects", rep("Yes", times = 6)),
+                           c("Treated firm obs.", rep(treated_obs, times = 2)),
+                           c("Control firm obs.", rep(control_obs, times = 2)),
+                           c("Distinct treated firms", rep(treated_distinct, times = 2)),
+                           c("Distinct control firms", rep(control_distinct, times = 2)),
+                           c("Observations", rep(obs, times = 2))),
+          type = 'latex',
+          notes.label = "",
+          notes.append = F,
+          notes = "",
+          font.size = "small",
+          no.space = T)
+
+```
+
+
+\renewcommand\arraystretch{0.55}
+\captionsetup{width=1.0\linewidth}
+\footnotesize
+\begin{longtable}{@{\extracolsep{5pt}}lcccccc}
+  \caption[Difference-in-differences regression analysis of foreign ownership-specific variables]{\textbf{Difference-in-differences regression analysis of foreign ownership-specific variables}\newline\scriptsize This table reports the results of the difference-in-differences regression analysis of ownership-specific variables. In Panel A, the dependent variables are foreign ownership (\textit{FOR\_OWN}) and foreign breadth (\textit{FOR\_BREADTH}). In Panel B, the dependent variables are foreign-to-institution ownership (\textit{FOR\_TO\_INST\_OWN}) and foreign-to-institution breadth (\textit{FOR\_TO\_INST\_BREADTH}). The treatment group is determined as stocks that lose a covering analyst due to 22 distinct brokerage closures listed by Kelly and Ljungqvist (2012). Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). For all stocks, I compute averages of the dependent variables and control variables in columns (1) and (4) over the quarters [-4,-1] and over the quarters [1,4], with the brokerage closure occurring in quarter 0. In columns (2) and  (5) the dependent variables are computed over the quarters [-8,-1] and [1,8] and in columns (3) and (6) over the quarters [-12,-1] and [1,12]. The explanatory variables are dummy variables indicating the treatment group (\textit{TREATED}), the post-event period (\textit{AFTER}) and their interaction (\textit{AFTER}\texttimes\textit{TREATED}). The control variables are book-to-market ratio (\textit{BM\_RATIO}), leverage (\textit{LEVERAGE}) and return on assets (\textit{ROA}). I include industry and year fixed effects in all regressions. Standard errors are clustered by the industry and year level and reported in parentheses. \textit{FOR\_OWN} and \textit{FOR\_BREADTH} are winsorized at the top to a maximum of 1. Control variables are winsorized at the top and bottom 1\%. Table \ref{table_variable_definitions} in Appendix provides a detailed list of variable definitions. *, ** and *** denote the statistical significance at the 10\%, 5\% and 1\% level, respectively. Sample period: 1997-2010. Sources: CRSP, COMPUSTAT, 13F and IBES.} 
+  \label{table_h2_1} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{6}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-7} 
+\\[-1.8ex] & \multicolumn{3}{c}{FOR\_OWN} & \multicolumn{3}{c}{FOR\_BREADTH} \\ 
+ & [-1,1] years & [-2,2] years & [-3,3] years & [-1,1] years & [-2,2] years & [-3,3] years \\ 
+\\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6)\\ 
+\hline
+\multicolumn{6}{@{} l}{\textit{Panel A: Foreign ownership and breadth}}
+\\
+\\
+ AFTER & 0.006$^{***}$ & 0.009$^{***}$ & 0.012$^{***}$ & 0.0003$^{***}$ & 0.0004$^{***}$ & 0.001$^{***}$ \\ 
+  & (0.002) & (0.003) & (0.002) & (0.0001) & (0.0001) & (0.0001) \\ 
+  TREATED & 0.001 & $-$0.001 & $-$0.001 & 0.001$^{**}$ & 0.001$^{*}$ & 0.0005 \\ 
+  & (0.001) & (0.001) & (0.001) & (0.0004) & (0.0004) & (0.0004) \\ 
+  AFTER\texttimes TREATED & 0.001 & 0.002 & 0.002$^{**}$ & 0.0001 & 0.0005$^{*}$ & 0.001$^{***}$ \\ 
+  & (0.001) & (0.001) & (0.001) & (0.0002) & (0.0003) & (0.0002) \\ 
+  LOG\_MKT\_CAP & 0.006$^{***}$ & 0.006$^{***}$ & 0.006$^{***}$ & 0.002$^{***}$ & 0.002$^{***}$ & 0.002$^{***}$ \\ 
+  & (0.001) & (0.001) & (0.001) & (0.0002) & (0.0002) & (0.0002) \\ 
+  BM\_RATIO & 0.0004 & 0.0001 & $-$0.0001 & 0.001$^{***}$ & 0.001$^{***}$ & 0.001$^{***}$ \\ 
+  & (0.002) & (0.001) & (0.001) & (0.0002) & (0.0001) & (0.0001) \\ 
+  LEVERAGE & 0.002 & 0.0003 & $-$0.0002 & 0.002$^{***}$ & 0.002$^{***}$ & 0.002$^{***}$ \\ 
+  & (0.002) & (0.002) & (0.003) & (0.0002) & (0.0002) & (0.0002) \\ 
+  ROA & 0.055$^{***}$ & 0.066$^{***}$ & 0.069$^{***}$ & $-$0.005$^{***}$ & $-$0.005$^{***}$ & $-$0.005$^{***}$ \\ 
+  & (0.008) & (0.009) & (0.007) & (0.001) & (0.001) & (0.001) \\ 
+ \hline \\[-1.8ex] 
+Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
+Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
+Treated firm obs. & 5,424 & 5,444 & 5,470 & 5,424 & 5,444 & 5,470 \\ 
+Control firm obs. & 152,298 & 154,200 & 154,932 & 152,298 & 154,200 & 154,932 \\ 
+Distinct treated firms & 1,651 & 1,657 & 1,658 & 1,651 & 1,657 & 1,658 \\ 
+Distinct control firms & 6,717 & 6,726 & 6,737 & 6,717 & 6,726 & 6,737 \\ 
+Observations & 157,722 & 159,644 & 160,402 & 157,722 & 159,644 & 160,402 \\ 
+Adjusted R$^{2}$ & 0.228 & 0.251 & 0.270 & 0.698 & 0.701 & 0.700 \\ 
+\hline \\[-1.8ex]
+\\[-1.83ex] 
+ & \multicolumn{6}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-7} 
+\\[-1.8ex] & \multicolumn{3}{c}{FOR\_TO\_INST\_OWN} & \multicolumn{3}{c}{FOR\_TO\_INST\_BREADTH} \\ 
+ & [-1,1] years & [-2,2] years & [-3,3] years & [-1,1] years & [-2,2] years & [-3,3] years \\ 
+\\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6)\\ 
+\hline \\[-1.8ex] 
+\multicolumn{6}{@{} l}{\textit{Panel B: Foreign-to-institution ownership and breadth}}
+\\
+\\
+ AFTER & 0.004 & 0.006 & 0.007$^{*}$ & 0.002 & 0.004 & 0.006 \\ 
+  & (0.003) & (0.004) & (0.004) & (0.005) & (0.005) & (0.004) \\ 
+  TREATED & $-$0.004$^{**}$ & $-$0.006$^{***}$ & $-$0.007$^{***}$ & $-$0.002 & $-$0.003$^{*}$ & $-$0.005$^{***}$ \\ 
+  & (0.002) & (0.002) & (0.002) & (0.002) & (0.002) & (0.001) \\ 
+  AFTER\texttimes TREATED & 0.003 & 0.004$^{**}$ & 0.007$^{***}$ & 0.004 & 0.006$^{**}$ & 0.009$^{***}$ \\ 
+  & (0.002) & (0.002) & (0.002) & (0.003) & (0.002) & (0.002) \\ 
+  LOG\_MKT\_CAP & 0.005$^{***}$ & 0.005$^{***}$ & 0.004$^{***}$ & 0.0001 & 0.0001 & 0.0002 \\ 
+  & (0.001) & (0.001) & (0.001) & (0.002) & (0.002) & (0.002) \\ 
+  BM\_RATIO & $-$0.004$^{**}$ & $-$0.005$^{***}$ & $-$0.006$^{***}$ & 0.001 & $-$0.0003 & $-$0.001 \\ 
+  & (0.002) & (0.002) & (0.002) & (0.002) & (0.001) & (0.001) \\ 
+  LEVERAGE & $-$0.014$^{***}$ & $-$0.014$^{***}$ & $-$0.013$^{***}$ & $-$0.001 & $-$0.002 & $-$0.003 \\ 
+  & (0.004) & (0.005) & (0.005) & (0.003) & (0.003) & (0.003) \\ 
+  ROA & $-$0.065$^{***}$ & $-$0.064$^{***}$ & $-$0.063$^{***}$ & $-$0.047$^{***}$ & $-$0.048$^{***}$ & $-$0.050$^{***}$ \\ 
+  & (0.017) & (0.017) & (0.017) & (0.016) & (0.016) & (0.015) \\ 
+ \hline \\[-1.8ex] 
+Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
+Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
+Treated firm obs. & 5,424 & 5,444 & 5,470 & 5,424 & 5,444 & 5,470 \\ 
+Control firm obs. & 152,298 & 154,200 & 154,932 & 152,298 & 154,200 & 154,932 \\ 
+Distinct treated firms & 1,651 & 1,657 & 1,658 & 1,651 & 1,657 & 1,658 \\ 
+Distinct control firms & 6,717 & 6,726 & 6,737 & 6,717 & 6,726 & 6,737 \\ 
+Observations & 157,722 & 159,644 & 160,402 & 157,722 & 159,644 & 160,402 \\ 
+Adjusted R$^{2}$ & 0.153 & 0.162 & 0.166 & 0.148 & 0.157 & 0.165 \\ 
+\hline 
+\hline \\[-1.8ex] 
+\multicolumn{6}{r}{} \\ 
+\end{longtable}
