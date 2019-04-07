@@ -1,5 +1,6 @@
 library(tidyverse)
 library(lubridate)
+library(DescTools)
 
 # PINs by Duarte and Young (2006 or 2009), PIN_DY, PIN_Adjusted and PSOS
 # link http://www.owlnet.rice.edu/~jd10/publications.html
@@ -88,11 +89,27 @@ vcv <- vcv_raw %>%
   mutate_at(vars(vcv1:vcv3),
             funs(Winsorize(., probs = c(0.01, 0.99), na.rm = T)))
 
+vcv_raw_quarter <- read_rds("data/vcv_quarter.rds")
+
+vcv_quarter <- vcv_raw_quarter %>% 
+  filter(quarter_date >= ymd("1996-12-31")) %>% 
+  mutate(permno = as.character(permno)) %>% 
+  mutate_at(vars(vcv1:vcv3),
+            funs(Winsorize(., probs = c(0.01, 0.99), na.rm = T)))
+  
 ba_spread_raw <- read_rds("data/ba_spread.rds")
 
 ba_spread <- ba_spread_raw %>% 
   mutate(permno = as.character(permno),
          bid_ask_spread = Winsorize(spread, probs = c(0.01, 0.99), na.rm = T))
+
+ba_spread_quarter_raw <- read_rds("data/ba_spread_quarter.rds")
+
+ba_spread_quarter <- ba_spread_quarter_raw %>% 
+  filter(quarter_date >= ymd("1996-12-31")) %>% 
+  mutate(permno = as.character(permno),
+         bid_ask_spread = Winsorize(ba_spread, probs = c(0.01, 0.99), na.rm = T)) %>% 
+  select(-ba_spread)
 
 information_asymmetry_measures <- pin_dy %>% 
   full_join(pin_eho, by = c("permno", "year")) %>% 
@@ -103,3 +120,9 @@ information_asymmetry_measures <- pin_dy %>%
   full_join(ba_spread, by = c("permno", "year"))
 
 write_rds(information_asymmetry_measures, "data/information_asymmetry_measures.rds")
+
+information_asymmetry_measures_quarter <- mia_quarter %>% 
+  full_join(vcv_quarter) %>% 
+  full_join(ba_spread_quarter)
+
+write_rds(information_asymmetry_measures_quarter, "data/information_asymmetry_measures_quarter.rds")
