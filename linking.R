@@ -252,15 +252,85 @@ did <- did_temp1 %>%
 
 write_rds(did, "data/did_regression_raw.rds")
 
-baseline_development <- thirteenf_crsp %>% 
-  select(report_date, institutional_own, foreign_own) %>% 
-  filter_all(all_vars(!is.na(.))) %>% 
-  group_by(report_date) %>% 
-  summarise(FOR_OWN = mean(foreign_own),
-            INST_OWN = mean(institutional_own)) %>% 
-  ungroup()
 
-ggplot(baseline_development, aes(report_date)) +
-  geom_line(aes(y = INST_OWN, colour = "INST_OWN")) +
-  #geom_line(aes(y = FOR_OWN, colour = "FOR_OWN")) +
-  theme_classic()
+## did with instrumental variable approach
+
+ia_quarter <- read_rds("data/information_asymmetry_measures_quarter.rds")
+
+thirteenf_crsp_compustat_ia_quarter <- thirteenf_crsp_compustat %>% 
+  inner_join(ia_quarter, by = c("permno", "report_date" = "quarter_date")) %>%
+  select(-mia) %>% 
+  filter_all(all_vars(!is.na(.)))
+
+columns_for_summarise <- thirteenf_crsp_compustat_ia_quarter %>%
+  select(institutional_own:bid_ask_spread) %>% colnames()
+
+summarise1 <- function (df) {
+  df %>%
+    group_by(permno, event_date, quarter_index, report_date) %>% 
+    summarise_at(columns_for_summarise, last) %>%
+    ungroup()
+}
+
+summarise2 <- function (df) {
+  df %>% 
+    group_by(permno, event_date, quarter_index) %>% 
+    summarise(sic_code = last(sic_code)) %>% 
+    ungroup()
+}
+
+before_val <- map(quarter_index, ~map(events$event_date, ~before_interval_fun(.x, .y), .y = .x)) %>%
+  flatten() %>% 
+  map(~filter1(thirteenf_crsp_compustat_ia_quarter, .x) %>%
+        mutate(event_date = .x$event_date,
+               quarter_index = .x$quarter_index)) %>% 
+  map_df(~summarise1(.x)) %>% 
+  mutate(after = 0,
+         quarter_index = (-1)*quarter_index) %>% 
+  arrange(permno, event_date, quarter_index)
+
+before_val_sic_code <- map(quarter_index, ~map(events$event_date, ~before_interval_fun(.x, .y), .y = .x)) %>%
+  flatten() %>% 
+  map(~filter1(thirteenf_crsp_compustat_ia_quarter, .x) %>%
+        mutate(event_date = .x$event_date,
+               quarter_index = .x$quarter_index)) %>% 
+  map_df(~summarise2(.x)) %>% 
+  mutate(after = 0,
+         quarter_index = (-1)*quarter_index) %>% 
+  arrange(permno, event_date, quarter_index)
+
+before_vals <- before_val %>% 
+  inner_join(before_val_sic_code)
+
+after_val <- map(quarter_index, ~map(events$event_date, 
+                                     ~after_interval_fun(.x, .y), .y = .x)) %>% 
+  flatten() %>% 
+  map(~filter1(thirteenf_crsp_compustat_ia_quarter, .x) %>%
+        mutate(event_date = .x$event_date,
+               quarter_index = .x$quarter_index)) %>% 
+  map_df(~summarise1(.x)) %>% 
+  mutate(after = 1) %>% 
+  arrange(permno, event_date, quarter_index)
+
+after_val_sic_code <- map(quarter_index, ~map(events$event_date, 
+                                              ~after_interval_fun(.x, .y), .y = .x)) %>% 
+  flatten() %>% 
+  map(~filter1(thirteenf_crsp_compustat_ia_quarter, .x) %>%
+        mutate(event_date = .x$event_date,
+               quarter_index = .x$quarter_index)) %>% 
+  map_df(~summarise2(.x)) %>% 
+  mutate(after = 1) %>% 
+  arrange(permno, event_date, quarter_index)
+
+after_vals <- after_val %>% 
+  inner_join(after_val_sic_code)
+
+vals <- bind_rows(before_vals, after_vals) %>% 
+  arrange(permno, event_date, after) %>% 
+  distinct()
+
+did <- did_temp1 %>% 
+  inner_join(vals, by = c("permno", "event_date", "after", "quarter_index")) %>% 
+  distinct()
+
+write_rds(did, "data/did_regression_raw_iv.rds")
