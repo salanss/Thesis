@@ -965,7 +965,7 @@ ggsave("figures/parallel_trend2b.pdf",
   \includegraphics[width=\textwidth]{figures/parallel_trend2b.pdf}
 \end{subfigure}
 \hfill
-\caption[Foreign ownership-specific variables between the treatment and control groups]{\textbf{Foreign ownership-specific variables between the treatment and control groups}\newline\scriptsize This figure presents the evolution of the mean of firm-quarter observations of ownership-specific variables during the twelve quarters (i.e. three years) before and after an exogenous decrease in analyst coverage due to the 22 distinct brokerage closures listed by \citet{kelly2012testing}. I impose a three-month gap over the events so that foreign ownership estimates are from quarters [-12,-1] and [1,12], with the brokerage closure occurring in the quarter 0. The sample consists of 1658 distinct treated firms and 3590 control firms. Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). Table \ref{table_variable_definitions} in Appendix provides a detailed list of variable definitions. Sample period: 1997-2010. Sources: CRSP, COMPUSTAT, 13F and IBES.}
+\caption[Foreign ownership-specific variables between the treatment and control groups around brokerage closures]{\textbf{Foreign ownership-specific variables between the treatment and control groups around brokerage closures}\newline\scriptsize This figure presents the evolution of the mean of firm-quarter observations of ownership-specific variables during the twelve quarters (i.e. three years) before and after an exogenous decrease in analyst coverage due to the 22 distinct brokerage closures listed by \citet{kelly2012testing}. I impose a three-month gap over the events so that foreign ownership estimates are from quarters [-12,-1] and [1,12], with the brokerage closure occurring in the quarter 0. The sample consists of 1658 distinct treated firms and 3590 control firms. Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). Table \ref{table_variable_definitions} in Appendix provides a detailed list of variable definitions. Sample period: 1997-2010. Sources: CRSP, COMPUSTAT, 13F and IBES.}
 \label{fig_parallel_trend1}
 \end{figure}
 
@@ -984,11 +984,14 @@ library(lfe)
 library(stargazer)
 
 did_regression_matched1 <- read_rds("results/did_regression_matched1.rds") %>%
-  mutate(AFTER_TREATED = TREATED * AFTER)
+  mutate(AFTER_TREATED = TREATED * AFTER,
+         sic_code =str_sub(sic_code, 1, 2))
 did_regression_matched2 <- read_rds("results/did_regression_matched2.rds") %>%
-  mutate(AFTER_TREATED = TREATED * AFTER)
+  mutate(AFTER_TREATED = TREATED * AFTER,
+         sic_code =str_sub(sic_code, 1, 2))
 did_regression_matched3 <- read_rds("results/did_regression_matched3.rds") %>%
-  mutate(AFTER_TREATED = TREATED * AFTER)
+  mutate(AFTER_TREATED = TREATED * AFTER,
+         sic_code =str_sub(sic_code, 1, 2))
 
 did_model1 <- felm(FOR_OWN ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
                      LEVERAGE + ROA|year + sic_code|0|year + sic_code,
@@ -1123,20 +1126,20 @@ stargazer(did_list, title = "\\textbf{Difference-in-differences regression analy
 \multicolumn{6}{@{} l}{\textit{Panel A: Foreign ownership and breadth}}
 \\
 \\
- AFTER & 0.008$^{**}$ & 0.011$^{**}$ & 0.014$^{***}$ & 0.001$^{***}$ & 0.001$^{***}$ & 0.001$^{***}$ \\ 
-  & (0.003) & (0.005) & (0.003) & (0.0002) & (0.0001) & (0.0001) \\ 
-  TREATED & $-$0.001 & $-$0.001 & $-$0.002 & 0.0003 & 0.0003 & 0.0002 \\ 
+ AFTER & 0.008$^{***}$ & 0.011$^{***}$ & 0.014$^{***}$ & 0.001$^{***}$ & 0.001$^{***}$ & 0.001$^{***}$ \\ 
+  & (0.003) & (0.004) & (0.003) & (0.0002) & (0.0001) & (0.0001) \\ 
+  TREATED & $-$0.001 & $-$0.002 & $-$0.002 & 0.0004 & 0.0004 & 0.0003 \\ 
   & (0.001) & (0.001) & (0.001) & (0.0004) & (0.0004) & (0.0004) \\ 
-  AFTER\texttimes TREATED & $-$0.001 & $-$0.0003 & 0.0003 & 0.00003 & 0.0002 & 0.0003 \\ 
+  AFTER\texttimes TREATED & $-$0.001 & $-$0.0002 & 0.0004 & 0.00004 & 0.0002 & 0.0004$^{*}$ \\ 
   & (0.001) & (0.002) & (0.002) & (0.0001) & (0.0002) & (0.0002) \\ 
   LOG\_MKT\_CAP & 0.005$^{***}$ & 0.005$^{***}$ & 0.005$^{***}$ & 0.003$^{***}$ & 0.003$^{***}$ & 0.003$^{***}$ \\ 
   & (0.001) & (0.001) & (0.001) & (0.0003) & (0.0003) & (0.0003) \\ 
-  BM\_RATIO & 0.001 & 0.001 & 0.001 & 0.002$^{***}$ & 0.002$^{***}$ & 0.001$^{***}$ \\ 
+  BM\_RATIO & 0.001 & 0.002 & 0.001 & 0.001$^{***}$ & 0.001$^{***}$ & 0.001$^{***}$ \\ 
   & (0.002) & (0.002) & (0.002) & (0.0003) & (0.0002) & (0.0002) \\ 
-  LEVERAGE & 0.002 & 0.002 & 0.002 & 0.001$^{***}$ & 0.001$^{***}$ & 0.001$^{***}$ \\ 
-  & (0.005) & (0.003) & (0.003) & (0.001) & (0.0005) & (0.0005) \\ 
-  ROA & 0.071$^{***}$ & 0.092$^{***}$ & 0.096$^{***}$ & $-$0.008$^{***}$ & $-$0.008$^{***}$ & $-$0.008$^{***}$ \\ 
-  & (0.014) & (0.016) & (0.012) & (0.002) & (0.002) & (0.002) \\ 
+  LEVERAGE & 0.001 & 0.002 & 0.002 & 0.001$^{*}$ & 0.001$^{**}$ & 0.001$^{**}$ \\ 
+  & (0.003) & (0.002) & (0.002) & (0.001) & (0.0004) & (0.0004) \\ 
+  ROA & 0.064$^{***}$ & 0.082$^{***}$ & 0.086$^{***}$ & $-$0.010$^{***}$ & $-$0.009$^{***}$ & $-$0.010$^{***}$ \\ 
+  & (0.012) & (0.013) & (0.009) & (0.003) & (0.003) & (0.003) \\ 
  \hline \\[-1.8ex] 
 Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
 Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
@@ -1145,7 +1148,7 @@ Control firm obs. & 16,176 & 16,318 & 16,410 & 16,176 & 16,318 & 16,410 \\
 Distinct treated firms & 1,651 & 1,657 & 1,658 & 1,651 & 1,657 & 1,658 \\ 
 Distinct control firms & 3,558 & 3,577 & 3,590 & 3,558 & 3,577 & 3,590 \\ 
 Observations & 21,600 & 21,762 & 21,880 & 21,600 & 21,762 & 21,880 \\ 
-Adjusted R$^{2}$ & 0.239 & 0.265 & 0.279 & 0.756 & 0.760 & 0.761 \\ 
+Adjusted R$^{2}$ & 0.179 & 0.199 & 0.209 & 0.727 & 0.733 & 0.734 \\ 
 \hline \\[-1.8ex]
 \\[-1.83ex] 
  & \multicolumn{6}{c}{\textit{Dependent variable:}} \\ 
@@ -1159,18 +1162,18 @@ Adjusted R$^{2}$ & 0.239 & 0.265 & 0.279 & 0.756 & 0.760 & 0.761 \\
 \\
  AFTER & 0.007$^{*}$ & 0.008 & 0.011$^{***}$ & 0.003 & 0.006 & 0.011$^{***}$ \\ 
   & (0.004) & (0.006) & (0.004) & (0.004) & (0.004) & (0.004) \\ 
-  TREATED & $-$0.005$^{**}$ & $-$0.006$^{***}$ & $-$0.006$^{***}$ & $-$0.004$^{***}$ & $-$0.004$^{***}$ & $-$0.004$^{***}$ \\ 
-  & (0.002) & (0.002) & (0.002) & (0.001) & (0.001) & (0.001) \\ 
-  AFTER\texttimes TREATED & 0.0003 & 0.002 & 0.002 & 0.003$^{***}$ & 0.004$^{***}$ & 0.003$^{**}$ \\ 
+  TREATED & $-$0.005$^{***}$ & $-$0.006$^{***}$ & $-$0.007$^{***}$ & $-$0.004$^{***}$ & $-$0.004$^{***}$ & $-$0.004$^{***}$ \\ 
   & (0.001) & (0.002) & (0.002) & (0.001) & (0.001) & (0.001) \\ 
-  LOG\_MKT\_CAP & 0.003 & 0.003$^{*}$ & 0.003$^{*}$ & 0.0004 & 0.001 & 0.001 \\ 
-  & (0.002) & (0.001) & (0.001) & (0.002) & (0.002) & (0.002) \\ 
-  BM\_RATIO & $-$0.001 & $-$0.001 & $-$0.003 & 0.003 & 0.002 & 0.001 \\ 
+  AFTER\texttimes TREATED & 0.0001 & 0.002 & 0.002 & 0.003$^{***}$ & 0.004$^{**}$ & 0.004$^{**}$ \\ 
+  & (0.001) & (0.003) & (0.002) & (0.001) & (0.001) & (0.001) \\ 
+  LOG\_MKT\_CAP & 0.004$^{***}$ & 0.004$^{***}$ & 0.004$^{***}$ & 0.0004 & 0.001 & 0.001 \\ 
+  & (0.001) & (0.001) & (0.001) & (0.002) & (0.002) & (0.002) \\ 
+  BM\_RATIO & 0.0001 & $-$0.0002 & $-$0.002 & 0.003 & 0.002 & 0.001 \\ 
   & (0.002) & (0.002) & (0.002) & (0.002) & (0.002) & (0.002) \\ 
-  LEVERAGE & $-$0.007 & $-$0.008 & $-$0.006 & $-$0.0005 & $-$0.001 & $-$0.001 \\ 
-  & (0.007) & (0.006) & (0.006) & (0.003) & (0.003) & (0.003) \\ 
-  ROA & $-$0.043$^{**}$ & $-$0.035$^{**}$ & $-$0.032$^{*}$ & $-$0.039$^{***}$ & $-$0.041$^{***}$ & $-$0.039$^{**}$ \\ 
-  & (0.017) & (0.017) & (0.018) & (0.014) & (0.016) & (0.016) \\ 
+  LEVERAGE & $-$0.002 & $-$0.003 & $-$0.002 & $-$0.002 & $-$0.003 & $-$0.003 \\ 
+  & (0.004) & (0.003) & (0.003) & (0.003) & (0.003) & (0.002) \\ 
+  ROA & $-$0.047$^{**}$ & $-$0.042 & $-$0.042 & $-$0.043$^{**}$ & $-$0.045$^{***}$ & $-$0.045$^{**}$ \\ 
+  & (0.022) & (0.026) & (0.029) & (0.017) & (0.017) & (0.019) \\ 
  \hline \\[-1.8ex] 
 Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
 Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes \\ 
@@ -1179,7 +1182,7 @@ Control firm obs. & 16,176 & 16,318 & 16,410 & 16,176 & 16,318 & 16,410 \\
 Distinct treated firms & 1,651 & 1,657 & 1,658 & 1,651 & 1,657 & 1,658 \\ 
 Distinct control firms & 3,558 & 3,577 & 3,590 & 3,558 & 3,577 & 3,590 \\ 
 Observations & 21,600 & 21,762 & 21,880 & 21,600 & 21,762 & 21,880 \\ 
-Adjusted R$^{2}$ & 0.169 & 0.181 & 0.183 & 0.215 & 0.237 & 0.248 \\ 
+Adjusted R$^{2}$ & 0.098 & 0.108 & 0.105 & 0.127 & 0.144 & 0.151 \\ 
 \hline 
 \hline \\[-1.8ex] 
 \multicolumn{6}{r}{} \\ 
@@ -1202,7 +1205,8 @@ library(lfe)
 library(stargazer)
 
 did_regression_matched1 <- read_rds("results/did_regression_matched1.rds") %>%
-  mutate(AFTER_TREATED = TREATED * AFTER)
+  mutate(AFTER_TREATED = TREATED * AFTER,
+         sic_code = str_sub(sic_code, 1, 2))
 
 did_model1 <- felm(FOR_OWN_QUASI ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
                      LEVERAGE + ROA|year + sic_code|0|year + sic_code,
@@ -1340,12 +1344,12 @@ stargazer(did_list, title = "\\textbf{Difference-in-differences regression analy
 
 ```
 
-\renewcommand\arraystretch{0.64}
+\renewcommand\arraystretch{0.63}
 \begin{landscape}
-\captionsetup{width=1.0\linewidth}
+\captionsetup{width=1\linewidth}
 \footnotesize
 \begin{longtable}{@{\extracolsep{15pt}}lcccccccc} 
-  \caption[Difference-in-differences regression analysis of ownership-specific variables by investor type]{\textbf{Difference-in-differences regression analysis of ownership-specific variables by investor type}\newline\scriptsize This table reports the results of the difference-in-differences regression analysis of ownership-specific variables by different classifications of institutional investor types \citep{bushee2001institutional}. In Panel A, the dependent variables are foreign ownership (\textit{FOR\_OWN}) and foreign breadth (\textit{FOR\_BREADTH}). In Panel B, the dependent variables are foreign-to-institution ownership (\textit{FOR\_TO\_INST\_OWN}) and foreign-to-institution breadth (\textit{FOR\_TO\_INST\_BREADTH}). For all stocks, I compute averages of the dependent variables and control variables in all columns over the quarters [-4,-1] and over the quarters [1,4], with the brokerage closure occurring in quarter 0. The control variables are book-to-market ratio (\textit{BM\_RATIO}), leverage (\textit{LEVERAGE}) and return on assets (\textit{ROA}). I include industry and year fixed effects in all regressions. Standard errors are clustered by the industry and year level and reported in parentheses. \textit{FOR\_OWN} and \textit{FOR\_BREADTH} are winsorized at the top to a maximum of 1. Control variables are winsorized at the top and bottom 1\%. Table \ref{table_variable_definitions} in Appendix provides a detailed list of variable definitions. *, ** and *** denote the statistical significance at the 10\%, 5\% and 1\% level, respectively. Sample period: 1997-2010. Sources: CRSP, COMPUSTAT, 13F and IBES.} 
+  \caption[Difference-in-differences regression analysis of foreign ownership-specific variables by investor type]{\textbf{Difference-in-differences regression analysis of foreign ownership-specific variables by investor type}\newline\scriptsize This table reports the results of the difference-in-differences regression analysis of ownership-specific variables by different classifications of institutional investor types \citep{bushee2001institutional}. In Panel A, the dependent variables are foreign ownership (\textit{FOR\_OWN}) and foreign breadth (\textit{FOR\_BREADTH}). In Panel B, the dependent variables are foreign-to-institution ownership (\textit{FOR\_TO\_INST\_OWN}) and foreign-to-institution breadth (\textit{FOR\_TO\_INST\_BREADTH}). For all stocks, I compute averages of the dependent variables and control variables in all columns over the quarters [-4,-1] and over the quarters [1,4], with the brokerage closure occurring in quarter 0. The control variables are book-to-market ratio (\textit{BM\_RATIO}), leverage (\textit{LEVERAGE}) and return on assets (\textit{ROA}). I include industry and year fixed effects in all regressions. Standard errors are clustered by the industry and year level and reported in parentheses. \textit{FOR\_OWN} and \textit{FOR\_BREADTH} are winsorized at the top to a maximum of 1. Control variables are winsorized at the top and bottom 1\%. Table \ref{table_variable_definitions} in Appendix provides a detailed list of variable definitions. *, ** and *** denote the statistical significance at the 10\%, 5\% and 1\% level, respectively. Sample period: 1997-2010. Sources: CRSP, COMPUSTAT, 13F and IBES.} 
   \label{table_h3_1} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
@@ -1355,20 +1359,23 @@ stargazer(did_list, title = "\\textbf{Difference-in-differences regression analy
  & Quasi & Non-quasi & Dedicated & Transient & Quasi & Non-quasi & Dedicated & Transient \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8)\\ 
 \hline \\[-1.8ex] 
- AFTER & 0.008$^{***}$ & 0.00003 & $-$0.0001 & 0.0002 & 0.001 & $-$0.0001 & 0.00001 & $-$0.0001 \\ 
-  & (0.002) & (0.003) & (0.0003) & (0.003) & (0.0005) & (0.0004) & (0.00002) & (0.0004) \\ 
-  TREATED & $-$0.0002 & $-$0.001 & $-$0.0001 & $-$0.001 & 0.00004 & 0.0003$^{***}$ & $-$0.00000 & 0.0003$^{***}$ \\ 
-  & (0.001) & (0.001) & (0.0003) & (0.001) & (0.0004) & (0.0001) & (0.00001) & (0.0001) \\ 
-  AFTER\texttimes TREATED & $-$0.001 & 0.0001 & $-$0.00002 & 0.0002 & 0.0002 & $-$0.0001$^{*}$ & 0.00002 & $-$0.0001 \\ 
-  & (0.001) & (0.001) & (0.0004) & (0.001) & (0.0002) & (0.0001) & (0.00002) & (0.0001) \\ 
-  LOG\_MKT\_CAP & 0.004$^{***}$ & 0.001 & $-$0.0001 & 0.001 & 0.001$^{***}$ & 0.001$^{***}$ & 0.00001$^{**}$ & 0.001$^{***}$ \\ 
+\multicolumn{6}{@{} l}{\textit{Panel A: Foreign ownership and breadth}}
+\\
+\\
+ AFTER & 0.008$^{***}$ & 0.0001 & $-$0.0001 & 0.0003 & 0.001 & $-$0.00004 & 0.00001 & $-$0.0001 \\ 
+  & (0.002) & (0.003) & (0.0003) & (0.003) & (0.0004) & (0.0004) & (0.00002) & (0.0004) \\ 
+  TREATED & $-$0.0002 & $-$0.001 & $-$0.0001 & $-$0.001 & 0.0001 & 0.0003$^{***}$ & $-$0.00000 & 0.0003$^{***}$ \\ 
+  & (0.0005) & (0.001) & (0.0003) & (0.001) & (0.0004) & (0.0001) & (0.00001) & (0.0001) \\ 
+  AFTER\texttimes TREATED & $-$0.001 & 0.0002 & $-$0.0001 & 0.0002 & 0.0002 & $-$0.0001 & 0.00002 & $-$0.0001 \\ 
+  & (0.001) & (0.001) & (0.0004) & (0.001) & (0.0002) & (0.0001) & (0.00001) & (0.0001) \\ 
+  LOG\_MKT\_CAP & 0.004$^{***}$ & 0.001$^{**}$ & 0.0001 & 0.001$^{**}$ & 0.002$^{***}$ & 0.002$^{***}$ & 0.00002$^{**}$ & 0.001$^{***}$ \\ 
   & (0.001) & (0.0004) & (0.0001) & (0.0004) & (0.0003) & (0.0001) & (0.00001) & (0.0001) \\ 
-  BM\_RATIO & 0.002 & $-$0.001$^{*}$ & $-$0.00001 & $-$0.001$^{**}$ & 0.001$^{***}$ & 0.001$^{***}$ & 0.00001$^{**}$ & 0.001$^{***}$ \\ 
-  & (0.002) & (0.001) & (0.0002) & (0.001) & (0.0003) & (0.00005) & (0.00000) & (0.00005) \\ 
-  LEVERAGE & 0.004 & $-$0.002 & 0.0004 & $-$0.003 & 0.001$^{**}$ & 0.001$^{***}$ & 0.00001 & 0.001$^{***}$ \\ 
-  & (0.002) & (0.003) & (0.001) & (0.002) & (0.0003) & (0.0003) & (0.00001) & (0.0003) \\ 
-  ROA & 0.044$^{***}$ & 0.027$^{***}$ & 0.001 & 0.025$^{***}$ & $-$0.004$^{**}$ & $-$0.004$^{***}$ & $-$0.00003 & $-$0.004$^{***}$ \\ 
-  & (0.012) & (0.004) & (0.003) & (0.004) & (0.002) & (0.001) & (0.00004) & (0.001) \\ 
+  BM\_RATIO & 0.002 & $-$0.001$^{*}$ & $-$0.0001 & $-$0.001$^{*}$ & 0.001$^{***}$ & 0.001$^{***}$ & 0.00001$^{*}$ & 0.001$^{***}$ \\ 
+  & (0.002) & (0.001) & (0.0001) & (0.001) & (0.0003) & (0.00005) & (0.00000) & (0.00004) \\ 
+  LEVERAGE & 0.004$^{***}$ & $-$0.002 & 0.0005 & $-$0.003 & 0.0004 & 0.0005$^{**}$ & 0.00001 & 0.0005$^{**}$ \\ 
+  & (0.001) & (0.002) & (0.001) & (0.002) & (0.0003) & (0.0002) & (0.00001) & (0.0002) \\ 
+  ROA & 0.042$^{***}$ & 0.022$^{***}$ & $-$0.002$^{*}$ & 0.024$^{***}$ & $-$0.005$^{***}$ & $-$0.004$^{***}$ & $-$0.0001 & $-$0.004$^{***}$ \\ 
+  & (0.009) & (0.005) & (0.001) & (0.005) & (0.002) & (0.001) & (0.00004) & (0.001) \\ 
  \hline \\[-1.8ex] 
 Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
 Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
@@ -1377,7 +1384,7 @@ Control firm obs. & 16,176 & 16,176 & 16,176 & 16,176 & 16,176 & 16,176 & 16,176
 Distinct treated firms & 1,651 & 1,651 & 1,651 & 1,651 & 1,651 & 1,651 & 1,651 & 1,651 \\ 
 Distinct control firms & 3,558 & 3,558 & 3,558 & 3,558 & 3,558 & 3,558 & 3,558 & 3,558 \\ 
 Observations & 21,600 & 21,600 & 21,600 & 21,600 & 21,600 & 21,600 & 21,600 & 21,600 \\ 
-Adjusted R$^{2}$ & 0.261 & 0.087 & 0.010 & 0.115 & 0.653 & 0.741 & 0.146 & 0.734 \\ 
+Adjusted R$^{2}$ & 0.211 & 0.049 & 0.003 & 0.065 & 0.629 & 0.714 & 0.135 & 0.709 \\  
 \hline \\[-1.8ex]
 \\[-1.83ex] 
  & \multicolumn{8}{c}{\textit{Dependent variable:}} \\ 
@@ -1386,20 +1393,23 @@ Adjusted R$^{2}$ & 0.261 & 0.087 & 0.010 & 0.115 & 0.653 & 0.741 & 0.146 & 0.734
  & Quasi & Non-quasi & Dedicated & Transient & Quasi & Non-quasi & Dedicated & Transient \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8)\\ 
 \hline \\[-1.8ex] 
- AFTER & 0.008$^{**}$ & $-$0.002 & $-$0.0003 & $-$0.002 & 0.005 & $-$0.003 & 0.00004 & $-$0.002 \\ 
+\multicolumn{6}{@{} l}{\textit{Panel B: Foreign-to-institution ownership and breadth}}
+\\
+\\
+ AFTER & 0.008$^{**}$ & $-$0.002 & $-$0.0003 & $-$0.001 & 0.005 & $-$0.003 & 0.00004 & $-$0.002 \\ 
   & (0.004) & (0.006) & (0.0004) & (0.006) & (0.006) & (0.008) & (0.0001) & (0.008) \\ 
-  TREATED & $-$0.002 & $-$0.003$^{**}$ & $-$0.0003 & $-$0.002$^{*}$ & $-$0.002$^{*}$ & $-$0.002$^{*}$ & $-$0.00002 & $-$0.002 \\ 
+  TREATED & $-$0.002$^{**}$ & $-$0.003$^{***}$ & $-$0.0004 & $-$0.003$^{**}$ & $-$0.002$^{*}$ & $-$0.002$^{*}$ & $-$0.00002 & $-$0.002$^{*}$ \\ 
   & (0.001) & (0.001) & (0.0004) & (0.001) & (0.001) & (0.001) & (0.00002) & (0.001) \\ 
-  AFTER\texttimes TREATED & $-$0.002$^{***}$ & 0.002$^{*}$ & 0.0002 & 0.002$^{*}$ & 0.001 & 0.003$^{**}$ & 0.0001 & 0.002 \\ 
+  AFTER\texttimes TREATED & $-$0.002$^{*}$ & 0.002$^{*}$ & 0.00004 & 0.002$^{*}$ & 0.001 & 0.003$^{**}$ & 0.0001 & 0.002 \\ 
   & (0.001) & (0.001) & (0.0004) & (0.001) & (0.001) & (0.001) & (0.0001) & (0.001) \\ 
-  LOG\_MKT\_CAP & 0.003$^{**}$ & $-$0.0004 & $-$0.0001 & $-$0.0003 & $-$0.001 & 0.002$^{***}$ & 0.00005$^{*}$ & 0.002$^{***}$ \\ 
+  LOG\_MKT\_CAP & 0.003$^{***}$ & 0.0004 & 0.0001 & 0.0003 & $-$0.001 & 0.002$^{***}$ & 0.0001$^{*}$ & 0.002$^{***}$ \\ 
   & (0.001) & (0.001) & (0.0001) & (0.001) & (0.002) & (0.001) & (0.00003) & (0.001) \\ 
-  BM\_RATIO & $-$0.0001 & $-$0.001 & $-$0.0002 & $-$0.001 & 0.002 & 0.001 & 0.00003 & 0.001 \\ 
-  & (0.002) & (0.001) & (0.0003) & (0.001) & (0.002) & (0.001) & (0.00004) & (0.001) \\ 
-  LEVERAGE & 0.003 & $-$0.009$^{*}$ & $-$0.00005 & $-$0.008$^{**}$ & 0.003 & $-$0.003 & $-$0.0001 & $-$0.003 \\ 
-  & (0.004) & (0.005) & (0.001) & (0.004) & (0.002) & (0.002) & (0.0001) & (0.002) \\ 
-  ROA & $-$0.042$^{***}$ & 0.004 & 0.0001 & 0.006 & $-$0.031$^{**}$ & $-$0.008 & $-$0.0005 & $-$0.007 \\ 
-  & (0.013) & (0.016) & (0.004) & (0.016) & (0.013) & (0.007) & (0.0004) & (0.008) \\ 
+  BM\_RATIO & 0.00000 & $-$0.0003 & $-$0.0002 & $-$0.0001 & 0.002 & 0.001 & 0.00002 & 0.001 \\ 
+  & (0.002) & (0.002) & (0.0003) & (0.002) & (0.002) & (0.001) & (0.00003) & (0.001) \\ 
+  LEVERAGE & 0.007$^{***}$ & $-$0.008$^{**}$ & 0.0002 & $-$0.008$^{**}$ & 0.001 & $-$0.003 & $-$0.0001 & $-$0.003 \\ 
+  & (0.002) & (0.004) & (0.001) & (0.003) & (0.002) & (0.002) & (0.0001) & (0.002) \\ 
+  ROA & $-$0.044$^{**}$ & 0.002 & $-$0.004$^{**}$ & 0.008 & $-$0.034$^{**}$ & $-$0.009 & $-$0.001$^{**}$ & $-$0.006 \\ 
+  & (0.017) & (0.016) & (0.002) & (0.014) & (0.014) & (0.009) & (0.0003) & (0.009) \\ 
  \hline \\[-1.8ex] 
 Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
 Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
@@ -1408,7 +1418,7 @@ Control firm obs. & 16,176 & 16,176 & 16,176 & 16,176 & 16,176 & 16,176 & 16,176
 Distinct treated firms & 1,651 & 1,651 & 1,651 & 1,651 & 1,651 & 1,651 & 1,651 & 1,651 \\ 
 Distinct control firms & 3,558 & 3,558 & 3,558 & 3,558 & 3,558 & 3,558 & 3,558 & 3,558 \\ 
 Observations & 21,600 & 21,600 & 21,600 & 21,600 & 21,600 & 21,600 & 21,600 & 21,600 \\ 
-Adjusted R$^{2}$ & 0.166 & 0.090 & 0.031 & 0.095 & 0.273 & 0.156 & 0.060 & 0.153 \\ 
+Adjusted R$^{2}$ & 0.108 & 0.047 & 0.004 & 0.052 & 0.214 & 0.105 & 0.023 & 0.106 \\ 
 \hline 
 \hline \\[-1.8ex] 
 \multicolumn{9}{r}{} \\ 
@@ -1431,7 +1441,8 @@ library(lfe)
 library(stargazer)
 
 did_regression_matched1 <- read_rds("results/did_regression_matched1.rds") %>%
-  mutate(AFTER_TREATED = TREATED * AFTER) %>%
+  mutate(AFTER_TREATED = TREATED * AFTER,
+         sic_code = str_sub(sic_code, 1,2)) %>%
   group_by(permno, event_date) %>% 
   mutate(inst_mean = mean(INST_OWN),
          analyst_mean = mean(ANALYST_COVERAGE)) %>% 
@@ -1594,7 +1605,7 @@ stargazer(did_list, title = "\\textbf{Difference-in-differences regression analy
 \captionsetup{width=1.0\linewidth}
 \footnotesize
 \begin{longtable}{@{\extracolsep{15pt}}lcccccccc} 
-  \caption[Difference-in-differences regression analysis of ownership-specific variables by institutional ownership and analyst coverage]{\textbf{Difference-in-differences regression analysis of ownership-specific variables by institutional ownership and analyst coverage}\newline\scriptsize This table reports the results of the difference-in-differences regression analysis of ownership-specific variables in subsamples of low (high) institutional ownership and analyst coverage. In Panel A, the dependent variables are foreign ownership (\textit{FOR\_OWN}) and foreign breadth (\textit{FOR\_BREADTH}). In Panel B, the dependent variables are foreign-to-institution ownership (\textit{FOR\_TO\_INST\_OWN}) and foreign-to-institution breadth (\textit{FOR\_TO\_INST\_BREADTH}). In the first (fifth) and second (sixth) column, the sample is restricted to firms that have in each brokerage closure event institutional ownership below first and third quartile, respectively. Similarly, in the third (seventh) and fourth (eighth) column, the sample is restricted to firms with analyst coverage below first and third quartile, respectively. For all stocks, I compute averages of the dependent variables and control variables in all columns over the quarters [-4,-1] and over the quarters [1,4], with the brokerage closure occurring in quarter 0. The control variables are book-to-market ratio (\textit{BM\_RATIO}), leverage (\textit{LEVERAGE}) and return on assets (\textit{ROA}). I include industry and year fixed effects in all regressions. Standard errors are clustered by the industry and year level and reported in parentheses. \textit{FOR\_OWN} and \textit{FOR\_BREADTH} are winsorized at the top to a maximum of 1. Control variables are winsorized at the top and bottom 1\%. Table \ref{table_variable_definitions} in Appendix provides a detailed list of variable definitions. *, ** and *** denote the statistical significance at the 10\%, 5\% and 1\% level, respectively. Sample period: 1997-2010. Sources: CRSP, COMPUSTAT, 13F and IBES.} 
+  \caption[Difference-in-differences regression analysis of foreign ownership-specific variables by institutional ownership and analyst coverage]{\textbf{Difference-in-differences regression analysis of foreign ownership-specific variables by institutional ownership and analyst coverage}\newline\scriptsize This table reports the results of the difference-in-differences regression analysis of ownership-specific variables in subsamples of low (high) institutional ownership and analyst coverage. In Panel A, the dependent variables are foreign ownership (\textit{FOR\_OWN}) and foreign breadth (\textit{FOR\_BREADTH}). In Panel B, the dependent variables are foreign-to-institution ownership (\textit{FOR\_TO\_INST\_OWN}) and foreign-to-institution breadth (\textit{FOR\_TO\_INST\_BREADTH}). In the first (fifth) and second (sixth) column, the sample is restricted to firms that have in each brokerage closure event institutional ownership below first and third quartile, respectively. Similarly, in the third (seventh) and fourth (eighth) column, the sample is restricted to firms with analyst coverage below first and third quartile, respectively. For all stocks, I compute averages of the dependent variables and control variables in all columns over the quarters [-4,-1] and over the quarters [1,4], with the brokerage closure occurring in quarter 0. The control variables are book-to-market ratio (\textit{BM\_RATIO}), leverage (\textit{LEVERAGE}) and return on assets (\textit{ROA}). I include industry and year fixed effects in all regressions. Standard errors are clustered by the industry and year level and reported in parentheses. \textit{FOR\_OWN} and \textit{FOR\_BREADTH} are winsorized at the top to a maximum of 1. Control variables are winsorized at the top and bottom 1\%. Table \ref{table_variable_definitions} in Appendix provides a detailed list of variable definitions. *, ** and *** denote the statistical significance at the 10\%, 5\% and 1\% level, respectively. Sample period: 1997-2010. Sources: CRSP, COMPUSTAT, 13F and IBES.} 
   \label{table_h3_1} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
@@ -1607,20 +1618,20 @@ stargazer(did_list, title = "\\textbf{Difference-in-differences regression analy
 \multicolumn{6}{@{} l}{\textit{Panel A: Foreign ownership and breadth}}
 \\
 \\
- AFTER & 0.005$^{***}$ & 0.011$^{**}$ & 0.006$^{***}$ & 0.011$^{***}$ & 0.0003$^{***}$ & 0.0004 & 0.0001 & 0.001$^{***}$ \\ 
-  & (0.001) & (0.004) & (0.002) & (0.003) & (0.0001) & (0.0003) & (0.0001) & (0.0005) \\ 
-  TREATED & 0.001 & 0.001 & $-$0.002 & $-$0.001 & 0.00004 & 0.0003 & $-$0.0002$^{***}$ & 0.0004 \\ 
-  & (0.002) & (0.002) & (0.002) & (0.002) & (0.0002) & (0.0003) & (0.0001) & (0.0003) \\ 
-  AFTER\texttimes TREATED & $-$0.0005 & $-$0.002 & $-$0.0004 & $-$0.004$^{**}$ & 0.0001$^{***}$ & 0.00001 & 0.0002$^{***}$ & $-$0.0003 \\ 
-  & (0.001) & (0.003) & (0.001) & (0.002) & (0.00003) & (0.0002) & (0.0001) & (0.0003) \\ 
-  LOG\_MKT\_CAP & 0.004$^{***}$ & 0.004$^{***}$ & 0.007$^{***}$ & 0.001 & 0.001$^{***}$ & 0.004$^{***}$ & 0.001$^{***}$ & 0.005$^{***}$ \\ 
-  & (0.001) & (0.001) & (0.002) & (0.002) & (0.0001) & (0.0004) & (0.0001) & (0.0003) \\ 
-  BM\_RATIO & $-$0.0003 & 0.002 & 0.0001 & 0.002 & 0.001$^{***}$ & 0.001$^{***}$ & 0.0005$^{***}$ & 0.002$^{***}$ \\ 
-  & (0.001) & (0.003) & (0.001) & (0.005) & (0.0001) & (0.0004) & (0.0001) & (0.0005) \\ 
-  LEVERAGE & 0.0002 & $-$0.003 & 0.002 & $-$0.004 & 0.001$^{***}$ & 0.001 & 0.0004$^{***}$ & 0.001 \\ 
-  & (0.006) & (0.006) & (0.004) & (0.010) & (0.0004) & (0.001) & (0.0001) & (0.001) \\ 
-  ROA & 0.011 & 0.013 & 0.049$^{***}$ & 0.058 & $-$0.003$^{*}$ & $-$0.007$^{***}$ & $-$0.002$^{***}$ & $-$0.006 \\ 
-  & (0.008) & (0.045) & (0.012) & (0.041) & (0.002) & (0.002) & (0.001) & (0.005) \\ 
+ AFTER & 0.005$^{***}$ & 0.012$^{***}$ & 0.006$^{***}$ & 0.011$^{***}$ & 0.0003$^{***}$ & 0.0004 & 0.0001 & 0.001$^{***}$ \\ 
+  & (0.001) & (0.004) & (0.002) & (0.003) & (0.0001) & (0.0004) & (0.0001) & (0.0005) \\ 
+  TREATED & 0.001 & 0.003 & $-$0.003 & $-$0.002 & 0.00004 & 0.0004 & $-$0.0002$^{**}$ & 0.0004 \\ 
+  & (0.001) & (0.002) & (0.003) & (0.002) & (0.0001) & (0.0004) & (0.0001) & (0.0003) \\ 
+  AFTER\texttimes TREATED & $-$0.001 & $-$0.003 & $-$0.0002 & $-$0.004$^{***}$ & 0.0001$^{***}$ & 0.00003 & 0.0002$^{***}$ & $-$0.0002 \\ 
+  & (0.001) & (0.003) & (0.001) & (0.001) & (0.00002) & (0.0002) & (0.0001) & (0.0003) \\ 
+  LOG\_MKT\_CAP & 0.004$^{***}$ & 0.004$^{**}$ & 0.006$^{***}$ & 0.001 & 0.001$^{***}$ & 0.004$^{***}$ & 0.001$^{***}$ & 0.005$^{***}$ \\ 
+  & (0.0005) & (0.002) & (0.002) & (0.001) & (0.0001) & (0.0004) & (0.0002) & (0.0003) \\ 
+  BM\_RATIO & 0.001 & $-$0.001 & $-$0.002 & 0.008$^{*}$ & 0.001$^{***}$ & 0.001$^{**}$ & 0.0004$^{***}$ & 0.002$^{***}$ \\ 
+  & (0.001) & (0.004) & (0.001) & (0.005) & (0.0001) & (0.001) & (0.0001) & (0.0005) \\ 
+  LEVERAGE & $-$0.0001 & $-$0.007 & 0.003 & 0.002 & 0.001$^{**}$ & 0.0001 & 0.0004$^{***}$ & 0.001 \\ 
+  & (0.006) & (0.005) & (0.004) & (0.007) & (0.0004) & (0.0004) & (0.0001) & (0.001) \\ 
+  ROA & 0.015$^{**}$ & 0.008 & 0.054$^{***}$ & 0.074$^{***}$ & $-$0.004$^{**}$ & $-$0.011$^{***}$ & $-$0.002$^{***}$ & $-$0.008 \\ 
+  & (0.007) & (0.033) & (0.015) & (0.028) & (0.002) & (0.001) & (0.001) & (0.005) \\ 
  \hline \\[-1.8ex] 
 Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
 Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
@@ -1629,7 +1640,7 @@ Control firm obs. & 4,350 & 3,988 & 4,618 & 3,360 & 4,350 & 3,988 & 4,618 & 3,36
 Distinct treated firms & 443 & 453 & 411 & 433 & 443 & 453 & 411 & 433 \\ 
 Distinct control firms & 1,423 &   991 & 1,681 &   561 & 1,423 &   991 & 1,681 &   561 \\ 
 Observations & 5,400 & 5,400 & 5,496 & 5,338 & 5,400 & 5,400 & 5,496 & 5,338 \\ 
-Adjusted R$^{2}$ & 0.370 & 0.367 & 0.256 & 0.379 & 0.656 & 0.782 & 0.630 & 0.815 \\ 
+Adjusted R$^{2}$ & 0.196 & 0.141 & 0.146 & 0.219 & 0.612 & 0.742 & 0.573 & 0.790 \\
 \hline \\[-1.8ex]
 \\[-1.83ex] 
  & \multicolumn{8}{c}{\textit{Dependent variable:}} \\ 
@@ -1641,20 +1652,20 @@ Adjusted R$^{2}$ & 0.370 & 0.367 & 0.256 & 0.379 & 0.656 & 0.782 & 0.630 & 0.815
 \multicolumn{6}{@{} l}{\textit{Panel B: Foreign-to-institution ownership and breadth}}
 \\
 \\
- AFTER & 0.004 & 0.009$^{**}$ & 0.003 & 0.013$^{***}$ & $-$0.005 & 0.006 & $-$0.006 & 0.012$^{**}$ \\ 
+ AFTER & 0.004 & 0.010$^{**}$ & 0.003 & 0.012$^{***}$ & $-$0.005 & 0.006 & $-$0.006 & 0.012$^{**}$ \\ 
   & (0.003) & (0.004) & (0.003) & (0.005) & (0.004) & (0.004) & (0.004) & (0.005) \\ 
-  TREATED & $-$0.005 & 0.001 & $-$0.009$^{*}$ & $-$0.004 & $-$0.009$^{***}$ & 0.001 & $-$0.009$^{**}$ & $-$0.0003 \\ 
-  & (0.005) & (0.002) & (0.005) & (0.003) & (0.002) & (0.002) & (0.004) & (0.001) \\ 
-  AFTER\texttimes TREATED & 0.001 & $-$0.002 & 0.003 & $-$0.005$^{**}$ & 0.008$^{***}$ & 0.001 & 0.009$^{***}$ & $-$0.003$^{*}$ \\ 
-  & (0.003) & (0.003) & (0.004) & (0.002) & (0.001) & (0.001) & (0.002) & (0.002) \\ 
-  LOG\_MKT\_CAP & 0.006$^{***}$ & 0.006$^{***}$ & 0.007$^{***}$ & 0.005$^{**}$ & $-$0.001 & 0.010$^{***}$ & $-$0.002 & $-$0.001 \\ 
-  & (0.002) & (0.001) & (0.002) & (0.002) & (0.002) & (0.003) & (0.002) & (0.002) \\ 
-  BM\_RATIO & $-$0.004 & 0.003 & $-$0.006$^{*}$ & 0.012 & 0.003 & 0.003 & 0.001 & $-$0.003 \\ 
-  & (0.003) & (0.003) & (0.003) & (0.008) & (0.004) & (0.002) & (0.004) & (0.003) \\ 
-  LEVERAGE & 0.021 & $-$0.007 & 0.002 & $-$0.018 & 0.005 & 0.002 & $-$0.001 & $-$0.005 \\ 
-  & (0.015) & (0.005) & (0.008) & (0.021) & (0.006) & (0.004) & (0.004) & (0.009) \\ 
-  ROA & $-$0.050 & 0.006 & $-$0.078$^{*}$ & $-$0.014 & $-$0.005 & $-$0.079$^{***}$ & $-$0.030$^{*}$ & $-$0.057$^{***}$ \\ 
-  & (0.033) & (0.052) & (0.042) & (0.061) & (0.007) & (0.027) & (0.016) & (0.018) \\ 
+  TREATED & $-$0.005 & 0.003 & $-$0.009 & $-$0.005$^{**}$ & $-$0.008$^{***}$ & 0.002 & $-$0.009$^{**}$ & $-$0.001 \\ 
+  & (0.004) & (0.002) & (0.006) & (0.002) & (0.002) & (0.002) & (0.004) & (0.002) \\ 
+  AFTER\texttimes TREATED & 0.001 & $-$0.002 & 0.002 & $-$0.005$^{**}$ & 0.008$^{***}$ & 0.001 & 0.008$^{***}$ & $-$0.003$^{*}$ \\ 
+  & (0.002) & (0.003) & (0.003) & (0.002) & (0.002) & (0.002) & (0.002) & (0.002) \\ 
+  LOG\_MKT\_CAP & 0.007$^{***}$ & 0.006$^{***}$ & 0.006$^{***}$ & 0.005$^{***}$ & $-$0.001 & 0.010$^{***}$ & $-$0.002 & $-$0.002 \\ 
+  & (0.001) & (0.002) & (0.002) & (0.001) & (0.002) & (0.003) & (0.003) & (0.002) \\ 
+  BM\_RATIO & $-$0.002 & $-$0.0002 & $-$0.009$^{**}$ & 0.022$^{**}$ & 0.003 & 0.002 & 0.0003 & 0.001 \\ 
+  & (0.003) & (0.004) & (0.004) & (0.009) & (0.003) & (0.002) & (0.004) & (0.003) \\ 
+  LEVERAGE & 0.016 & $-$0.011$^{**}$ & 0.004 & $-$0.008 & 0.001 & $-$0.001 & $-$0.006 & $-$0.006 \\ 
+  & (0.015) & (0.005) & (0.011) & (0.014) & (0.008) & (0.004) & (0.005) & (0.007) \\ 
+  ROA & $-$0.037 & $-$0.006 & $-$0.066 & $-$0.012 & 0.002 & $-$0.108$^{***}$ & $-$0.023 & $-$0.076$^{***}$ \\ 
+  & (0.023) & (0.043) & (0.044) & (0.073) & (0.017) & (0.028) & (0.017) & (0.023) \\ 
  \hline \\[-1.8ex] 
 Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
 Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
@@ -1663,7 +1674,7 @@ Control firm obs. & 4,350 & 3,988 & 4,618 & 3,360 & 4,350 & 3,988 & 4,618 & 3,36
 Distinct treated firms & 443 & 453 & 411 & 433 & 443 & 453 & 411 & 433 \\ 
 Distinct control firms & 1,423 &   991 & 1,681 &   561 & 1,423 &   991 & 1,681 &   561 \\ 
 Observations & 5,400 & 5,400 & 5,496 & 5,338 & 5,400 & 5,400 & 5,496 & 5,338 \\ 
-Adjusted R$^{2}$ & 0.233 & 0.330 & 0.162 & 0.354 & 0.240 & 0.482 & 0.179 & 0.519 \\ 
+Adjusted R$^{2}$ & 0.123 & 0.150 & 0.076 & 0.195 & 0.109 & 0.374 & 0.067 & 0.404 \\  
 \hline 
 \hline \\[-1.8ex] 
 \multicolumn{9}{r}{} \\ 
