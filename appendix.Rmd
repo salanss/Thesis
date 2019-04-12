@@ -481,7 +481,7 @@ stargazer(did_list, title = "\\textbf{Difference-in-differences regression analy
 
 \renewcommand\arraystretch{0.9}
 \begin{landscape}
-\captionsetup{width=0.9\linewidth}
+\captionsetup{width=1.0\linewidth}
 \footnotesize
 \begin{longtable}{@{\extracolsep{15pt}}lccccc}
   \caption[Difference-in-differences regression analysis of foreign ownership-specific variables with instrumental variable approach]{\textbf{Difference-in-differences regression analysis of foreign ownership-specific variables with instrumental variable approach}\newline\scriptsize This table reports the results of the difference-in-differences regression analysis of foreign ownership-specific variables with instrumental variable approach.} 
@@ -490,15 +490,15 @@ stargazer(did_list, title = "\\textbf{Difference-in-differences regression analy
 \hline \\[-1.8ex] 
  & \multicolumn{5}{c}{\textit{Dependent variable:}} \\ 
 \cline{2-6} 
-\\[-1.8ex] & \multicolumn{1}{c}{First stage} & \multicolumn{4}{c}{Second state} \\ 
+\\[-1.8ex] & \multicolumn{1}{c}{First stage} & \multicolumn{4}{c}{Second stage} \\ 
 \cline{3-6} 
-\\[-1.8ex] & VCV\_USD & FOR\_OWN & FOR\_BREADTH & FOR\_TO\_INST\_OWN & FOR\_TO\_INST\_BREADTH \\ 
+\\[-1.8ex] & VCV\textsubscript{USD} & FOR\_OWN & FOR\_BREADTH & FOR\_TO\_INST\_OWN & FOR\_TO\_INST\_BREADTH \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4) & (5)\\ 
 \hline \\[-1.8ex] 
-\multicolumn{6}{@{} l}{\textit{Panel A: Instrumented with volume coefficient variation (\textit{VCV\_USD})}}
+\multicolumn{6}{@{} l}{\textit{Panel A: Instrumented with volume coefficient variation (\textit{VCV\textsubscript{USD}})}}
 \\
 \\
-  VCV\_USD &  & $-$0.042$^{***}$ & $-$0.023$^{***}$ & $-$0.029$^{**}$ & $-$0.003 \\ 
+  VCV\textsubscript{USD} &  & $-$0.042$^{***}$ & $-$0.023$^{***}$ & $-$0.029$^{**}$ & $-$0.003 \\ 
   &  & (0.009) & (0.004) & (0.011) & (0.017) \\ 
  AFTER & $-$0.054$^{***}$ &  &  &  &  \\ 
   & (0.014) &  &  &  &  \\ 
