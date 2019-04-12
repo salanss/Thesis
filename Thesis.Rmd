@@ -105,7 +105,7 @@ I contribute to the existing literature by examining the relationship of foreign
 
 # 3 Hypotheses
 
-In this thesis, I study the effect of information asymmetry on foreign ownership in US stock markets. In particular, I examine how the foreign ownership of US stocks are affected by an exogenous reduction in analyst coverage using a credible quasi-natural of brokerage closures [@kelly2012testing]. Moreover, I test the general relationship of foreign ownership and information asymmetry with alternative proxy measures for information asymmetry in a panel regression setting. Based on these research settings, I construct the following hypotheses:
+In this thesis, I study the effect of information asymmetry on foreign ownership in US stock markets. In particular, I examine how the foreign ownership of US stocks are affected by an exogenous reduction in analyst coverage using a credible quasi-natural experiment of brokerage closures [@kelly2012testing]. Moreover, I test the general relationship of foreign ownership and information asymmetry with alternative proxy measures for information asymmetry in a panel regression setting. Based on these research settings, I construct the following hypotheses:
 
 *H1: Stocks with higher information asymmetry are associated with low foreign ownership*
 
@@ -201,14 +201,13 @@ stargazer(baseline_regression_summary,
  \renewcommand{\dbltopfraction}{.66}
  \renewcommand{\dblfloatpagefraction}{.66}
 
-\begin{table}[htp] \centering 
-  \caption[Summary statistics of the baseline sample]{\textbf{Summary statistics of the baseline sample}\newline\small This table reports summary statistics of firm-year observations of baseline sample variables. Ownership-specific variables are winsorized at the top to a maximum of 1. Control variables, bid-ask spread (\textit{BA\_SPREAD}) and different VCV measures are winsorized at the top and bottom by 1\%. Table \ref{table_variable_definitions} in Appendix provides a detailed list of variable definitions. Sample period: 1997-2017. Sources: CRSP, COMPUSTAT, 13F and the cited authors’ websites.} 
-  \label{table_summary_baseline} 
 \footnotesize 
-\begin{tabular}{@{\extracolsep{2pt}}lcccccccc} 
+\begin{longtable}{@{\extracolsep{2pt}}lcccccccc} 
+  \caption[Summary statistics of the baseline sample]{\textbf{Summary statistics of the baseline sample}\newline\footnotesize This table reports summary statistics of firm-year observations of baseline sample variables. Ownership-specific variables are winsorized at the top to a maximum of 1. Control variables, bid-ask spread (\textit{BA\_SPREAD}) and different VCV measures are winsorized at the top and bottom by 1\%. Table \ref{table_variable_definitions} in Appendix provides a detailed list of variable definitions. Sample period: 1997-2017. Sources: CRSP, COMPUSTAT, 13F and the cited authors’ websites.} 
+  \label{table_summary_baseline} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
-Statistic & \multicolumn{1}{c}{N} & \multicolumn{1}{c}{Mean} & \multicolumn{1}{c}{St. Dev.} & \multicolumn{1}{c}{Min} & \multicolumn{1}{c}{P25} & \multicolumn{1}{c}{Median} & \multicolumn{1}{c}{P75} & \multicolumn{1}{c}{Max} \\ 
+Variable & \multicolumn{1}{c}{N} & \multicolumn{1}{c}{Mean} & \multicolumn{1}{c}{St. Dev.} & \multicolumn{1}{c}{Min} & \multicolumn{1}{c}{P25} & \multicolumn{1}{c}{Median} & \multicolumn{1}{c}{P75} & \multicolumn{1}{c}{Max} \\ 
 \hline \\[-1.8ex] 
 FOR\_OWN & 110,819 & 0.033 & 0.056 & 0.000 & 0.001 & 0.016 & 0.043 & 1.000 \\ 
 FOR\_BREADTH & 110,819 & 0.003 & 0.006 & 0.000 & 0.0005 & 0.001 & 0.004 & 0.060 \\ 
@@ -221,20 +220,19 @@ BM\_RATIO & 110,819 & 0.714 & 0.612 & 0.034 & 0.318 & 0.563 & 0.907 & 3.931 \\
 LEVERAGE & 110,819 & 0.529 & 0.261 & 0.035 & 0.316 & 0.534 & 0.743 & 1.140 \\ 
 ROA & 110,819 & $-$0.012 & 0.064 & $-$0.425 & $-$0.010 & 0.004 & 0.015 & 0.105 \\ 
 BA\_SPREAD & 110,819 & 0.046 & 0.030 & 0.003 & 0.024 & 0.037 & 0.059 & 0.175 \\ 
-PIN\_DY & 15,025 & 0.203 & 0.119 & 0.00000 & 0.121 & 0.167 & 0.244 & 1.000 \\ 
-PIN\_DY\_ADJ & 15,025 & 0.162 & 0.086 & 0.000 & 0.103 & 0.140 & 0.197 & 0.903 \\ 
-PSOS\_DY & 15,025 & 0.284 & 0.156 & 0.000 & 0.177 & 0.233 & 0.346 & 1.000 \\ 
-PIN\_EHO & 9,498 & 0.188 & 0.091 & 0.000 & 0.120 & 0.166 & 0.234 & 0.895 \\ 
-PIN\_BHL & 78,226 & 0.196 & 0.118 & 0.000 & 0.105 & 0.197 & 0.273 & 1.000 \\ 
-PIN\_BH & 78,335 & 0.233 & 0.134 & 0.000 & 0.131 & 0.202 & 0.304 & 1.000 \\ 
+PIN\textsubscript{BHL} & 78,226 & 0.196 & 0.118 & 0.000 & 0.105 & 0.197 & 0.273 & 1.000 \\ 
+PIN\textsubscript{BH} & 78,335 & 0.233 & 0.134 & 0.000 & 0.131 & 0.202 & 0.304 & 1.000 \\ 
+PIN\textsubscript{DY} & 15,025 & 0.203 & 0.119 & 0.00000 & 0.121 & 0.167 & 0.244 & 1.000 \\ 
+PIN\textsubscript{DY\_ADJ} & 15,025 & 0.162 & 0.086 & 0.000 & 0.103 & 0.140 & 0.197 & 0.903 \\ 
+PSOS\textsubscript{DY} & 15,025 & 0.284 & 0.156 & 0.000 & 0.177 & 0.233 & 0.346 & 1.000 \\ 
+PIN\textsubscript{EHO} & 9,498 & 0.188 & 0.091 & 0.000 & 0.120 & 0.166 & 0.234 & 0.895 \\ 
 MIA & 20,813 & 0.416 & 0.106 & 0.014 & 0.351 & 0.422 & 0.477 & 1.000 \\ 
-VCV\_USD & 94,888 & 1.305 & 0.854 & 0.370 & 0.704 & 1.081 & 1.614 & 4.986 \\ 
-VCV\_MKT & 94,888 & 1.282 & 0.862 & 0.328 & 0.675 & 1.062 & 1.598 & 5.021 \\ 
-VCV\_TO & 94,888 & 1.252 & 0.792 & 0.377 & 0.690 & 1.039 & 1.546 & 4.558 \\  
+VCV\textsubscript{USD} & 94,888 & 1.305 & 0.854 & 0.370 & 0.704 & 1.081 & 1.614 & 4.986 \\ 
+VCV\textsubscript{MKT} & 94,888 & 1.282 & 0.862 & 0.328 & 0.675 & 1.062 & 1.598 & 5.021 \\ 
+VCV\textsubscript{TO} & 94,888 & 1.252 & 0.792 & 0.377 & 0.690 & 1.039 & 1.546 & 4.558 \\  
 \hline \\[-1.8ex] 
 \multicolumn{9}{l}{} \\ 
-\end{tabular} 
-\end{table}
+\end{longtable}
 
 As shown in Table \ref{table_summary_baseline}, the mean and median of foreign institutional ownership (*FOR_OWN*) are 3.3% and 1.6%, respectively. The corresponding measures for total institutional ownership (*INST_OWN*) are 43.8% and 40.9%. The results are mainly in line with the findings of @baik2013liability, who report the mean (median) of 2.62% (2.48%) for foreign ownership and 40.0% (36.5%) for institutional ownership. They use similarly 13F data, but they compute ownership variables with 13F and COMPUSTAT data, compared to 13F and CRSP data in my sample. Moreover, their sample period is 1990-2007 and they report the summary statistics with firm-quarter observations. Hence, our samples are not perfectly comparable. Notably, the minimum (0.0%) and first quartile (14.0%) compared to the third quartile (71.8%) and maximum (100.0%), along with the standard deviation (31.6%), indicate a high variability of institutional ownership. Foreign ownership has similar, but lower variability between firm-quarter observations. 
 
@@ -392,12 +390,52 @@ library(kableExtra)
 
 did_regression_matched_raw <- read_rds("results/did_regression_matched_raw.rds")
 
-did_regression_summary <- did_regression_matched_raw %>% 
+did_regression_summary_treated <- did_regression_matched_raw %>% 
+  filter(TREATED == 1) %>% 
     select(FOR_OWN, FOR_BREADTH,  INST_OWN, INST_BREADTH, FOR_TO_INST_OWN, FOR_TO_INST_BREADTH,
          LOG_MKT_CAP, BM_RATIO, LEVERAGE, ROA, ANALYST_COVERAGE) %>% 
   as.data.frame()
 
-stargazer(did_regression_summary,
+stargazer(did_regression_summary_treated,
+          header = F,
+          label = "table_summary_did",
+          median = T,
+          #omit.summary.stat = c("p25", "p75"),
+          notes.label = "",
+          notes.append = F,
+          notes = "",
+          font.size = "small",
+          column.sep.width = "0pt",
+          #no.space = T,
+          title = "\\textbf{Summary statistics of the quasi-natural experiment sample}\\newline\\small This table reports summary statistics of firm-quarter observations of the quasi-natural experiment sample variables. Control variables are winsorized at the top and bottom 1\\%. Table \\ref{table_variable_definitions} in Appendix provides a detailed list of variable definitions. Sample period: 1997-2010. Sources: CRSP, COMPUSTAT, 13F and IBES.", 
+          type = "latex")
+
+did_regression_summary_control <- did_regression_matched_raw %>% 
+  filter(TREATED == 0) %>% 
+    select(FOR_OWN, FOR_BREADTH,  INST_OWN, INST_BREADTH, FOR_TO_INST_OWN, FOR_TO_INST_BREADTH,
+         LOG_MKT_CAP, BM_RATIO, LEVERAGE, ROA, ANALYST_COVERAGE) %>% 
+  as.data.frame()
+
+stargazer(did_regression_summary_control,
+          header = F,
+          label = "table_summary_did",
+          median = T,
+          #omit.summary.stat = c("p25", "p75"),
+          notes.label = "",
+          notes.append = F,
+          notes = "",
+          font.size = "small",
+          column.sep.width = "0pt",
+          #no.space = T,
+          title = "\\textbf{Summary statistics of the quasi-natural experiment sample}\\newline\\small This table reports summary statistics of firm-quarter observations of the quasi-natural experiment sample variables. Control variables are winsorized at the top and bottom 1\\%. Table \\ref{table_variable_definitions} in Appendix provides a detailed list of variable definitions. Sample period: 1997-2010. Sources: CRSP, COMPUSTAT, 13F and IBES.", 
+          type = "latex")
+
+did_regression_summary_all <- did_regression_matched_raw %>% 
+    select(FOR_OWN, FOR_BREADTH,  INST_OWN, INST_BREADTH, FOR_TO_INST_OWN, FOR_TO_INST_BREADTH,
+         LOG_MKT_CAP, BM_RATIO, LEVERAGE, ROA, ANALYST_COVERAGE) %>% 
+  as.data.frame()
+
+stargazer(did_regression_summary_all,
           header = F,
           label = "table_summary_did",
           median = T,
@@ -413,16 +451,45 @@ stargazer(did_regression_summary,
 
 ```
 
-\renewcommand\arraystretch{1}
-\begin{table}[!htbp] \centering 
+\renewcommand\arraystretch{1.0}
+\footnotesize
+\begin{longtable}{@{\extracolsep{2pt}}lcccccccc} 
   \caption[Summary statistics of the quasi-natural experiment sample]{\textbf{Summary statistics of the quasi-natural experiment sample}\newline\small This table reports summary statistics of firm-quarter observations of the quasi-natural experiment sample variables. Ownership-specific variables are winsorized at the top to a maximum of 1. Control variables are winsorized at the top and bottom by 1\%. Table \ref{table_variable_definitions} in Appendix provides a detailed list of variable definitions. Sample period: 1997-2010. Sources: CRSP, COMPUSTAT, 13F and IBES.} 
   \label{table_summary_did} 
-\footnotesize
-\begin{tabular}{@{\extracolsep{2pt}}lcccccccc} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
-Statistic & \multicolumn{1}{c}{N} & \multicolumn{1}{c}{Mean} & \multicolumn{1}{c}{St. Dev.} & \multicolumn{1}{c}{Min} & \multicolumn{1}{c}{P25} & \multicolumn{1}{c}{Median} & \multicolumn{1}{c}{P75} & \multicolumn{1}{c}{Max} \\ 
+Variable & \multicolumn{1}{c}{N} & \multicolumn{1}{c}{Mean} & \multicolumn{1}{c}{St. Dev.} & \multicolumn{1}{c}{Min} & \multicolumn{1}{c}{P25} & \multicolumn{1}{c}{Median} & \multicolumn{1}{c}{P75} & \multicolumn{1}{c}{Max} \\ 
 \hline \\[-1.8ex] 
+\multicolumn{9}{@{} l}{\textit{Panel A: Treated firms}}
+\\
+FOR\_OWN & 58,634 & 0.047 & 0.039 & 0.000 & 0.022 & 0.042 & 0.062 & 1.000 \\ 
+FOR\_BREADTH & 58,634 & 0.008 & 0.007 & 0.000 & 0.002 & 0.005 & 0.013 & 0.051 \\ 
+INST\_OWN & 58,634 & 0.634 & 0.235 & 0.00000 & 0.484 & 0.672 & 0.813 & 1.000 \\ 
+INST\_BREADTH & 58,634 & 0.120 & 0.119 & 0.0004 & 0.042 & 0.080 & 0.154 & 0.684 \\ 
+FOR\_TO\_INST\_OWN & 58,634 & 0.075 & 0.061 & 0.000 & 0.041 & 0.065 & 0.095 & 1.000 \\ 
+FOR\_TO\_INST\_BREADTH & 58,634 & 0.068 & 0.040 & 0.000 & 0.045 & 0.061 & 0.083 & 1.000 \\ 
+LOG\_MKT\_CAP & 58,634 & 7.580 & 1.865 & 1.301 & 6.248 & 7.562 & 8.988 & 10.785 \\ 
+BM\_RATIO & 58,634 & 0.551 & 0.506 & 0.034 & 0.248 & 0.425 & 0.686 & 3.931 \\ 
+LEVERAGE & 58,634 & 0.512 & 0.249 & 0.035 & 0.309 & 0.517 & 0.698 & 1.000 \\ 
+ROA & 58,634 & 0.001 & 0.051 & $-$0.425 & 0.0002 & 0.009 & 0.021 & 0.105 \\ 
+ANALYST\_COVERAGE & 58,634 & 12.224 & 9.039 & 0 & 5 & 11 & 18 & 50 \\ 
+\hline \\[-1.8ex] 
+\multicolumn{9}{@{} l}{\textit{Panel B: Control firms}}
+\\
+FOR\_OWN & 172,684 & 0.047 & 0.046 & 0.000 & 0.019 & 0.039 & 0.061 & 1.000 \\ 
+FOR\_BREADTH & 172,684 & 0.006 & 0.006 & 0.000 & 0.002 & 0.004 & 0.009 & 0.054 \\ 
+INST\_OWN & 172,684 & 0.605 & 0.259 & 0.00000 & 0.419 & 0.644 & 0.811 & 1.000 \\ 
+INST\_BREADTH & 172,684 & 0.092 & 0.094 & 0.0003 & 0.035 & 0.064 & 0.115 & 0.684 \\ 
+FOR\_TO\_INST\_OWN & 172,684 & 0.080 & 0.079 & 0.000 & 0.039 & 0.064 & 0.097 & 1.000 \\ 
+FOR\_TO\_INST\_BREADTH & 172,684 & 0.069 & 0.048 & 0.000 & 0.043 & 0.060 & 0.083 & 1.000 \\ 
+LOG\_MKT\_CAP & 172,684 & 7.176 & 1.761 & 1.301 & 6.032 & 7.205 & 8.354 & 10.785 \\ 
+BM\_RATIO & 172,684 & 0.556 & 0.477 & 0.034 & 0.268 & 0.446 & 0.695 & 3.931 \\ 
+LEVERAGE & 172,684 & 0.536 & 0.250 & 0.035 & 0.337 & 0.544 & 0.729 & 1.000 \\ 
+ROA & 172,684 & 0.001 & 0.052 & $-$0.425 & 0.001 & 0.009 & 0.021 & 0.105 \\ 
+ANALYST\_COVERAGE & 172,684 & 9.296 & 7.661 & 0 & 3 & 8 & 14 & 49 \\ 
+\hline \\[-1.8ex] 
+\multicolumn{9}{@{} l}{\textit{Panel C: All firms}}
+\\
 FOR\_OWN & 231,318 & 0.047 & 0.044 & 0.000 & 0.020 & 0.040 & 0.061 & 1.000 \\ 
 FOR\_BREADTH & 231,318 & 0.007 & 0.007 & 0.000 & 0.002 & 0.004 & 0.010 & 0.054 \\ 
 INST\_OWN & 231,318 & 0.613 & 0.253 & 0.00000 & 0.437 & 0.652 & 0.812 & 1.000 \\ 
@@ -436,8 +503,7 @@ ROA & 231,318 & 0.001 & 0.052 & $-$0.425 & 0.001 & 0.009 & 0.021 & 0.105 \\
 ANALYST\_COVERAGE & 231,318 & 10.038 & 8.133 & 0 & 4 & 8 & 15 & 50 \\ 
 \hline \\[-1.8ex] 
 \multicolumn{9}{l}{} \\ 
-\end{tabular} 
-\end{table}
+\end{longtable}
 
 As shown in Table \ref{table_summary_did}, the mean and median of foreign institutional ownership (*FOR_OWN*) are 4.7% and 4.0%, respectively. The corresponding measures for total institutional ownership (*INST_OWN*) are 61.3% and 65.2%, respectively. The estimates are notably higher than in the baseline setting. This is largely explained by the fact that the exogenous reductions in analyst coverage are more affected by larger firms which have higher share of foreign ownership. Furthermore, the control firms are matched with a ratio of three by similar firm characteristics. Hence, it is consistent that *LOG_MKT_CAP* has higher mean, *BM_RATIO* lower mean and *ROA* higher mean than in the baseline setting. There is no essential difference in *LEVERAGE* between Tables \ref{table_summary_baseline} and \ref{table_summary_did}. *ANALYST_COVERAGE* has a mean of 10.038, with a minimum of 0 and a maximum of 50, indicating large variation between firm-quarter observations.
 
@@ -592,25 +658,25 @@ starpolishr::star_tex_write(a, file = "my_tex_file2.tex", headers = TRUE)
  \\[-1.5ex]
 BA\_SPREAD & $-$0.265$^{***}$ &  &  &  &  &  &  &  &  &  &  \\ 
   & (0.040) &  &  &  &  &  &  &  &  &  &  \\ 
-  PIN\_DY &  & $-$0.074$^{***}$ &  &  &  &  &  &  &  &  &  \\ 
-  &  & (0.013) &  &  &  &  &  &  &  &  &  \\ 
-  PIN\_DY\_ADJ &  &  & $-$0.097$^{***}$ &  &  &  &  &  &  &  &  \\ 
-  &  &  & (0.016) &  &  &  &  &  &  &  &  \\ 
-  PSOS\_DY &  &  &  & $-$0.042$^{***}$ &  &  &  &  &  &  &  \\ 
-  &  &  &  & (0.010) &  &  &  &  &  &  &  \\ 
-  PIN\_EHO &  &  &  &  & $-$0.089$^{***}$ &  &  &  &  &  &  \\ 
-  &  &  &  &  & (0.013) &  &  &  &  &  &  \\ 
-  PIN\_BHL &  &  &  &  &  & $-$0.077$^{***}$ &  &  &  &  &  \\ 
-  &  &  &  &  &  & (0.017) &  &  &  &  &  \\ 
-  PIN\_BH &  &  &  &  &  &  & $-$0.079$^{***}$ &  &  &  &  \\ 
-  &  &  &  &  &  &  & (0.014) &  &  &  &  \\ 
+  PIN\textsubscript{BHL} &  & $-$0.077$^{***}$ &  &  &  &  &  &  &  &  &  \\ 
+  &  & (0.017)  &  &  &  &  &  &  &  &  &  \\ 
+  PIN\textsubscript{BH} &  &  & $-$0.079$^{***}$ &  &  &  &  &  &  &  &  \\ 
+  &  &  & (0.014) &  &  &  &  &  &  &  &  \\ 
+  PIN\textsubscript{DY} &  &  &  & $-$0.074$^{***}$ &  &  &  &  &  &  &  \\ 
+  &  &  &  & (0.013) &  &  &  &  &  &  &  \\ 
+  PIN\textsubscript{DY\_ADJ} &  &  &  &  & $-$0.097$^{***}$ &  &  &  &  &  &  \\ 
+  &  &  &  &  & (0.016) &  &  &  &  &  &  \\ 
+  PSOS\textsubscript{DY} &  &  &  &  &  & $-$0.042$^{***}$ &  &  &  &  &  \\ 
+  &  &  &  &  &  & (0.010) &  &  &  &  &  \\ 
+  PIN\textsubscript{EHO} &  &  &  &  &  &  & $-$0.089$^{***}$ &  &  &  &  \\ 
+  &  &  &  &  &  &  & (0.013) &  &  &  &  \\ 
   MIA &  &  &  &  &  &  &  & $-$0.035$^{***}$ &  &  &  \\ 
   &  &  &  &  &  &  &  & (0.007) &  &  &  \\ 
-  VCV\_USD &  &  &  &  &  &  &  &  & $-$0.011$^{***}$ &  &  \\ 
+  VCV\textsubscript{USD} &  &  &  &  &  &  &  &  & $-$0.011$^{***}$ &  &  \\ 
   &  &  &  &  &  &  &  &  & (0.001) &  &  \\ 
-  VCV\_MKT &  &  &  &  &  &  &  &  &  & $-$0.011$^{***}$ &  \\ 
+  VCV\textsubscript{MKT} &  &  &  &  &  &  &  &  &  & $-$0.011$^{***}$ &  \\ 
   &  &  &  &  &  &  &  &  &  & (0.001) &  \\ 
-  VCV\_TO &  &  &  &  &  &  &  &  &  &  & $-$0.012$^{***}$ \\ 
+  VCV\textsubscript{TO} &  &  &  &  &  &  &  &  &  &  & $-$0.012$^{***}$ \\ 
   &  &  &  &  &  &  &  &  &  &  & (0.001) \\ 
   BM\_RATIO & $-$0.006$^{***}$ & $-$0.003$^{***}$ & $-$0.003$^{***}$ & $-$0.005$^{***}$ & $-$0.003$^{***}$ & $-$0.005$^{***}$ & $-$0.003$^{***}$ & $-$0.0001 & $-$0.006$^{***}$ & $-$0.006$^{***}$ & $-$0.006$^{***}$ \\ 
   & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) \\ 
@@ -635,25 +701,25 @@ Adjusted R$^{2}$ & 0.156 & 0.349 & 0.343 & 0.312 & 0.331 & 0.190 & 0.199 & 0.262
  \\[-1.5ex]
  BA\_SPREAD & $-$0.036$^{***}$ &  &  &  &  &  &  &  &  &  &  \\ 
   & (0.009) &  &  &  &  &  &  &  &  &  &  \\ 
-  PIN\_DY &  & $-$0.014$^{***}$ &  &  &  &  &  &  &  &  &  \\ 
-  &  & (0.003) &  &  &  &  &  &  &  &  &  \\ 
-  PIN\_DY\_ADJ &  &  & $-$0.021$^{***}$ &  &  &  &  &  &  &  &  \\ 
-  &  &  & (0.003) &  &  &  &  &  &  &  &  \\ 
-  PSOS\_DY &  &  &  & $-$0.007$^{***}$ &  &  &  &  &  &  &  \\ 
-  &  &  &  & (0.002) &  &  &  &  &  &  &  \\ 
-  PIN\_EHO &  &  &  &  & $-$0.018$^{***}$ &  &  &  &  &  &  \\ 
-  &  &  &  &  & (0.002) &  &  &  &  &  &  \\ 
-  PIN\_BHL &  &  &  &  &  & $-$0.013$^{***}$ &  &  &  &  &  \\ 
+  PIN\textsubscript{BHL} &  & $-$0.013$^{***}$ &  &  &  &  &  &  &  &  &  \\ 
+  &  & (0.002) &  &  &  &  &  &  &  &  &  \\ 
+  PIN\textsubscript{BH} &  &  & $-$0.013$^{***}$ &  &  &  &  &  &  &  &  \\ 
+  &  &  & (0.002) &  &  &  &  &  &  &  &  \\ 
+  PIN\textsubscript{DY} &  &  &  & $-$0.014$^{***}$ &  &  &  &  &  &  &  \\ 
+  &  &  &  & (0.003) &  &  &  &  &  &  &  \\ 
+  PIN\textsubscript{DY\_ADJ} &  &  &  &  & $-$0.021$^{***}$ &  &  &  &  &  &  \\ 
+  &  &  &  &  & (0.003) &  &  &  &  &  &  \\ 
+  PSOS\textsubscript{DY} &  &  &  &  &  & $-$0.007$^{***}$ &  &  &  &  &  \\ 
   &  &  &  &  &  & (0.002) &  &  &  &  &  \\ 
-  PIN\_BH &  &  &  &  &  &  & $-$0.013$^{***}$ &  &  &  &  \\ 
+  PIN\textsubscript{EHO} &  &  &  &  &  &  & $-$0.018$^{***}$ &  &  &  &  \\ 
   &  &  &  &  &  &  & (0.002) &  &  &  &  \\ 
   MIA &  &  &  &  &  &  &  & $-$0.033$^{***}$ &  &  &  \\ 
   &  &  &  &  &  &  &  & (0.003) &  &  &  \\ 
-  VCV\_USD &  &  &  &  &  &  &  &  & $-$0.002$^{***}$ &  &  \\ 
+  VCV\textsubscript{USD} &  &  &  &  &  &  &  &  & $-$0.002$^{***}$ &  &  \\ 
   &  &  &  &  &  &  &  &  & (0.0002) &  &  \\ 
-  VCV\_MKT &  &  &  &  &  &  &  &  &  & $-$0.002$^{***}$ &  \\ 
+  VCV\textsubscript{MKT} &  &  &  &  &  &  &  &  &  & $-$0.002$^{***}$ &  \\ 
   &  &  &  &  &  &  &  &  &  & (0.0002) &  \\ 
-  VCV\_TO &  &  &  &  &  &  &  &  &  &  & $-$0.002$^{***}$ \\ 
+  VCV\textsubscript{TO} &  &  &  &  &  &  &  &  &  &  & $-$0.002$^{***}$ \\ 
   &  &  &  &  &  &  &  &  &  &  & (0.0002) \\ 
   BM\_RATIO & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.0003$^{***}$ & $-$0.0003 & $-$0.001$^{***}$ & $-$0.001$^{***}$ & $-$0.001$^{***}$ \\ 
   & (0.0001) & (0.0002) & (0.0002) & (0.0002) & (0.0001) & (0.0001) & (0.0001) & (0.0003) & (0.0001) & (0.0001) & (0.0001) \\ 
@@ -790,25 +856,25 @@ starpolishr::star_tex_write(a, file = "my_tex_file3.tex", headers = TRUE)
  \\[-1.5ex]
  BA\_SPREAD & $-$0.024 &  &  &  &  &  &  &  &  &  &  \\ 
   & (0.076) &  &  &  &  &  &  &  &  &  &  \\ 
-  PIN\_DY &  & 0.001 &  &  &  &  &  &  &  &  &  \\ 
-  &  & (0.043) &  &  &  &  &  &  &  &  &  \\ 
-  PIN\_DY\_ADJ &  &  & $-$0.014 &  &  &  &  &  &  &  &  \\ 
-  &  &  & (0.051) &  &  &  &  &  &  &  &  \\ 
-  PSOS\_DY &  &  &  & 0.007 &  &  &  &  &  &  &  \\ 
-  &  &  &  & (0.022) &  &  &  &  &  &  &  \\ 
-  PIN\_EHO &  &  &  &  & 0.071 &  &  &  &  &  &  \\ 
-  &  &  &  &  & (0.070) &  &  &  &  &  &  \\ 
-  PIN\_BHL &  &  &  &  &  & $-$0.023 &  &  &  &  &  \\ 
-  &  &  &  &  &  & (0.021) &  &  &  &  &  \\ 
-  PIN\_BH &  &  &  &  &  &  & $-$0.021 &  &  &  &  \\ 
-  &  &  &  &  &  &  & (0.030) &  &  &  &  \\ 
+  PIN\textsubscript{BHL} &  & $-$0.023 &  &  &  &  &  &  &  &  &  \\ 
+  &  & (0.021) &  &  &  &  &  &  &  &  &  \\ 
+  PIN\textsubscript{BH} &  &  & $-$0.021 &  &  &  &  &  &  &  &  \\ 
+  &  &  & (0.030) &  &  &  &  &  &  &  &  \\
+  PIN\textsubscript{DY} &  &  &  & 0.001 &  &  &  &  &  &  &  \\ 
+  &  &  &  & (0.043) &  &  &  &  &  &  &  \\ 
+  PIN\textsubscript{DY\_ADJ} &  &  &  &  & $-$0.014 &  &  &  &  &  &  \\ 
+  &  &  &  &  & (0.051) &  &  &  &  &  &  \\ 
+  PSOS\textsubscript{DY} &  &  &  &  &  & 0.007 &  &  &  &  &  \\ 
+  &  &  &  &  &  & (0.022) &  &  &  &  &  \\ 
+  PIN\textsubscript{EHO} &  &  &  &  &  &  & 0.071 &  &  &  &  \\ 
+  &  &  &  &  &  &  & (0.070) &  &  &  &  \\ 
   MIA &  &  &  &  &  &  &  & $-$0.057$^{***}$ &  &  &  \\ 
   &  &  &  &  &  &  &  & (0.012) &  &  &  \\ 
-  VCV\_USD &  &  &  &  &  &  &  &  & $-$0.008$^{***}$ &  &  \\ 
+  VCV\textsubscript{USD} &  &  &  &  &  &  &  &  & $-$0.008$^{***}$ &  &  \\ 
   &  &  &  &  &  &  &  &  & (0.002) &  &  \\ 
-  VCV\_MKT &  &  &  &  &  &  &  &  &  & $-$0.007$^{***}$ &  \\ 
+  VCV\textsubscript{MKT} &  &  &  &  &  &  &  &  &  & $-$0.007$^{***}$ &  \\ 
   &  &  &  &  &  &  &  &  &  & (0.002) &  \\ 
-  VCV\_TO &  &  &  &  &  &  &  &  &  &  & $-$0.010$^{***}$ \\ 
+  VCV\textsubscript{TO} &  &  &  &  &  &  &  &  &  &  & $-$0.010$^{***}$ \\ 
   &  &  &  &  &  &  &  &  &  &  & (0.002) \\ 
   BM\_RATIO & $-$0.010$^{***}$ & $-$0.007$^{***}$ & $-$0.006$^{**}$ & $-$0.007$^{**}$ & $-$0.009$^{***}$ & $-$0.011$^{***}$ & $-$0.010$^{***}$ & 0.004 & $-$0.010$^{***}$ & $-$0.010$^{***}$ & $-$0.009$^{***}$ \\ 
   & (0.002) & (0.002) & (0.002) & (0.003) & (0.003) & (0.002) & (0.002) & (0.003) & (0.002) & (0.002) & (0.002) \\ 
@@ -833,25 +899,25 @@ Adjusted R$^{2}$ & 0.086 & 0.083 & 0.083 & 0.083 & 0.101 & 0.087 & 0.086 & 0.209
  \\[-1.5ex]
 BA\_SPREAD & $-$0.071 &  &  &  &  &  &  &  &  &  &  \\ 
   & (0.074) &  &  &  &  &  &  &  &  &  &  \\ 
-  PIN\_DY &  & 0.094$^{**}$ &  &  &  &  &  &  &  &  &  \\ 
-  &  & (0.037) &  &  &  &  &  &  &  &  &  \\ 
-  PIN\_DY\_ADJ &  &  & 0.105$^{**}$ &  &  &  &  &  &  &  &  \\ 
-  &  &  & (0.042) &  &  &  &  &  &  &  &  \\ 
-  PSOS\_DY &  &  &  & 0.056$^{***}$ &  &  &  &  &  &  &  \\ 
-  &  &  &  & (0.021) &  &  &  &  &  &  &  \\ 
-  PIN\_EHO &  &  &  &  & 0.190$^{***}$ &  &  &  &  &  &  \\ 
-  &  &  &  &  & (0.058) &  &  &  &  &  &  \\ 
-  PIN\_BHL &  &  &  &  &  & 0.020 &  &  &  &  &  \\ 
+  PIN\textsubscript{BHL} &  & 0.020 &  &  &  &  &  &  &  &  &  \\ 
+  &  & (0.021) &  &  &  &  &  &  &  &  &  \\ 
+  PIN\textsubscript{BH} &  &  & 0.050 &  &  &  &  &  &  &  &  \\ 
+  &  &  & (0.034) &  &  &  &  &  &  &  &  \\ 
+  PIN\textsubscript{DY} &  &  &  & 0.094$^{**}$ &  &  &  &  &  &  &  \\ 
+  &  &  &  & (0.037) &  &  &  &  &  &  &  \\ 
+  PIN\textsubscript{DY\_ADJ} &  &  &  &  & 0.105$^{**}$ &  &  &  &  &  &  \\ 
+  &  &  &  &  & (0.042) &  &  &  &  &  &  \\ 
+  PSOS\textsubscript{DY} &  &  &  &  &  & 0.056$^{***}$ &  &  &  &  &  \\ 
   &  &  &  &  &  & (0.021) &  &  &  &  &  \\ 
-  PIN\_BH &  &  &  &  &  &  & 0.050 &  &  &  &  \\ 
-  &  &  &  &  &  &  & (0.034) &  &  &  &  \\ 
+  PIN\textsubscript{EHO} &  &  &  &  &  &  & 0.190$^{***}$ &  &  &  &  \\ 
+  &  &  &  &  &  &  & (0.058) &  &  &  &  \\ 
   MIA &  &  &  &  &  &  &  & $-$0.025$^{***}$ &  &  &  \\ 
   &  &  &  &  &  &  &  & (0.009) &  &  &  \\ 
-  VCV\_USD &  &  &  &  &  &  &  &  & $-$0.006 &  &  \\ 
+  VCV\textsubscript{USD} &  &  &  &  &  &  &  &  & $-$0.006 &  &  \\ 
   &  &  &  &  &  &  &  &  & (0.004) &  &  \\ 
-  VCV\_MKT &  &  &  &  &  &  &  &  &  & $-$0.005 &  \\ 
+  VCV\textsubscript{MKT} &  &  &  &  &  &  &  &  &  & $-$0.005 &  \\ 
   &  &  &  &  &  &  &  &  &  & (0.004) &  \\ 
-  VCV\_TO &  &  &  &  &  &  &  &  &  &  & $-$0.007$^{*}$ \\ 
+  VCV\textsubscript{TO} &  &  &  &  &  &  &  &  &  &  & $-$0.007$^{*}$ \\ 
   &  &  &  &  &  &  &  &  &  &  & (0.004) \\ 
   BM\_RATIO & $-$0.004$^{*}$ & 0.001 & 0.002 & 0.003 & $-$0.003 & $-$0.001 & $-$0.003$^{*}$ & 0.004$^{**}$ & $-$0.004$^{**}$ & $-$0.004$^{**}$ & $-$0.004$^{**}$ \\ 
   & (0.002) & (0.002) & (0.002) & (0.003) & (0.003) & (0.002) & (0.002) & (0.002) & (0.002) & (0.002) & (0.002) \\ 
@@ -1188,17 +1254,21 @@ Adjusted R$^{2}$ & 0.098 & 0.108 & 0.105 & 0.127 & 0.144 & 0.151 \\
 \multicolumn{6}{r}{} \\ 
 \end{longtable}
 
-In Panel A, the difference-in-differences regression results of foreign ownership (*FOR_OWN*) for the one-year, two-year and three-year pre- and post-closure period are reported in columns (1)-(3), respectively. The regression coefficients of *AFTER* are positive and statistically significant in all three columns. In addition, the coefficient is the largest in the three-year window and the smallest in the one-year window. Although the regression models contain year fixed effects, these findings are consistent with the increasing trend of foreign ownership for both groups in Figure \ref{fig_parallel_trend1}, as the foreign ownership has an increasing pattern even within-year period. Moreover, the coefficients of *TREATED* are negative but close to zero and statistically insignificant in all three columns, indicating that there is no significant difference of foreign ownership between treatment and control firms. The coefficients of the variable of main interest \textit{AFTER}\texttimes\textit{TREATED} are negative columns (1)-(2) and statistically insignificant. In column (3), the coefficient is positive and statistically insignificant. Hence, the results do not provide support for the second hypothesis that an exogenous increase in information asymmetry causes a decline in foreign ownership. The control variables have similar results as in the baseline setting, with notably positive and statistically significant results for *ROA*. Compared to baseline setting, the additional control variable *LOG_MKT_CAP* is positive and statistically significant in all three columncs, which is intuitive and in line with the correlation matrix results in Table \ref{table_cor_matrix}. Based on adjusted R^2^, the models explain variation relatively well compared to the baseline results.
+In Panel A, the difference-in-differences regression results of foreign ownership (*FOR_OWN*) for the one-year, two-year and three-year pre- and post-closure period are reported in columns (1)-(3), respectively. The regression coefficients of *AFTER* are positive and statistically significant in all three columns. In addition, the coefficient is the largest in the three-year window and the smallest in the one-year window. Although the regression models contain year fixed effects, these findings are consistent with the increasing trend of foreign ownership for both groups in Figure \ref{fig_parallel_trend1}, as the foreign ownership has an increasing pattern even within-year period. Moreover, the coefficients of *TREATED* are negative but close to zero and statistically insignificant in all three columns, indicating that there is no significant difference of foreign ownership between treatment and control firms. The coefficients of the variable of main interest \textit{AFTER}\texttimes\textit{TREATED} are negative columns (1)-(2) and statistically insignificant. In column (3), the coefficient is positive and statistically insignificant. Hence, the results do not provide support for the second hypothesis that an exogenous increase in information asymmetry causes a decline in foreign ownership. The control variables have similar results as in the baseline setting, with notably positive and statistically significant results for *ROA*. Compared to baseline setting, the additional control variable *LOG_MKT_CAP* is positive and statistically significant in all three columns, which is intuitive and in line with the correlation matrix results in Table \ref{table_cor_matrix}. Based on adjusted R^2^, the models explain variation relatively well compared to the baseline results.
 
-The results of foreign breadth (*FOR_BREADTH*) in Panel A are similarly reported in columns (4)-(6). The regression coefficients of *AFTER* are similarly positive and statistically significant in columns (1)-(3), although with slightly smaller estimates. The coefficients of *TREATED* are, on the contrary, positice and statistically insignificant. In column (4), the coefficients of \textit{AFTER}\texttimes\textit{TREATED} are positive and statistically insignificant in all three columns. Hence, the results of foreign breadth do neither provide evidence for the second hypothesis. Interestingly, the coefficients of control variables are somewhat inconsistent with the previous results. *LOG_MKT_CAP* and *LEVERAGE* are still positive and statistically significant in all three columns, but *BM_RATIO* is positive and statistically significant and *ROA* is negative and statistically significant. Adjusted R^2^ is, on average, 0.76, implying relatively high explanatory power of the model and notably higher than in the case of foreign ownership. 
+The results of foreign breadth (*FOR_BREADTH*) in Panel A are similarly reported in columns (4)-(6). The regression coefficients of *AFTER* are similarly positive and statistically significant in columns (1)-(3), although with slightly smaller estimates. The coefficients of *TREATED* are, on the contrary, positive and statistically insignificant. In column (4), the coefficients of \textit{AFTER}\texttimes\textit{TREATED} are positive and statistically insignificant in all three columns. Hence, the results of foreign breadth do neither provide evidence for the second hypothesis. Interestingly, the coefficients of control variables are somewhat inconsistent with the previous results. *LOG_MKT_CAP* and *LEVERAGE* are still positive and statistically significant in all three columns, but *BM_RATIO* is positive and statistically significant and *ROA* is negative and statistically significant. Adjusted R^2^ is, on average, 0.76, implying relatively high explanatory power of the model and notably higher than in the case of foreign ownership. 
 
-In Panel B, the regression coefficients of *AFTER* are positive for both *FOR_TO_INST_OWN* and *FOR_TO_INST_BREADTH* in all six columns and statistically significant in columns (1), (3) and (6), which implies an increasing trend in the dollar amount and number of foreign institutional investors even within year fixed effect, compared to domestic insitutional investors. On the other hand, *TREATED* is negative and statistically significant in all six columns, implying that treated firms have relatively low dollar amount and number of foreign institutional investors compared to domestic ones. \textit{AFTER}\texttimes\textit{TREATED} is positive in all six columns, but statistically insignificant in columns (1)-(3) and statistically significant in columns (4)-(6). Hence, the results do not provide support for the second hypothesis in columns (1)-(3) and in columns (4)-(6), the results provide even opposing results. Nonetheless, these oppsing results are to some extent downgraded in Figure \ref{fig_parallel_trend1}, in which the treatment group slightly catches the control group, but there is no clear drop in breadth measure for either groups. The control variables are mainly statistically insignificant, with the exception of statistically significant negative coefficients of *ROA*. Adjusted R^2^ is ca. 0.20 and mainly in line with the models of columns (1)-(3) in Panel A.
+In Panel B, the regression coefficients of *AFTER* are positive for both *FOR_TO_INST_OWN* and *FOR_TO_INST_BREADTH* in all six columns and statistically significant in columns (1), (3) and (6), which implies an increasing trend in the dollar amount and number of foreign institutional investors even within year fixed effect, compared to domestic institutional investors. On the other hand, *TREATED* is negative and statistically significant in all six columns, implying that treated firms have relatively low dollar amount and number of foreign institutional investors compared to domestic ones. \textit{AFTER}\texttimes\textit{TREATED} is positive in all six columns, but statistically insignificant in columns (1)-(3) and statistically significant in columns (4)-(6). Hence, the results do not provide support for the second hypothesis in columns (1)-(3) and in columns (4)-(6), the results provide even opposing results. Nonetheless, these opposing results are to some extent downgraded in Figure \ref{fig_parallel_trend1}, in which the treatment group slightly catches the control group, but there is no clear drop in breadth measure for either groups. The control variables are mainly statistically insignificant, with the exception of statistically significant negative coefficients of *ROA*. Adjusted R^2^ is ca. 0.20 and mainly in line with the models of columns (1)-(3) in Panel A.
 
 Overall, the results of Table \ref{table_h2_1} give no evidence of the negative causal effect of information asymmetry on foreign ownership. In fact, the results provide even some opposing evidence of positive causal effect of information asymmetry on the number of foreign institutional investors compared to domestic ones. Nonetheless, I do not find opposing results significant enough, when compared to the results in Panel A and of Figure \ref{fig_parallel_trend1}.
 
 ## 6.3 The results of the quasi-natural experiment by investor type
 
-``` {r, results='asis', echo = FALSE, eval=FALSE}
+In this section, I study the causal effect of asymmetric information on foreign ownership more in-depth by using different types of foreign institutional investors. I identify informed and non-informed foreign investors by using classifications by @bushee2001institutional, who define different institutional investors in 13F data as either "dedicated", "transient" or "quasi-indexing" investors. Dedicated investors are the most informed ones of these and prefer large and stable holdings in a small number of firms. Transient investors have highly diversified portfolios and are focused on short-term earnings and therefore their portfolios have high turnover. Quasi-indexing investors have highly diversified and low turnover portfolios, with a passive buy-and-hold strategy.
+
+Based on these classifications, I compute the same foreign-ownership specific variables for each classification group, which only affects the nominator of these variables. For instance, *FOR_OWN* for dedicated investors is defined as the number of a firm’s shares held by foreign dedicated institutions divided by the firm’s total shares outstanding (CRSP) at the end of a quarter. Furthermore, I define an additional classification group of foreign "non-quasi" investors which is defined as all foreign institutional investors except foreign quasi investors. With these variables, I compute similar difference-in-differences regression analysis than in the section 6.2, with dependent and control variables calculated for one-year before and after brokerage closures. Table \ref{table_h2_2} presents the results.
+
+``` {r, results='asis', echo = FALSE, eval=TRUE}
 
 library(tidyverse)
 library(lfe)
@@ -1206,7 +1276,11 @@ library(stargazer)
 
 did_regression_matched1 <- read_rds("results/did_regression_matched1.rds") %>%
   mutate(AFTER_TREATED = TREATED * AFTER,
-         sic_code = str_sub(sic_code, 1, 2))
+         sic_code = str_sub(sic_code, 1, 2),
+         FOR_OWN_NONQUASI = FOR_OWN_DEDICATED + FOR_OWN_TRANSIENT,
+         FOR_BREADTH_NONQUASI = FOR_BREADTH_DEDICATED + FOR_BREADTH_TRANSIENT,
+         FOR_TO_INST_OWN_NONQUASI = FOR_TO_INST_OWN_DEDICATED + FOR_TO_INST_OWN_TRANSIENT,
+         FOR_TO_INST_BREADTH_NONQUASI = FOR_TO_INST_BREADTH_DEDICATED + FOR_TO_INST_BREADTH_TRANSIENT)
 
 did_model1 <- felm(FOR_OWN_QUASI ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
                      LEVERAGE + ROA|year + sic_code|0|year + sic_code,
@@ -1216,32 +1290,24 @@ did_model2 <- felm(FOR_OWN_NONQUASI ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_
                      LEVERAGE + ROA|year + sic_code|0|year + sic_code,
                    data = did_regression_matched1)
 
-did_model3 <- felm(FOR_OWN_DEDICATED ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+did_model3 <- felm(FOR_OWN_TRANSIENT ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
                      LEVERAGE + ROA|year + sic_code|0|year + sic_code,
                    data = did_regression_matched1)
 
-did_model4 <- felm(FOR_OWN_TRANSIENT ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+did_model4 <- felm(FOR_BREADTH_QUASI ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
                      LEVERAGE + ROA|year + sic_code|0|year + sic_code,
                    data = did_regression_matched1)
 
-did_model5 <- felm(FOR_BREADTH_QUASI ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+did_model5 <- felm(FOR_BREADTH_NONQUASI ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
                      LEVERAGE + ROA|year + sic_code|0|year + sic_code,
                    data = did_regression_matched1)
 
-did_model6 <- felm(FOR_BREADTH_NONQUASI ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
-                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
-                   data = did_regression_matched1)
-
-did_model7 <- felm(FOR_BREADTH_DEDICATED ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
-                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
-                   data = did_regression_matched1)
-
-did_model8 <- felm(FOR_BREADTH_TRANSIENT ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+did_model6 <- felm(FOR_BREADTH_TRANSIENT ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
                      LEVERAGE + ROA|year + sic_code|0|year + sic_code,
                    data = did_regression_matched1)
 
 did_list <- list(did_model1, did_model2, did_model3, did_model4,
-                 did_model5, did_model6, did_model7, did_model8)
+                 did_model5, did_model6)
 
 treated_obs <- did_regression_matched1 %>% filter(TREATED == 1) %>% 
   group_by(TREATED) %>% summarise(n = n()) %>% ungroup() %>% pluck("n") %>% 
@@ -1268,16 +1334,16 @@ stargazer(did_list, title = "\\textbf{Difference-in-differences regression analy
           header = F,
           dep.var.labels.include = F,
           dep.var.labels =c("FOR\\_OWN", "FOR\\_BREADTH"),
-          column.labels = rep(c("Quasi", "Non-quasi", "Dedicated", "Transient"), times = 2),
+          column.labels = rep(c("Quasi", "Non-quasi", "Transient"), times = 2),
           covariate.labels = c("AFTER", "TREATED", "AFTER\\texttimes TREATED", "LOG\\_MKT\\_CAP", "BM\\_RATIO", "LEVERAGE", "ROA"),
           omit.stat = c("ser", "rsq", "n"),
-          add.lines = list(c("Industry fixed effects", rep("Yes", times = 8)),
-                           c("Year fixed effects", rep("Yes", times = 8)),
-                           c("Treated firm obs.", rep(treated_obs, times = 8)),
-                           c("Control firm obs.", rep(control_obs, times = 8)),
-                           c("Distinct treated firms", rep(treated_distinct, times = 8)),
-                           c("Distinct control firms", rep(control_distinct, times = 8)),
-                           c("Observations", rep(obs, times = 8))),
+          add.lines = list(c("Industry fixed effects", rep("Yes", times = 6)),
+                           c("Year fixed effects", rep("Yes", times = 6)),
+                           c("Treated firm obs.", rep(treated_obs, times = 6)),
+                           c("Control firm obs.", rep(control_obs, times = 6)),
+                           c("Distinct treated firms", rep(treated_distinct, times = 6)),
+                           c("Distinct control firms", rep(control_distinct, times = 6)),
+                           c("Observations", rep(obs, times = 6))),
           type = 'latex',
           notes.label = "",
           notes.append = F,
@@ -1295,45 +1361,38 @@ did_model2 <- felm(FOR_TO_INST_OWN_NONQUASI ~ AFTER + TREATED + AFTER_TREATED + 
                      LEVERAGE + ROA|year + sic_code|0|year + sic_code,
                    data = did_regression_matched1)
 
-did_model3 <- felm(FOR_TO_INST_OWN_DEDICATED ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+did_model3 <- felm(FOR_TO_INST_OWN_TRANSIENT ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
                      LEVERAGE + ROA|year + sic_code|0|year + sic_code,
                    data = did_regression_matched1)
 
-did_model4 <- felm(FOR_TO_INST_OWN_TRANSIENT ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+did_model4 <- felm(FOR_TO_INST_BREADTH_QUASI ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
                      LEVERAGE + ROA|year + sic_code|0|year + sic_code,
                    data = did_regression_matched1)
 
-did_model5 <- felm(FOR_TO_INST_BREADTH_QUASI ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
-                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+did_model5 <- felm(FOR_TO_INST_BREADTH_NONQUASI ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO + LEVERAGE + ROA|year + sic_code|0|year + sic_code,
                    data = did_regression_matched1)
 
-did_model6 <- felm(FOR_TO_INST_BREADTH_NONQUASI ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO + LEVERAGE + ROA|year + sic_code|0|year + sic_code,
-                   data = did_regression_matched1)
-
-did_model7 <- felm(FOR_TO_INST_BREADTH_DEDICATED ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO + LEVERAGE + ROA|year + sic_code|0|year + sic_code,
-                   data = did_regression_matched1)
-
-did_model8 <- felm(FOR_TO_INST_BREADTH_TRANSIENT ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO + LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+did_model6 <- felm(FOR_TO_INST_BREADTH_TRANSIENT ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO + LEVERAGE + ROA|year + sic_code|0|year + sic_code,
                    data = did_regression_matched1)
 
 did_list <- list(did_model1, did_model2, did_model3, did_model4,
-                 did_model5, did_model6, did_model7, did_model8)
+                 did_model5, did_model6)
 
 stargazer(did_list, title = "\\textbf{Difference-in-differences regression analysis of foreign ownership and breadth by institutional ownership and analyst coverage}\\newline\\scriptsize This table reports the results",
           label = "table_h2_2",
           header = F,
           dep.var.labels.include = F,
           dep.var.labels =c("FOR\\_TO\\_INST\\_OWN", "FOR\\_TO\\_INST\\_BREADTH"),
-          column.labels = rep(c("Quasi", "Non-quasi", "Dedicated", "Transient"), times = 2),
+          column.labels = rep(c("Quasi", "Non-quasi", "Transient"), times = 2),
           covariate.labels = c("AFTER", "TREATED", "AFTER\\texttimes TREATED", "LOG\\_MKT\\_CAP", "BM\\_RATIO", "LEVERAGE", "ROA"),
           omit.stat = c("ser", "rsq", "n"),
-          add.lines = list(c("Industry fixed effects", rep("Yes", times = 8)),
-                           c("Year fixed effects", rep("Yes", times = 8)),
-                           c("Treated firm obs.", rep(treated_obs, times = 8)),
-                           c("Control firm obs.", rep(control_obs, times = 8)),
-                           c("Distinct treated firms", rep(treated_distinct, times = 8)),
-                           c("Distinct control firms", rep(control_distinct, times = 8)),
-                           c("Observations", rep(obs, times = 8))),
+          add.lines = list(c("Industry fixed effects", rep("Yes", times = 6)),
+                           c("Year fixed effects", rep("Yes", times = 6)),
+                           c("Treated firm obs.", rep(treated_obs, times = 6)),
+                           c("Control firm obs.", rep(control_obs, times = 6)),
+                           c("Distinct treated firms", rep(treated_distinct, times = 6)),
+                           c("Distinct control firms", rep(control_distinct, times = 6)),
+                           c("Observations", rep(obs, times = 6))),
           type = 'latex',
           notes.label = "",
           notes.append = F,
@@ -1346,11 +1405,11 @@ stargazer(did_list, title = "\\textbf{Difference-in-differences regression analy
 
 \renewcommand\arraystretch{0.63}
 \begin{landscape}
-\captionsetup{width=1\linewidth}
+\captionsetup{width=1.0\linewidth}
 \footnotesize
 \begin{longtable}{@{\extracolsep{15pt}}lcccccccc} 
   \caption[Difference-in-differences regression analysis of foreign ownership-specific variables by investor type]{\textbf{Difference-in-differences regression analysis of foreign ownership-specific variables by investor type}\newline\scriptsize This table reports the results of the difference-in-differences regression analysis of ownership-specific variables by different classifications of institutional investor types \citep{bushee2001institutional}. In Panel A, the dependent variables are foreign ownership (\textit{FOR\_OWN}) and foreign breadth (\textit{FOR\_BREADTH}). In Panel B, the dependent variables are foreign-to-institution ownership (\textit{FOR\_TO\_INST\_OWN}) and foreign-to-institution breadth (\textit{FOR\_TO\_INST\_BREADTH}). For all stocks, I compute averages of the dependent variables and control variables in all columns over the quarters [-4,-1] and over the quarters [1,4], with the brokerage closure occurring in quarter 0. The control variables are book-to-market ratio (\textit{BM\_RATIO}), leverage (\textit{LEVERAGE}) and return on assets (\textit{ROA}). I include industry and year fixed effects in all regressions. Standard errors are clustered by the industry and year level and reported in parentheses. \textit{FOR\_OWN} and \textit{FOR\_BREADTH} are winsorized at the top to a maximum of 1. Control variables are winsorized at the top and bottom 1\%. Table \ref{table_variable_definitions} in Appendix provides a detailed list of variable definitions. *, ** and *** denote the statistical significance at the 10\%, 5\% and 1\% level, respectively. Sample period: 1997-2010. Sources: CRSP, COMPUSTAT, 13F and IBES.} 
-  \label{table_h3_1} 
+  \label{table_h2_2} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
  & \multicolumn{8}{c}{\textit{Dependent variable:}} \\ 
@@ -1384,7 +1443,7 @@ Control firm obs. & 16,176 & 16,176 & 16,176 & 16,176 & 16,176 & 16,176 & 16,176
 Distinct treated firms & 1,651 & 1,651 & 1,651 & 1,651 & 1,651 & 1,651 & 1,651 & 1,651 \\ 
 Distinct control firms & 3,558 & 3,558 & 3,558 & 3,558 & 3,558 & 3,558 & 3,558 & 3,558 \\ 
 Observations & 21,600 & 21,600 & 21,600 & 21,600 & 21,600 & 21,600 & 21,600 & 21,600 \\ 
-Adjusted R$^{2}$ & 0.211 & 0.049 & 0.003 & 0.065 & 0.629 & 0.714 & 0.135 & 0.709 \\  
+Adjusted R$^{2}$ & 0.211 & 0.049 & 0.003 & 0.065 & 0.629 & 0.714 & 0.135 & 0.709 \\   
 \hline \\[-1.8ex]
 \\[-1.83ex] 
  & \multicolumn{8}{c}{\textit{Dependent variable:}} \\ 
@@ -1418,13 +1477,14 @@ Control firm obs. & 16,176 & 16,176 & 16,176 & 16,176 & 16,176 & 16,176 & 16,176
 Distinct treated firms & 1,651 & 1,651 & 1,651 & 1,651 & 1,651 & 1,651 & 1,651 & 1,651 \\ 
 Distinct control firms & 3,558 & 3,558 & 3,558 & 3,558 & 3,558 & 3,558 & 3,558 & 3,558 \\ 
 Observations & 21,600 & 21,600 & 21,600 & 21,600 & 21,600 & 21,600 & 21,600 & 21,600 \\ 
-Adjusted R$^{2}$ & 0.108 & 0.047 & 0.004 & 0.052 & 0.214 & 0.105 & 0.023 & 0.106 \\ 
+Adjusted R$^{2}$ & 0.108 & 0.047 & 0.004 & 0.052 & 0.214 & 0.105 & 0.023 & 0.106 \\  
 \hline 
 \hline \\[-1.8ex] 
 \multicolumn{9}{r}{} \\ 
 \end{longtable}
 \end{landscape}
 
+Based on the results in Panel A, there is no significant changes for the treated relative to control firms in *FOR_OWN* or *FOR_BREADTH* after brokerage closure events for any investor type. Although insignificant, it is noticeable that \textit{AFTER\texttimes TREATED} has different sign of coefficients for *FOR_OWN* and *FOR_BREADTH* in every investor type. For instance, based on columns (3) and (7), foreign dedicated investors decrease their holdings in the treated firms relative to control firms after  closures, but the number of dedicated investors increase. The increase is consistent with the theoretical background, since foreign dedicated investors are informed investors, who might exploit the increased information asymmetry to their advantage. Nonetheless, there is no significant results for \textit{AFTER\texttimes TREATED} in any column. Control variables are mostly in line with the previous results of the study. Notably, foreign quasi investors invest relatively more in large firms than other investor types. Based on Adjusted R^2^, explanatory power of these models are limited, especially in models with dedicated investors. 
 
 ## 6.4 The results of the quasi-natural experiment by institutional ownership and analyst coverage
 
@@ -1681,7 +1741,18 @@ Adjusted R$^{2}$ & 0.123 & 0.150 & 0.076 & 0.195 & 0.109 & 0.374 & 0.067 & 0.404
 \end{longtable}
 \end{landscape}
 
+
 # 7 Robustness tests
+
+In this section, I conduct several robustness tests for the empirical results of this study. First, I test the credibility of the quasi-natural experiment identification. Second, I perform an alternative selection of the control group used in difference-in-differences regression. Finally, as the main results rely on the findings of @kelly2012testing and @derrien2013real that exogenous reductions in analyst coverage results in increased information asymmetry, I examine the difference-in-differences regression analysis with instrumental variable approach in which information asymmetry measure is used as as instrument variable. I present the findings in Appendix.
+
+## 7.1 The credibility of the quasi-natural experiment identification
+
+I test the credibility of the quasi-natural experiment identification by examining the analyst coverage between treatment and control groups around brokerage closures. To keep sample comparable with my previous results and sample size sufficient, the control group is matched with the treatment group by a ratio of 3 and with same covariates. @kelly2012testing use a ratio of 5 and @derrien2013real a ratio of 1 with slightly different covariates, but mostly I find my data processing to replicate their versions. Figure \ref{fig_parallel_trend_analyst} reports the results.
+
+As shown in Figure \ref{fig_parallel_trend_analyst}, analyst coverage for both treatment and control groups increases notably before the event. The pre-treatment parallel trend assumption is mostly satisfied, although the number of analysts increases to some extent relatively more in the treatment group. Notably, the treatment group has ca. 2-3.5 more analysts covering than the control group, although the control group is matched with analyst coverage as one covariate. There is a significant drop in analyst coverage during the event quarter for the treatment group. The control group decreases also, but only slightly compared to the treatment group. Moreover, the drop is limited only to three quarters after the event, as the number of analysts stabilizes after three quarters in the treatment group. Hence, I find supporting evidence that my identification of the quasi-natural experiment is consistent with the data processing methods of @derrien2013real and @kelly2012testing. 
+
+## 7.2 The alternative selection of control group
 
 # 8 Discussion
 
