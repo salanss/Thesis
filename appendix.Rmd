@@ -356,32 +356,57 @@ did_model1 <- felm(VCV_USD ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_
                      LEVERAGE + ROA | year + sic_code | 0 | year + sic_code,
                    data = did_regression_matched1_iv)
 
-did_model2 <- felm(FOR_OWN ~ BM_RATIO + LEVERAGE + ROA|
+did_model2 <- felm(FOR_OWN ~ VCV_USD + BM_RATIO + LEVERAGE + ROA|
+                     year + sic_code|
+                     0 |
+                     year + sic_code,
+                   data = did_regression_matched1_iv)
+
+did_model3 <- felm(FOR_OWN ~ BM_RATIO + LEVERAGE + ROA|
                      year + sic_code|
                      (VCV_USD ~  AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP) |
                      year + sic_code,
                    data = did_regression_matched1_iv)
 
-did_model3 <- felm(FOR_BREADTH ~ BM_RATIO + LEVERAGE + ROA|
+did_model4 <- felm(FOR_BREADTH ~ VCV_USD + BM_RATIO + LEVERAGE + ROA|
+                     year + sic_code|
+                     0 |
+                     year + sic_code,
+                   data = did_regression_matched1_iv)
+
+did_model5 <- felm(FOR_BREADTH ~ BM_RATIO + LEVERAGE + ROA|
                      year + sic_code|
                      (VCV_USD ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP) |
                      year + sic_code,
                    data = did_regression_matched1_iv)
 
-did_model4 <- felm(FOR_TO_INST_OWN ~ BM_RATIO + LEVERAGE + ROA|
+did_model6 <- felm(FOR_TO_INST_OWN ~ VCV_USD + BM_RATIO + LEVERAGE + ROA|
+                     year + sic_code|
+                     0 |
+                     year + sic_code,
+                   data = did_regression_matched1_iv)
+
+did_model7 <- felm(FOR_TO_INST_OWN ~ BM_RATIO + LEVERAGE + ROA|
                      year + sic_code|
                      (VCV_USD ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP) |
                      year + sic_code,
                    data = did_regression_matched1_iv)
 
-did_model5 <- felm(FOR_TO_INST_BREADTH ~ BM_RATIO + LEVERAGE + ROA|
+did_model8 <- felm(FOR_TO_INST_BREADTH ~ VCV_USD + BM_RATIO + LEVERAGE + ROA|
+                     year + sic_code|
+                     0 |
+                     year + sic_code,
+                   data = did_regression_matched1_iv)
+
+did_model9 <- felm(FOR_TO_INST_BREADTH ~ BM_RATIO + LEVERAGE + ROA|
                      year + sic_code|
                      (VCV_USD ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP) |
                      year + sic_code,
                    data = did_regression_matched1_iv)
 
 
-did_list <- list(did_model1, did_model2, did_model3, did_model4, did_model5)
+did_list <- list(did_model1, did_model2, did_model3, did_model4, did_model5,
+                 did_model6, did_model7, did_model8, did_model9)
 
 treated_obs <- did_regression_matched1_iv %>% filter(TREATED == 1) %>% 
   group_by(TREATED) %>% summarise(n = n()) %>% ungroup() %>% pluck("n") %>% 
@@ -409,13 +434,13 @@ stargazer(did_list, title = "\\textbf{Difference-in-differences regression analy
           #dep.var.labels =c("FOR\\_OWN", "FOR\\_BREADTH"),
           #column.labels = rep(c("[-1,1] years", "[-2,2] years", "[-3,3] years"), times = 2),
           omit.stat = c("ser", "rsq", "n"),
-          add.lines = list(c("Industry fixed effects", rep("Yes", times = 5)),
-                           c("Year fixed effects", rep("Yes", times = 5)),
-                           c("Treated firm obs.", rep(treated_obs, times = 5)),
-                           c("Control firm obs.", rep(control_obs, times = 5)),
-                           c("Distinct treated firms", rep(treated_distinct, times = 5)),
-                           c("Distinct control firms", rep(control_distinct, times = 5)),
-                           c("Observations", rep(obs, times = 5))),
+          add.lines = list(c("Industry fixed effects", rep("Yes", times = 9)),
+                           c("Year fixed effects", rep("Yes", times = 9)),
+                           c("Treated firm obs.", rep(treated_obs, times = 9)),
+                           c("Control firm obs.", rep(control_obs, times = 9)),
+                           c("Distinct treated firms", rep(treated_distinct, times = 9)),
+                           c("Distinct control firms", rep(control_distinct, times = 9)),
+                           c("Observations", rep(obs, times = 9))),
           type = 'latex',
           notes.label = "",
           notes.append = F,
@@ -427,32 +452,57 @@ did_model1 <- felm(BA_SPREAD ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + B
                      LEVERAGE + ROA | year + sic_code | 0 | year + sic_code,
                    data = did_regression_matched1_iv)
 
-did_model2 <- felm(FOR_OWN ~ BM_RATIO + LEVERAGE + ROA|
+did_model2 <- felm(FOR_OWN ~ BA_SPREAD + BM_RATIO + LEVERAGE + ROA|
+                     year + sic_code|
+                     0|
+                     year + sic_code,
+                   data = did_regression_matched1_iv)
+
+did_model3 <- felm(FOR_OWN ~ BM_RATIO + LEVERAGE + ROA|
                      year + sic_code|
                      (BA_SPREAD ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP) |
                      year + sic_code,
                    data = did_regression_matched1_iv)
 
-did_model3 <- felm(FOR_BREADTH ~ BM_RATIO + LEVERAGE + ROA|
+did_model4 <- felm(FOR_BREADTH ~ BA_SPREAD + BM_RATIO + LEVERAGE + ROA|
+                     year + sic_code|
+                     0|
+                     year + sic_code,
+                   data = did_regression_matched1_iv)
+
+did_model5 <- felm(FOR_BREADTH ~ BM_RATIO + LEVERAGE + ROA|
                      year + sic_code|
                      (BA_SPREAD ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP) |
                      year + sic_code,
                    data = did_regression_matched1_iv)
 
-did_model4 <- felm(FOR_TO_INST_OWN ~ BM_RATIO + LEVERAGE + ROA|
+did_model6 <- felm(FOR_TO_INST_OWN ~ BA_SPREAD + BM_RATIO + LEVERAGE + ROA|
+                     year + sic_code|
+                     0|
+                     year + sic_code,
+                   data = did_regression_matched1_iv)
+
+did_model7 <- felm(FOR_TO_INST_OWN ~ BM_RATIO + LEVERAGE + ROA|
                      year + sic_code|
                      (BA_SPREAD ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP) |
                      year + sic_code,
                    data = did_regression_matched1_iv)
 
-did_model5 <- felm(FOR_TO_INST_BREADTH ~ BM_RATIO + LEVERAGE + ROA|
+did_model8 <- felm(FOR_TO_INST_BREADTH ~ BA_SPREAD + BM_RATIO + LEVERAGE + ROA|
+                     year + sic_code|
+                     0|
+                     year + sic_code,
+                   data = did_regression_matched1_iv)
+
+did_model9 <- felm(FOR_TO_INST_BREADTH ~ BM_RATIO + LEVERAGE + ROA|
                      year + sic_code|
                      (BA_SPREAD ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP) |
                      year + sic_code,
                    data = did_regression_matched1_iv)
 
 
-did_list <- list(did_model1, did_model2, did_model3, did_model4, did_model5)
+did_list <- list(did_model1, did_model2, did_model3, did_model4, did_model5,
+                 did_model6, did_model7, did_model8, did_model9)
 
 stargazer(did_list, title = "\\textbf{Difference-in-differences regression analysis of foreign ownership and breadth}\\newline\\footnotesize This table reports the results of the difference-in-differences regression analysis of foreign ownership and breadth. The explanatory variables are \\textit{AFTER}.",
           label = "table_h2_1",
@@ -460,13 +510,13 @@ stargazer(did_list, title = "\\textbf{Difference-in-differences regression analy
           #dep.var.labels =c("FOR\\_OWN", "FOR\\_BREADTH"),
           #column.labels = rep(c("[-1,1] years", "[-2,2] years", "[-3,3] years"), times = 2),
           omit.stat = c("ser", "rsq", "n"),
-          add.lines = list(c("Industry fixed effects", rep("Yes", times = 5)),
-                           c("Year fixed effects", rep("Yes", times = 5)),
-                           c("Treated firm obs.", rep(treated_obs, times = 5)),
-                           c("Control firm obs.", rep(control_obs, times = 5)),
-                           c("Distinct treated firms", rep(treated_distinct, times = 5)),
-                           c("Distinct control firms", rep(control_distinct, times = 5)),
-                           c("Observations", rep(obs, times = 5))),
+          add.lines = list(c("Industry fixed effects", rep("Yes", times = 9)),
+                           c("Year fixed effects", rep("Yes", times = 9)),
+                           c("Treated firm obs.", rep(treated_obs, times = 9)),
+                           c("Control firm obs.", rep(control_obs, times = 9)),
+                           c("Distinct treated firms", rep(treated_distinct, times = 9)),
+                           c("Distinct control firms", rep(control_distinct, times = 9)),
+                           c("Observations", rep(obs, times = 9))),
           type = 'latex',
           notes.label = "",
           notes.append = F,
@@ -479,86 +529,86 @@ stargazer(did_list, title = "\\textbf{Difference-in-differences regression analy
 
 \clearpage
 
-\renewcommand\arraystretch{0.9}
+\renewcommand\arraystretch{0.63}
 \begin{landscape}
 \captionsetup{width=1.0\linewidth}
 \footnotesize
-\begin{longtable}{@{\extracolsep{15pt}}lccccc}
+\begin{longtable}{@{\extracolsep{5pt}}lccccccccc}
   \caption[Difference-in-differences regression analysis of foreign ownership-specific variables with instrumental variable approach]{\textbf{Difference-in-differences regression analysis of foreign ownership-specific variables with instrumental variable approach}\newline\scriptsize This table reports the results of the difference-in-differences regression analysis of foreign ownership-specific variables with instrumental variable approach.} 
-  \label{table_h2_1} 
+  \label{table_h2_iv} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
- & \multicolumn{5}{c}{\textit{Dependent variable:}} \\ 
-\cline{2-6} 
-\\[-1.8ex] & \multicolumn{1}{c}{First stage} & \multicolumn{4}{c}{Second stage} \\ 
-\cline{3-6} 
-\\[-1.8ex] & VCV\textsubscript{USD} & FOR\_OWN & FOR\_BREADTH & FOR\_TO\_INST\_OWN & FOR\_TO\_INST\_BREADTH \\ 
-\\[-1.8ex] & (1) & (2) & (3) & (4) & (5)\\ 
+ & \multicolumn{9}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-10} 
+\\[-1.8ex] & \multicolumn{1}{c}{First stage} & \multicolumn{1}{c}{OLS} & \multicolumn{1}{c}{IV} & \multicolumn{1}{c}{OLS} & \multicolumn{1}{c}{IV} & \multicolumn{1}{c}{OLS} & \multicolumn{1}{c}{IV} & \multicolumn{1}{c}{OLS} & \multicolumn{1}{c}{IV} \\ 
+\cline{3-10} 
+\\[-1.8ex] & VCV\textsubscript{USD} & \multicolumn{2}{c}{FOR\_OWN} & \multicolumn{2}{c}{FOR\_BREADTH} & \multicolumn{2}{c}{FOR\_TO\_INST\_OWN} & \multicolumn{2}{c}{FOR\_TO\_INST\_BREADTH} \\ 
+\\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) & (9) \\ 
 \hline \\[-1.8ex] 
-\multicolumn{6}{@{} l}{\textit{Panel A: Instrumented with volume coefficient variation (\textit{VCV\textsubscript{USD}})}}
+\multicolumn{10}{@{} l}{\textit{Panel A: Instrumented with volume coefficient variation (\textit{VCV\textsubscript{USD}})}}
 \\
 \\
-  VCV\textsubscript{USD} &  & $-$0.042$^{***}$ & $-$0.023$^{***}$ & $-$0.029$^{**}$ & $-$0.003 \\ 
-  &  & (0.009) & (0.004) & (0.011) & (0.017) \\ 
- AFTER & $-$0.054$^{***}$ &  &  &  &  \\ 
-  & (0.014) &  &  &  &  \\ 
-  TREATED & $-$0.017 &  &  &  &  \\ 
-  & (0.011) &  &  &  &  \\ 
-  AFTER\texttimes TREATED & 0.024$^{***}$ &  &  &  &  \\ 
-  & (0.006) &  &  &  &  \\ 
-  LOG\_MKT\_CAP & $-$0.133$^{***}$ &  &  &  &  \\ 
-  & (0.008) &  &  &  &  \\ 
-  BM\_RATIO & $-$0.011 & 0.003 & 0.001$^{***}$ & 0.001 & 0.003 \\ 
-  & (0.008) & (0.002) & (0.0002) & (0.001) & (0.002) \\ 
-  LEVERAGE & $-$0.020 & 0.003 & 0.0003 & $-$0.008$^{***}$ & $-$0.003 \\ 
-  & (0.018) & (0.003) & (0.001) & (0.003) & (0.002) \\ 
-  ROA & $-$0.048 & 0.053$^{***}$ & $-$0.012$^{**}$ & $-$0.066$^{***}$ & $-$0.074$^{***}$ \\ 
-  & (0.163) & (0.005) & (0.006) & (0.023) & (0.024) \\ 
+  VCV\textsubscript{USD}  &  & $-$0.023$^{***}$ & $-$0.042$^{***}$ & $-$0.008$^{***}$ & $-$0.023$^{***}$ & $-$0.012 & $-$0.029$^{**}$ & 0.011 & $-$0.003 \\ 
+  &  & (0.006) & (0.009) & (0.001) & (0.004) & (0.009) & (0.011) & (0.007) & (0.017) \\ 
+ AFTER & $-$0.054$^{***}$ &  &  &  &  &  &  &  &  \\ 
+  & (0.014) &  &  &  &  &  &  &  &  \\ 
+  TREATED & $-$0.017 &  &  &  &  &  &  &  &  \\ 
+  & (0.011) &  &  &  &  &  &  &  &  \\ 
+  AFTER\_TREATED & 0.024$^{***}$ &  &  &  &  &  &  &  &  \\ 
+  & (0.006) &  &  &  &  &  &  &  &  \\ 
+  LOG\_MKT\_CAP & $-$0.133$^{***}$ &  &  &  &  &  &  &  &  \\ 
+  & (0.008) &  &  &  &  &  &  &  &  \\ 
+  BM\_RATIO & $-$0.011 & $-$0.0001 & 0.003 & $-$0.001$^{***}$ & 0.001$^{***}$ & $-$0.002 & 0.001 & 0.001 & 0.003 \\ 
+  & (0.008) & (0.002) & (0.002) & (0.0001) & (0.0002) & (0.001) & (0.001) & (0.001) & (0.002) \\ 
+  LEVERAGE & $-$0.020 & 0.006$^{**}$ & 0.003 & 0.003$^{***}$ & 0.0003 & $-$0.005 & $-$0.008$^{***}$ & $-$0.001 & $-$0.003 \\ 
+  & (0.018) & (0.003) & (0.003) & (0.0004) & (0.001) & (0.003) & (0.003) & (0.003) & (0.002) \\ 
+  ROA & $-$0.048 & 0.080$^{***}$ & 0.053$^{***}$ & 0.009$^{***}$ & $-$0.012$^{**}$ & $-$0.043$^{**}$ & $-$0.066$^{***}$ & $-$0.053$^{***}$ & $-$0.074$^{***}$ \\ 
+  & (0.163) & (0.007) & (0.005) & (0.003) & (0.006) & (0.021) & (0.023) & (0.009) & (0.024) \\ 
  \hline \\[-1.8ex] 
-Industry fixed effects & Yes & Yes & Yes & Yes & Yes \\ 
-Year fixed effects & Yes & Yes & Yes & Yes & Yes \\ 
-Treated firm obs. & 5,298 & 5,298 & 5,298 & 5,298 & 5,298 \\ 
-Control firm obs. & 15,836 & 15,836 & 15,836 & 15,836 & 15,836 \\ 
-Distinct treated firms & 1,610 & 1,610 & 1,610 & 1,610 & 1,610 \\ 
-Distinct control firms & 3,435 & 3,435 & 3,435 & 3,435 & 3,435 \\ 
-Observations & 21,134 & 21,134 & 21,134 & 21,134 & 21,134 \\ 
-Adjusted R$^{2}$ & 0.506 \\
+Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
+Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
+Treated firm obs. & 5,298 & 5,298 & 5,298 & 5,298 & 5,298 & 5,298 & 5,298 & 5,298 & 5,298 \\ 
+Control firm obs. & 15,836 & 15,836 & 15,836 & 15,836 & 15,836 & 15,836 & 15,836 & 15,836 & 15,836 \\ 
+Distinct treated firms & 1,610 & 1,610 & 1,610 & 1,610 & 1,610 & 1,610 & 1,610 & 1,610 & 1,610 \\ 
+Distinct control firms & 3,435 & 3,435 & 3,435 & 3,435 & 3,435 & 3,435 & 3,435 & 3,435 & 3,435 \\ 
+Observations & 21,134 & 21,134 & 21,134 & 21,134 & 21,134 & 21,134 & 21,134 & 21,134 & 21,134 \\ 
+Adjusted R$^{2}$ & 0.506 & 0.170 &  & 0.361 &  & 0.090 &  & 0.130 &  \\ 
 \hline \\[-1.8ex]
-\\[-1.8ex] & \multicolumn{1}{c}{First stage} & \multicolumn{4}{c}{Second stage} \\ 
-\cline{3-6} 
-\\[-1.8ex] & BA\_SPREAD & FOR\_OWN & FOR\_BREADTH & FOR\_TO\_INST\_OWN & FOR\_TO\_INST\_BREADTH \\ 
+\\[-1.8ex] & \multicolumn{1}{c}{First stage} & \multicolumn{1}{c}{OLS} & \multicolumn{1}{c}{IV} & \multicolumn{1}{c}{OLS} & \multicolumn{1}{c}{IV} & \multicolumn{1}{c}{OLS} & \multicolumn{1}{c}{IV} & \multicolumn{1}{c}{OLS} & \multicolumn{1}{c}{IV} \\ 
+\cline{3-10} 
+\\[-1.8ex] & BA\_SPREAD & \multicolumn{2}{c}{FOR\_OWN} & \multicolumn{2}{c}{FOR\_BREADTH} & \multicolumn{2}{c}{FOR\_TO\_INST\_OWN} & \multicolumn{2}{c}{FOR\_TO\_INST\_BREADTH} \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4) & (5)\\ 
 \hline \\[-1.8ex] 
-\multicolumn{6}{@{} l}{\textit{Panel B: Instrumented with bid-ask spread (\textit{BA\_SPREAD})}}
+\multicolumn{10}{@{} l}{\textit{Panel B: Instrumented with bid-ask spread (\textit{BA\_SPREAD})}}
 \\
 \\
-  BA\_SPREAD &  & $-$1.811$^{***}$ & $-$1.037$^{***}$ & $-$1.244$^{**}$ & $-$0.128 \\ 
-  &  & (0.434) & (0.159) & (0.504) & (0.724) \\ 
-  AFTER & 0.001 &  &  &  &  \\ 
-  & (0.003) &  &  &  &  \\ 
-  TREATED & 0.002 &  &  &  &  \\ 
-  & (0.001) &  &  &  &  \\ 
-  AFTER\texttimes TREATED & $-$0.001 &  &  &  &  \\ 
-  & (0.001) &  &  &  &  \\ 
-  LOG\_MKT\_CAP & $-$0.003$^{***}$ &  &  &  &  \\ 
-  & (0.0005) &  &  &  &  \\ 
-  BM\_RATIO & 0.004$^{***}$ & 0.010$^{*}$ & 0.005$^{***}$ & 0.006 & 0.003 \\ 
-  & (0.001) & (0.005) & (0.002) & (0.004) & (0.005) \\ 
-  LEVERAGE & $-$0.012$^{***}$ & $-$0.017$^{*}$ & $-$0.011$^{**}$ & $-$0.021$^{***}$ & $-$0.005 \\ 
-  & (0.004) & (0.010) & (0.005) & (0.008) & (0.007) \\ 
-  ROA & $-$0.202$^{***}$ & $-$0.308$^{***}$ & $-$0.221$^{***}$ & $-$0.315$^{***}$ & $-$0.098 \\ 
-  & (0.020) & (0.099) & (0.037) & (0.114) & (0.166) \\ 
+  BA\_SPREAD &  & $-$0.249$^{***}$ & $-$1.811$^{***}$ & $-$0.057$^{***}$ & $-$1.037$^{***}$ & $-$0.213$^{***}$ & $-$1.244$^{**}$ & $-$0.041 & $-$0.128 \\ 
+  &  & (0.051) & (0.434) & (0.015) & (0.159) & (0.059) & (0.504) & (0.048) & (0.724) \\ 
+ AFTER & 0.001 &  &  &  &  &  &  &  &  \\ 
+  & (0.003) &  &  &  &  &  &  &  &  \\ 
+  TREATED & 0.002 &  &  &  &  &  &  &  &  \\ 
+  & (0.001) &  &  &  &  &  &  &  &  \\ 
+  AFTER\_TREATED & $-$0.001 &  &  &  &  &  &  &  &  \\ 
+  & (0.001) &  &  &  &  &  &  &  &  \\ 
+  LOG\_MKT\_CAP & $-$0.003$^{***}$ &  &  &  &  &  &  &  &  \\ 
+  & (0.0005) &  &  &  &  &  &  &  &  \\ 
+  BM\_RATIO & 0.004$^{***}$ & $-$0.002 & 0.010$^{*}$ & $-$0.002$^{***}$ & 0.005$^{***}$ & $-$0.002 & 0.006 & 0.002$^{*}$ & 0.003 \\ 
+  & (0.001) & (0.002) & (0.005) & (0.0003) & (0.002) & (0.002) & (0.004) & (0.001) & (0.005) \\ 
+  LEVERAGE & $-$0.012$^{***}$ & 0.006$^{*}$ & $-$0.017$^{*}$ & 0.003$^{***}$ & $-$0.011$^{**}$ & $-$0.006 & $-$0.021$^{***}$ & $-$0.003 & $-$0.005 \\ 
+  & (0.004) & (0.004) & (0.010) & (0.001) & (0.005) & (0.005) & (0.008) & (0.004) & (0.007) \\ 
+  ROA & $-$0.202$^{***}$ & 0.054$^{**}$ & $-$0.308$^{***}$ & 0.007 & $-$0.221$^{***}$ & $-$0.076$^{***}$ & $-$0.315$^{***}$ & $-$0.078$^{***}$ & $-$0.098 \\ 
+  & (0.020) & (0.027) & (0.099) & (0.004) & (0.037) & (0.020) & (0.114) & (0.006) & (0.166) \\ 
  \hline \\[-1.8ex] 
-Industry fixed effects & Yes & Yes & Yes & Yes & Yes \\ 
-Year fixed effects & Yes & Yes & Yes & Yes & Yes \\ 
-Treated firm obs. & 5,298 & 5,298 & 5,298 & 5,298 & 5,298 \\ 
-Control firm obs. & 15,836 & 15,836 & 15,836 & 15,836 & 15,836 \\
-Distinct treated firms & 1,610 & 1,610 & 1,610 & 1,610 & 1,610 \\ 
-Distinct control firms & 3,435 & 3,435 & 3,435 & 3,435 & 3,435 \\ 
-Observations & 21,134 & 21,134 & 21,134 & 21,134 & 21,134 \\ 
-Adjusted R$^{2}$ & 0.606 \\
+Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
+Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
+Treated firm obs. & 5,298 & 5,298 & 5,298 & 5,298 & 5,298 & 5,298 & 5,298 & 5,298 & 5,298 \\ 
+Control firm obs. & 15,836 & 15,836 & 15,836 & 15,836 & 15,836 & 15,836 & 15,836 & 15,836 & 15,836 \\ 
+Distinct treated firms & 1,610 & 1,610 & 1,610 & 1,610 & 1,610 & 1,610 & 1,610 & 1,610 & 1,610 \\ 
+Distinct control firms & 3,435 & 3,435 & 3,435 & 3,435 & 3,435 & 3,435 & 3,435 & 3,435 & 3,435 \\ 
+Observations & 21,134 & 21,134 & 21,134 & 21,134 & 21,134 & 21,134 & 21,134 & 21,134 & 21,134 \\ 
+Adjusted R$^{2}$ & 0.606 & 0.152 &  & 0.215 &  & 0.090 &  & 0.124 &  \\ 
 \hline 
 \hline \\[-1.8ex] 
-\multicolumn{6}{r}{} \\ 
+\multicolumn{10}{r}{} \\ 
 \end{longtable}
 \end{landscape}
