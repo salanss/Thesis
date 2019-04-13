@@ -1752,7 +1752,36 @@ I test the credibility of the quasi-natural experiment identification by examini
 
 As shown in Figure \ref{fig_parallel_trend_analyst}, analyst coverage for both treatment and control groups increases notably before the event. The pre-treatment parallel trend assumption is mostly satisfied, although the number of analysts increases to some extent relatively more in the treatment group. Notably, the treatment group has ca. 2-3.5 more analysts covering than the control group, although the control group is matched with analyst coverage as one covariate. There is a significant drop in analyst coverage during the event quarter for the treatment group. The control group decreases also, but only slightly compared to the treatment group. Moreover, the drop is limited only to three quarters after the event, as the number of analysts stabilizes after three quarters in the treatment group. Hence, I find supporting evidence that my identification of the quasi-natural experiment is consistent with the data processing methods of @derrien2013real and @kelly2012testing. 
 
-## 7.2 The alternative selection of control group
+## 7.2 Alternative selection of the control group
+
+As another robustness check, I test the difference-in-differences regression analysis with an alternative selection of the control group. Contrary to the main results of the quasi-natural experiment, I do not match control firms on any covariates with the treatment group. I only require the control firms to be covered one year before the brokerage closure event to keep only actively covered firms. Moreover, control firms must have non-missing observations of dependent and control variables, when mergin IBES data set with CRSP, COMPUSTAT and 13F data. Based on this selection, I conduct a similar difference-in-differences regression analysis with observations one year before and after the event. Table \ref{table_h2_nonmatched} presents the results.
+
+Table \ref{table_h2_nonmatched} provides similarly no supporting evidence for the second hypothesis of the negative causal effect between asymmetric information and foreign ownership. In all columns, the regression coefficients of \textit{AFTER\texttimes TREATED} are positive but insignificant. Mostly, foreign ownership and breadth when comparing to whole market or only to institutional investors are associated with large market capitalization. When compared to institutional investors, foreign institutional investors invest relatively more in growth, non-levered and less profitable firms. Moreover, foreign institutional investors invest relatively less in the treated firms, when compared to all institutional investors. Overall, the results are mostly in line with the main results and do not change the conclusion of the difference-in-differences regression results.
+
+## 7.3 The quasi-natural experiment with instrumental variable approach
+
+As the study relies heavily in the main quasi-natural experiment results on the findings of @kelly2012testing and @derrien2013real that exogenous reductions in analyst coverage leads to increased information asymmetry, I test the causal effect of information asymmetry on foreign ownership with instrumental variable approach. In the first-stage regression, I perform a similar difference-in-differences regression, but with an information asymmetry measure as dependent variable. For the data availability and sufficient sample size reasons, I select volume coefficient variation (*VCV~USD~*) and bid-ask spread (*BA_SPREAD*) as the dependent variables. I calculate *VCV~USD~* and *BA_SPREAD* in a similar manner with the main data processing but as quarter averages. The first-stage difference-in-differences regression is as follows:
+
+\begin{equation}\label{eq_iv_did}
+\label{eq_didh2}
+\begin{aligned}
+IA\_MEASURE_{i,t} &= \beta_0 + \beta_{1}TREATED_{i} + \beta_{2}AFTER_{t} + \beta_{3}AFTER\times TREATED_{i,t}\\ &+ \beta_{4}LOG\_MKT\_CAP_{i,t} + \beta_{5}BM\_RATIO_{i,t} + \beta_{6}LEVERAGE_{i,t}\\ &+ \beta_{7}ROA_{i,t} + YEAR_{t}+ INDUSTRY_{n} + \varepsilon_{i,t}
+\end{aligned}
+\end{equation}
+
+In the second-state regression, I 
+
+\begin{aligned}
+FOREIGN_{i,t} &= \beta_0 + \beta_{1}IA\_MEASURE_{i,t} + \beta_{3}BM\_RATIO_{i,t}\\ &+ \beta_{4}LEVERAGE_{i,t}+ \beta_{5}ROA_{i,t}\\ &+ YEAR_{t}+ INDUSTRY_{n} + \varepsilon_{i,t}
+\end{aligned}
+\end{equation}
+
+\begin{equation}
+\label{eq_didh2}
+\begin{aligned}
+FOREIGN_{i,t} &= \beta_0 + \beta_{1}TREATED_{i} + \beta_{2}AFTER_{t} + \beta_{3}AFTER\times TREATED_{i,t}\\ &+ \beta_{4}LOG\_MKT\_CAP_{i,t} + \beta_{5}BM\_RATIO_{i,t} + \beta_{6}LEVERAGE_{i,t}\\ &+ \beta_{7}ROA_{i,t} + YEAR_{t}+ INDUSTRY_{n} + \varepsilon_{i,t}
+\end{aligned}
+\end{equation}
 
 # 8 Discussion
 
