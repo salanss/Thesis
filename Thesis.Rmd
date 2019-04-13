@@ -517,7 +517,7 @@ I test the relation of foreign ownership and information asymmetry by using the 
 
 \begin{equation}\label{eq_baseline}
 \begin{aligned}
-FOREIGN_{i,t} &= \beta_0 + \beta_{1}IA\_MEASURE_{i,t} + \beta_{3}BM\_RATIO_{i,t}\\ &+ \beta_{4}LEVERAGE_{i,t}+ \beta_{5}ROA_{i,t}\\ &+ YEAR_{t}+ INDUSTRY_{n} + \varepsilon_{i,t}
+FOREIGN_{i,t} &= \beta_{0} + \beta_{1}IA\_MEASURE_{i,t} + \beta_{2}BM\_RATIO_{i,t}\\ &+ \beta_{3}LEVERAGE_{i,t}+ \beta_{4}ROA_{i,t}\\ &+ YEAR_{t}+ INDUSTRY_{n} + \varepsilon_{i,t}
 \end{aligned}
 \end{equation}
 
@@ -741,7 +741,7 @@ Adjusted R$^{2}$ & 0.267 & 0.406 & 0.426 & 0.342 & 0.449 & 0.375 & 0.365 & 0.488
 
 Similar to the findings of correlations in Table \ref{table_cor_matrix}, the empirical results of the panel regression models in Table \ref{table_h1_base} support Hypothesis 1 and the findings by @jiang2004foreign, @baik2013liability and @batten2015foreign of the negative relation between foreign ownership and asymmetric information. In Panel A, The regression coefficients of information asymmetry measures are negative in all models and statistically significant at the 1% level in all regression models except with bid-ask spread as the information asymmetry measure. Based on column (3), a 1 percentage point increase in information asymmetry (PIN~DY_ADJ~) leads to a decrease of about 0.10% in foreign ownership *ceteris paribus*. Based on all models, a 1 percentage point increase in information asymmetry results, on average, in a decrease of about 0.05% in foreign ownership *ceteris paribus*. Overall, the negative relation is stronger with the probability of informed trading measures than with bid-ask spread, multimarket information asymmetry or volume coefficient of variation. Based on the results of adjusted R^2^, models with different probability of informed trading measures and MIA have the best explanatory power.
 
-The control variables in Panel A are mainly statistically significant and in line with the existing literature. Book-to-market ratio (*BM_RATIO*) is negative and statistically significant at the 1% level in all regression models except in the model with MIA as the explanatory variable. This implies that foreign investors are driven way of the stocks with relatively high book-to-market ratio (i.e. value stocks). Book-to-market ratio is used as a measure of risk in many asset pricing models [e.g., @fama1993common; @carhart1997persistence; @pastor2003liquidity], which, in addition to my results, support the findings of @ko2007characteristics and @lin2003foreign that foreign investors avoid riskier firms with high book-to-market ratios. Moreover, the regression coefficients of ROA are positive and statistically significant at the 1% level in all models, implying that foreign investors prefer firms with positive probability. Based on column (1), an increase of 100 basis point in return on assets results in an increase of about 0.09 percentage points in foreign ownership *ceteris paribus*. The regression coefficients of leverage are mainly positive. LEVERAGE is positive and statistically significant in six out of eleven models, positive and statistically insignificant in four out of eleven models and negative and statistically significant once. Hence, an increase in leverage is mostly associated with an increase in foreign ownership. The results mostly contradicts the findings of foreign investors' preference on low debt ratio firms by @kang1997there and @dahlquist2001direct.
+The control variables in Panel A are mainly statistically significant and in line with the existing literature. Book-to-market ratio (*BM_RATIO*) is negative and statistically significant at the 1% level in all regression models except in the model with MIA as the explanatory variable. This implies that foreign investors are driven away of the stocks with relatively high book-to-market ratio (i.e. value stocks). Book-to-market ratio is used as a measure of risk in many asset pricing models [e.g., @fama1993common; @carhart1997persistence; @pastor2003liquidity], which, in addition to my results, support the findings of @ko2007characteristics and @lin2003foreign that foreign investors avoid riskier firms with high book-to-market ratios. Moreover, the regression coefficients of ROA are positive and statistically significant at the 1% level in all models, implying that foreign investors prefer firms with positive probability. Based on column (1), an increase of 100 basis point in return on assets results in an increase of about 0.09 percentage points in foreign ownership *ceteris paribus*. The regression coefficients of leverage are mainly positive. LEVERAGE is positive and statistically significant in six out of eleven models, positive and statistically insignificant in four out of eleven models and negative and statistically significant once. Hence, an increase in leverage is mostly associated with an increase in foreign ownership. The results mostly contradicts the findings of foreign investors' preference on low debt ratio firms by @kang1997there and @dahlquist2001direct.
 
 Panel B reports the results of regressing foreign breadth on information asymmetry measures. The results follow similar pattern with foreign ownership results in Panel A. The regression coefficients of coefficients of information asymmetry are negative in all models and statistically significant at the 1% level in all models except with bid-ask spread as the information asymmetry measure. Based on column (8), a 100 basis point increase in information asymmetry (*MIA*) is associated with ca. 0.03 percentage points decrease in foreign breadth *ceteris paribus*. In general, a 1 percentage point increase in information asymmetry results in 0.001-0.03 percentage points decrease of foreign ownership. Based on adjusted R^2^, the explanatory power is, in general, better than with models in Panel A. Notably, the model with *MIA* clearly explains variation better than other models, which differs from the results in Panel A. 
 
@@ -1760,28 +1760,32 @@ Table \ref{table_h2_nonmatched} provides similarly no supporting evidence for th
 
 ## 7.3 The quasi-natural experiment with instrumental variable approach
 
-As the study relies heavily in the main quasi-natural experiment results on the findings of @kelly2012testing and @derrien2013real that exogenous reductions in analyst coverage leads to increased information asymmetry, I test the causal effect of information asymmetry on foreign ownership with instrumental variable approach. In the first-stage regression, I perform a similar difference-in-differences regression, but with an information asymmetry measure as dependent variable. For the data availability and sufficient sample size reasons, I select volume coefficient variation (*VCV~USD~*) and bid-ask spread (*BA_SPREAD*) as the dependent variables. I calculate *VCV~USD~* and *BA_SPREAD* in a similar manner with the main data processing but as quarter averages. The first-stage difference-in-differences regression is as follows:
-
-\begin{equation}\label{eq_iv_did}
-\label{eq_didh2}
-\begin{aligned}
-IA\_MEASURE_{i,t} &= \beta_0 + \beta_{1}TREATED_{i} + \beta_{2}AFTER_{t} + \beta_{3}AFTER\times TREATED_{i,t}\\ &+ \beta_{4}LOG\_MKT\_CAP_{i,t} + \beta_{5}BM\_RATIO_{i,t} + \beta_{6}LEVERAGE_{i,t}\\ &+ \beta_{7}ROA_{i,t} + YEAR_{t}+ INDUSTRY_{n} + \varepsilon_{i,t}
-\end{aligned}
-\end{equation}
-
-In the second-state regression, I 
-
-\begin{aligned}
-FOREIGN_{i,t} &= \beta_0 + \beta_{1}IA\_MEASURE_{i,t} + \beta_{3}BM\_RATIO_{i,t}\\ &+ \beta_{4}LEVERAGE_{i,t}+ \beta_{5}ROA_{i,t}\\ &+ YEAR_{t}+ INDUSTRY_{n} + \varepsilon_{i,t}
-\end{aligned}
-\end{equation}
+As the study relies heavily in the main quasi-natural experiment results on the findings of @kelly2012testing and @derrien2013real that exogenous reductions in analyst coverage leads to increased information asymmetry, I test the causal effect of information asymmetry on foreign ownership with instrumental variable approach. In the first-stage regression, I perform a similar difference-in-differences regression, but with an information asymmetry measure as dependent variable. For the data availability and sufficient sample size reasons, I select volume coefficient variation (*VCV~USD~*) and bid-ask spread (*BA_SPREAD*) as the dependent variables. I calculate *VCV~USD~* and *BA_SPREAD* in a similar manner with the main data processing but as quarter averages. The first-stage difference-in-differences regression of firm-quarter observations is as follows:
 
 \begin{equation}
-\label{eq_didh2}
+\label{eq_iv_1}
 \begin{aligned}
-FOREIGN_{i,t} &= \beta_0 + \beta_{1}TREATED_{i} + \beta_{2}AFTER_{t} + \beta_{3}AFTER\times TREATED_{i,t}\\ &+ \beta_{4}LOG\_MKT\_CAP_{i,t} + \beta_{5}BM\_RATIO_{i,t} + \beta_{6}LEVERAGE_{i,t}\\ &+ \beta_{7}ROA_{i,t} + YEAR_{t}+ INDUSTRY_{n} + \varepsilon_{i,t}
+IA\_MEASURE_{i,t} &= \beta_0 + \beta_{1}TREATED_{i} + \beta_{2}AFTER_{t} + \beta_{3}AFTER\times TREATED_{i,t}\\ &+ \beta_{4}LOG\_MKT\_CAP_{i,t} + \beta_{5}BM\_RATIO_{i,t} + \beta_{6}LEVERAGE_{i,t}\\ &+ \beta_{7}ROA_{i,t} + YEAR_{t}+ INDUSTRY_{n} + u_{i,t}
 \end{aligned}
 \end{equation}
+
+In the second-state regression, the fitted values of *IA_MEASURE* are used as an explanatory variable with several control variables. Similar to the baseline regression model, I exclude *LOG_MKT_CAP* from control variables due to potential risk of multicollinearity. The second-state regression model is as follows:
+
+\begin{equation}
+\label{eq_iv_2}
+\begin{aligned}
+FOREIGN_{i,t} &= \beta_0 + \beta_{1}\hat{IA\_MEASURE_{i,t}} + \beta_{2}BM\_RATIO_{i,t}\\ &+ \beta_{3}LEVERAGE_{i,t}+ \beta_{4}ROA_{i,t}\\ &+ YEAR_{t}+ INDUSTRY_{n} + \varepsilon_{i,t}
+\end{aligned}
+\end{equation}
+
+For comparability, I also examine the relationship of information asymmetry and foreign ownership-specific variables with a similar baseline panel regression (OLS) model but with firm-quarter observations. Table \ref{table_h2_iv} presents the results.
+
+In Panel A, volume coefficient variation (*VCV~USD~*) is used as an instrument. As shown in column (1), 
+the coefficient of *AFTER* is negative and significant, which is consistent with the findings of @lof2018asymmetric that VCV is on average decreasing over time. Similar to @lof2018asymmetric, *TREATED* is only slightly negative. Moreover, the variable of main interest \textit{AFTER\texttimes TREATED} is positive and statistically significant, indicating that information asymmetry of firms that are exposed to exogenous reductions in analyst coverage increases, which is consistent with @lof2018asymmetric. Control variables are mainly in line with my previous results, for instance *LOG_MKT_CAP* and *ROA* are negatively associated with information asymmetry. Based on adjusted R^2^, the model explains variation relatively well.
+
+In OLS regressions, the coefficients of *VCV~USD~* are negative and significant in columns (2) and (4), negative and insignificant in column (6) and positive in column (8), consistent with the baseline regression results with firm-year observations. Nonetheless, *VCV~USD~* is more strongly negatively associated with asymmetric information in the second-stage instrumental variable regressions. This finding suggests that foreign institutional investors are driven away (both in dollar terms and in numbers relative to market or all institutions) from stocks that have experienced increase in information asymmetry due to exogenous reductions in analyst coverage. Hence, the result gives supporting evidence for the second hypothesis.
+
+In Panel B, bid-ask spread (*BA_SPREAD*) is used as an instrument. In column (1), different from results in Panel A, there is no average decrease of bid-ask spread over time and coefficient of \textit{AFTER\texttimes TREATED} is negative and insignificant. However, the coefficients of control variables are intuitive and in line with the previous results. Similar to Panel A, the coefficients of *BA_SPREAD* are negative in all OLS regressions and statistically significant in all OLS regressions, except with *FOR_TO_INST_BREADTH* as the dependent variable. Moreover, the coefficients in the second-stage regressions are more strongly negative and significant than in OLS regressions.
 
 # 8 Discussion
 
