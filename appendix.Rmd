@@ -575,7 +575,7 @@ Adjusted R$^{2}$ & 0.246 & 0.224 &  & 0.459 &  & 0.158 &  & 0.222 &  \\
 \\[-1.8ex] & \multicolumn{1}{c}{First stage} & \multicolumn{1}{c}{OLS} & \multicolumn{1}{c}{IV} & \multicolumn{1}{c}{OLS} & \multicolumn{1}{c}{IV} & \multicolumn{1}{c}{OLS} & \multicolumn{1}{c}{IV} & \multicolumn{1}{c}{OLS} & \multicolumn{1}{c}{IV} \\ 
 \cline{3-10} 
 \\[-1.8ex] & BA\_SPREAD & \multicolumn{2}{c}{FOR\_OWN} & \multicolumn{2}{c}{FOR\_BREADTH} & \multicolumn{2}{c}{FOR\_TO\_INST\_OWN} & \multicolumn{2}{c}{FOR\_TO\_INST\_BREADTH} \\ 
-\\[-1.8ex] & (1) & (2) & (3) & (4) & (5)\\ 
+\\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) & (9) \\ 
 \hline \\[-1.8ex] 
 \multicolumn{10}{@{} l}{\textit{Panel B: Instrumented with bid-ask spread (\textit{BA\_SPREAD})}}
 \\
