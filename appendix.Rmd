@@ -356,6 +356,14 @@ did_model1 <- felm(VCV_USD ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO + LEVERA
                      year + sic_code | 0 | year + sic_code,
                    data = did_regression_matched1_iv)
 
+did_model_f <- felm(FOR_OWN ~ BM_RATIO + LEVERAGE + ROA |
+                     year + sic_code|
+                     (VCV_USD ~ TREATED + AFTER + AFTER_TREATED)|
+                     year + sic_code,
+                     data = did_regression_matched1_iv)
+
+test <- lfe::waldtest(did_model_f$stage1, ~TREATED|AFTER|AFTER_TREATED, type = "cluster")
+
 did_model2 <- felm(FOR_OWN ~ VCV_USD + BM_RATIO + LEVERAGE + ROA|
                      year + sic_code|
                      0 |
@@ -452,6 +460,14 @@ did_model1 <- felm(BA_SPREAD ~ AFTER + TREATED + AFTER_TREATED + BM_RATIO +
                      LEVERAGE + ROA | year + sic_code | 0 | year + sic_code,
                    data = did_regression_matched1_iv)
 
+did_model_f <- felm(FOR_OWN ~ BM_RATIO + LEVERAGE + ROA |
+                     year + sic_code|
+                     (BA_SPREAD ~ TREATED + AFTER + AFTER_TREATED)|
+                     year + sic_code,
+                     data = did_regression_matched1_iv)
+
+test <- lfe::waldtest(did_model_f$stage1, ~TREATED|AFTER|AFTER_TREATED, type = "cluster")
+
 did_model2 <- felm(FOR_OWN ~ BA_SPREAD + BM_RATIO + LEVERAGE + ROA|
                      year + sic_code|
                      0|
@@ -534,7 +550,7 @@ stargazer(did_list, title = "\\textbf{Difference-in-differences regression analy
 \captionsetup{width=0.99\linewidth}
 \footnotesize
 \begin{longtable}{@{\extracolsep{12pt}}lccccccccc}
-  \caption[Difference-in-differences regression analysis of foreign ownership-specific variables with instrumental variable approach]{\textbf{Difference-in-differences regression analysis of foreign ownership-specific variables with instrumental variable approach}\newline\scriptsize This table reports the results of the difference-in-differences regression analysis of foreign ownership-specific variables with instrumental variable approach. The treatment group is determined as stocks that lose a covering analyst due to 22 distinct brokerage closures listed by Kelly and Ljungqvist (2012). For all stocks, I compute averages of the dependent variables and control variables in all columns over the quarters [-4,-1] and over the quarters [1,4], with the brokerage closure occurring in quarter 0. In the first-stage regression, explanatory variables are dummy variables indicating the treatment group (\textit{TREATED}), the post-event period (\textit{AFTER}) and their interaction (\textit{AFTER}\texttimes\textit{TREATED}). The control variables are book-to-market ratio (\textit{BM\_RATIO}), leverage (\textit{LEVERAGE}) and return on assets (\textit{ROA}). In the second-stage instrumental variable regressions, fitted values of information asymmetry measure are used as explanatory variable along with the control variables. I also examine the OLS panel regressions with information asymmetry measure (non-fitted) as explanatory variable along with control variables. I include industry and year fixed effects in all regressions. Standard errors are clustered by the industry and year level and reported in parentheses. \textit{FOR\_OWN} and \textit{FOR\_BREADTH} are winsorized at the top to a maximum of 1. Control variables are winsorized at the top and bottom 1\%. Table \ref{table_variable_definitions} in Appendix provides a detailed list of variable definitions. *, ** and *** denote the statistical significance at the 10\%, 5\% and 1\% level, respectively. Sample period: 1997-2010. Sources: CRSP, COMPUSTAT, 13F and IBES.} 
+  \caption[Difference-in-differences regression analysis of foreign ownership-specific variables with instrumental variable approach]{\textbf{Difference-in-differences regression analysis of foreign ownership-specific variables with instrumental variable approach}\newline\scriptsize This table reports the results of the difference-in-differences regression analysis of foreign ownership-specific variables with instrumental variable approach. The treatment group is determined as stocks that lose a covering analyst due to 22 distinct brokerage closures listed by Kelly and Ljungqvist (2012). For all stocks, I compute averages of the dependent variables and control variables in all columns over the quarters [-4,-1] and over the quarters [1,4], with the brokerage closure occurring in quarter 0. In the first-stage regression, explanatory variables are dummy variables indicating the treatment group (\textit{TREATED}), the post-event period (\textit{AFTER}) and their interaction (\textit{AFTER}\texttimes\textit{TREATED}). The control variables are book-to-market ratio (\textit{BM\_RATIO}), leverage (\textit{LEVERAGE}) and return on assets (\textit{ROA}). In the second-stage instrumental variable regressions, fitted values of information asymmetry measure are used as explanatory variable along with the control variables. I also examine the OLS panel regressions with information asymmetry measure (non-fitted) as explanatory variable along with control variables. I include industry and year fixed effects in all regressions. Standard errors are clustered by the industry and year level and reported in parentheses. I test the weakness of instruments by examining their joint significance and report the first-stage F-statistics. \textit{FOR\_OWN} and \textit{FOR\_BREADTH} are winsorized at the top to a maximum of 1. Control variables are winsorized at the top and bottom 1\%. Table \ref{table_variable_definitions} in Appendix provides a detailed list of variable definitions. *, ** and *** denote the statistical significance at the 10\%, 5\% and 1\% level, respectively. Sample period: 1997-2010. Sources: CRSP, COMPUSTAT, 13F and IBES.} 
   \label{table_h2_iv} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
@@ -545,7 +561,7 @@ stargazer(did_list, title = "\\textbf{Difference-in-differences regression analy
 \\[-1.8ex] & VCV\textsubscript{USD} & \multicolumn{2}{c}{FOR\_OWN} & \multicolumn{2}{c}{FOR\_BREADTH} & \multicolumn{2}{c}{FOR\_TO\_INST\_OWN} & \multicolumn{2}{c}{FOR\_TO\_INST\_BREADTH} \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) & (9) \\ 
 \hline \\[-1.8ex] 
-\multicolumn{10}{@{} l}{\textit{Panel A: Instrumented with volume coefficient variation (\textit{VCV\textsubscript{USD}})}}
+\multicolumn{10}{@{} l}{\textit{Panel A: Volume coefficient variation (\textit{VCV\textsubscript{USD}}) as information asymmetry measure}}
 \\
 \\
   VCV\textsubscript{USD}  &  & $-$0.020$^{***}$ & $-$0.076$^{*}$ & $-$0.007$^{***}$ & $-$0.018$^{***}$ & $-$0.009 & $-$0.037 & 0.011$^{*}$ & $-$0.012 \\ 
@@ -570,6 +586,7 @@ Control firm obs. & 15,836 & 15,836 & 15,836 & 15,836 & 15,836 & 15,836 & 15,836
 Distinct treated firms & 1,610 & 1,610 & 1,610 & 1,610 & 1,610 & 1,610 & 1,610 & 1,610 & 1,610 \\ 
 Distinct control firms & 3,435 & 3,435 & 3,435 & 3,435 & 3,435 & 3,435 & 3,435 & 3,435 & 3,435 \\ 
 Observations & 21,134 & 21,134 & 21,134 & 21,134 & 21,134 & 21,134 & 21,134 & 21,134 & 21,134 \\ 
+First-stage F-statistic & 22.304 \\
 Adjusted R$^{2}$ & 0.246 & 0.224 &  & 0.459 &  & 0.158 &  & 0.222 &  \\ 
 \hline \\[-1.8ex]
 \\[-1.8ex] & \multicolumn{1}{c}{First stage} & \multicolumn{1}{c}{OLS} & \multicolumn{1}{c}{IV} & \multicolumn{1}{c}{OLS} & \multicolumn{1}{c}{IV} & \multicolumn{1}{c}{OLS} & \multicolumn{1}{c}{IV} & \multicolumn{1}{c}{OLS} & \multicolumn{1}{c}{IV} \\ 
@@ -577,7 +594,7 @@ Adjusted R$^{2}$ & 0.246 & 0.224 &  & 0.459 &  & 0.158 &  & 0.222 &  \\
 \\[-1.8ex] & BA\_SPREAD & \multicolumn{2}{c}{FOR\_OWN} & \multicolumn{2}{c}{FOR\_BREADTH} & \multicolumn{2}{c}{FOR\_TO\_INST\_OWN} & \multicolumn{2}{c}{FOR\_TO\_INST\_BREADTH} \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) & (9) \\ 
 \hline \\[-1.8ex] 
-\multicolumn{10}{@{} l}{\textit{Panel B: Instrumented with bid-ask spread (\textit{BA\_SPREAD})}}
+\multicolumn{10}{@{} l}{\textit{Panel B: Bid-ask spread (\textit{BA\_SPREAD}) as information asymmetry measure}}
 \\
 \\
 BA\_SPREAD &  & $-$0.213$^{***}$ & 2.516 & $-$0.042$^{***}$ & $-$0.939 & $-$0.146$^{**}$ & 4.820 & $-$0.033 & 2.844 \\ 
@@ -602,6 +619,7 @@ Control firm obs. & 15,836 & 15,836 & 15,836 & 15,836 & 15,836 & 15,836 & 15,836
 Distinct treated firms & 1,610 & 1,610 & 1,610 & 1,610 & 1,610 & 1,610 & 1,610 & 1,610 & 1,610 \\ 
 Distinct control firms & 3,435 & 3,435 & 3,435 & 3,435 & 3,435 & 3,435 & 3,435 & 3,435 & 3,435 \\ 
 Observations & 21,134 & 21,134 & 21,134 & 21,134 & 21,134 & 21,134 & 21,134 & 21,134 & 21,134 \\ 
+First-stage F-statistic & 2.107 \\
 Adjusted R$^{2}$ & 0.644 & 0.212 & & 0.356 &  & 0.158 &  & 0.217 &  \\
 \hline 
 \hline \\[-1.8ex] 
