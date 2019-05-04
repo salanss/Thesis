@@ -47,7 +47,9 @@ knitr::opts_chunk$set(echo = FALSE,
 
 
 
-\section{Appendix}\label{appendix}
+\section{Appendices}\label{appendices}
+
+\subsection{Appendix A: Variable definitions}\label{appendix_a}
 
 \scriptsize
   \begin{longtable}{lp{10cm}l}
@@ -166,6 +168,8 @@ ggsave("figures/parallel_trend1a_facet.pdf",
   
 ```
 
+\subsection{Appendix B: Supplementary figure of the main quasi-natural experiment results}\label{appendix_b}
+
 \begin{figure}[H]
 \centering
 \includegraphics[width = \linewidth]{figures/parallel_trend1a_facet.pdf}
@@ -213,12 +217,156 @@ ggsave("figures/parallel_trend_analyst_b.pdf",
 
 \clearpage
 
+\subsection{Appendix C: Robustness tables and figures}\label{appendix_c}
+
 \begin{figure}[H]
 \centering
 \includegraphics[width = \linewidth]{figures/parallel_trend_analyst_b.pdf}
 \caption[Analyst coverage between the treatment and control groups around brokerage closures]{\textbf{Analyst coverage between the treatment and control groups during brokerage closures}\newline\scriptsize This figure presents the evolution of the mean of firm-quarter observations of analyst coverage (\textit{ANALYST\_COVERAGE}) during the twelve quarters (i.e. three years) before and after an exogenous decrease in analyst coverage due to the 22 distinct brokerage closures listed by Kelly and Ljungqvist (2012). I impose a three-month gap over the events so that foreign ownership estimates are from quarters [-12,-1] and [1,12], with the brokerage closure occurring in the quarter 0. Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). The firm-quarter observations of foreign ownership and foreign breadth are winsorized at the top and bottom 1\%. Sample period: 1997- 2010. Sources: CRSP, COMPUSTAT, 13F and IBES.}
 \label{fig_parallel_trend_analyst}
 \end{figure}
+
+\clearpage
+
+``` {r, results='asis', echo = FALSE, eval=FALSE}
+
+library(tidyverse)
+library(lfe)
+library(stargazer)
+
+did_regression_matched1 <- read_rds("results/did_regression_matched1.rds") %>%
+  mutate(AFTER_TREATED = TREATED * AFTER,
+         sic_code = str_sub(sic_code, 1, 4),
+         FOR_OWN_NONQUASI = FOR_OWN_DEDICATED + FOR_OWN_TRANSIENT,
+         FOR_BREADTH_NONQUASI = FOR_BREADTH_DEDICATED + FOR_BREADTH_TRANSIENT,
+         FOR_TO_INST_OWN_NONQUASI = FOR_TO_INST_OWN_DEDICATED + FOR_TO_INST_OWN_TRANSIENT,
+         FOR_TO_INST_BREADTH_NONQUASI = FOR_TO_INST_BREADTH_DEDICATED + FOR_TO_INST_BREADTH_TRANSIENT)
+
+did_model1 <- felm(FOR_OWN_QUASI ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched1)
+
+did_model2 <- felm(FOR_OWN_NONQUASI ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched1)
+
+did_model3 <- felm(FOR_BREADTH_QUASI ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched1)
+
+did_model4 <- felm(FOR_BREADTH_NONQUASI ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched1)
+
+did_model5 <- felm(FOR_TO_INST_OWN_QUASI ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched1)
+
+did_model6 <- felm(FOR_TO_INST_OWN_NONQUASI ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched1)
+
+did_model7 <- felm(FOR_TO_INST_BREADTH_QUASI ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO +
+                     LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched1)
+
+did_model8 <- felm(FOR_TO_INST_BREADTH_NONQUASI ~ AFTER + TREATED + AFTER_TREATED + LOG_MKT_CAP + BM_RATIO + LEVERAGE + ROA|year + sic_code|0|year + sic_code,
+                   data = did_regression_matched1)
+
+
+did_list <- list(did_model1, did_model2, did_model3, did_model4,
+                 did_model5, did_model6, did_model7, did_model8)
+
+treated_obs <- did_regression_matched1 %>% filter(TREATED == 1) %>% 
+  group_by(TREATED) %>% summarise(n = n()) %>% ungroup() %>% pluck("n") %>% 
+  format(big.mark = ",")
+
+control_obs <- did_regression_matched1 %>% filter(TREATED == 0) %>% 
+  group_by(TREATED) %>% summarise(n = n()) %>% ungroup() %>% pluck("n") %>% 
+  format(big.mark = ",")
+
+treated_distinct <- did_regression_matched1 %>% filter(TREATED == 1) %>% 
+  group_by(TREATED) %>% summarise(n = n_distinct(permno)) %>% ungroup() %>% pluck("n") %>% 
+  format(big.mark = ",")
+
+control_distinct <- did_regression_matched1 %>% filter(TREATED == 0) %>% 
+  group_by(TREATED) %>% summarise(n = n_distinct(permno)) %>% ungroup() %>% pluck("n") %>% 
+  format(big.mark = ",")
+
+obs <- did_regression_matched1 %>%
+  summarise(n = n()) %>% ungroup() %>% pluck("n") %>% 
+  format(big.mark = ",")
+
+stargazer(did_list, title = "\\textbf{Difference-in-differences regression analysis of foreign ownership and breadth by institutional ownership and analyst coverage}\\newline\\scriptsize This table reports the results",
+          label = "table_h2_2",
+          header = F,
+          dep.var.labels.include = F,
+          dep.var.labels =c("FOR\\_OWN", "FOR\\_BREADTH"),
+          column.labels = rep(c("Quasi", "Non-quasi"), times = 4),
+          covariate.labels = c("AFTER", "TREATED", "AFTER\\texttimes TREATED", "LOG\\_MKT\\_CAP", "BM\\_RATIO", "LEVERAGE", "ROA"),
+          omit.stat = c("ser", "rsq", "n"),
+          add.lines = list(c("Industry fixed effects", rep("Yes", times = 8)),
+                           c("Year fixed effects", rep("Yes", times = 8)),
+                           c("Treated firm obs.", rep(treated_obs, times = 8)),
+                           c("Control firm obs.", rep(control_obs, times = 8)),
+                           c("Distinct treated firms", rep(treated_distinct, times = 8)),
+                           c("Distinct control firms", rep(control_distinct, times = 8)),
+                           c("Observations", rep(obs, times = 8))),
+          type = 'latex',
+          notes.label = "",
+          notes.append = F,
+          column.sep.width = "1pt",
+          notes = "",
+          font.size = "footnotesize",
+          no.space = T)
+
+
+```
+
+
+\renewcommand\arraystretch{0.63}
+\begin{landscape}
+\captionsetup{width=1.0\linewidth}
+\footnotesize
+\begin{longtable}{@{\extracolsep{24pt}}lcccccccc} 
+  \caption[Difference-in-differences regression analysis of foreign ownership-specific variables by investor type]{\textbf{Difference-in-differences regression analysis of foreign ownership-specific variables by investor type}\newline\scriptsize This table reports the results of the difference-in-differences regression analysis of ownership-specific variables by different classifications of institutional investor types \citep{bushee2001institutional}. The classification group \textit{Quasi} contains quasi-indexing investors and \textit{Non-quasi} transient and dedicated investors. For all stocks, I compute averages of the dependent variables and control variables in all columns over the quarters [-4,-1] and over the quarters [1,4], with the brokerage closure occurring in quarter 0. The control variables are book-to-market ratio (\textit{BM\_RATIO}), leverage (\textit{LEVERAGE}) and return on assets (\textit{ROA}). I include industry and year fixed effects in all regressions. Standard errors are clustered by the industry and year level and reported in parentheses. \textit{FOR\_OWN} and \textit{FOR\_BREADTH} are winsorized at the top to a maximum of 1. Control variables are winsorized at the top and bottom 1\%. Table \ref{table_variable_definitions} in Appendix provides a detailed list of variable definitions. *, ** and *** denote the statistical significance at the 10\%, 5\% and 1\% level, respectively. Sample period: 1997-2010. Sources: CRSP, COMPUSTAT, 13F and IBES.} 
+  \label{table_h2_2} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{8}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-9} 
+\\[-1.8ex] & \multicolumn{2}{c}{FOR\_OWN} & \multicolumn{2}{c}{FOR\_BREADTH} & \multicolumn{2}{c}{FOR\_TO\_INST\_OWN} & \multicolumn{2}{c}{FOR\_TO\_INST\_BREADTH} \\ 
+ & Quasi & Non-quasi & Quasi & Non-quasi & Quasi & Non-quasi & Quasi & Non-quasi \\ 
+\\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8)\\ 
+\hline \\[-1.8ex] 
+ AFTER & 0.008$^{***}$ & 0.0001 & 0.001 & $-$0.0001 & 0.008$^{**}$ & $-$0.002 & 0.005 & $-$0.002 \\ 
+  & (0.002) & (0.004) & (0.0005) & (0.0004) & (0.004) & (0.006) & (0.006) & (0.008) \\ 
+  TREATED & $-$0.0002 & $-$0.001 & 0.00004 & 0.0003$^{***}$ & $-$0.002 & $-$0.003$^{**}$ & $-$0.002$^{*}$ & $-$0.002 \\ 
+  & (0.001) & (0.001) & (0.0004) & (0.0001) & (0.001) & (0.001) & (0.001) & (0.001) \\ 
+  AFTER\texttimes TREATED & $-$0.001 & 0.0002 & 0.0002 & $-$0.0001 & $-$0.002$^{***}$ & 0.002$^{*}$ & 0.001 & 0.002 \\ 
+  & (0.001) & (0.001) & (0.0002) & (0.0001) & (0.001) & (0.001) & (0.001) & (0.001) \\ 
+  LOG\_MKT\_CAP & 0.004$^{***}$ & 0.001 & 0.001$^{***}$ & 0.001$^{***}$ & 0.003$^{**}$ & $-$0.0004 & $-$0.001 & 0.002$^{***}$ \\ 
+  & (0.001) & (0.0004) & (0.0003) & (0.0001) & (0.001) & (0.001) & (0.002) & (0.001) \\ 
+  BM\_RATIO & 0.002 & $-$0.001$^{*}$ & 0.001$^{***}$ & 0.001$^{***}$ & $-$0.0001 & $-$0.001 & 0.002 & 0.001 \\ 
+  & (0.002) & (0.001) & (0.0003) & (0.00005) & (0.002) & (0.001) & (0.002) & (0.001) \\ 
+  LEVERAGE & 0.004 & $-$0.002 & 0.001$^{**}$ & 0.001$^{***}$ & 0.003 & $-$0.009$^{*}$ & 0.003 & $-$0.003 \\ 
+  & (0.002) & (0.003) & (0.0003) & (0.0003) & (0.004) & (0.005) & (0.002) & (0.002) \\ 
+  ROA & 0.044$^{***}$ & 0.027$^{***}$ & $-$0.004$^{**}$ & $-$0.004$^{***}$ & $-$0.042$^{***}$ & 0.006 & $-$0.031$^{**}$ & $-$0.007 \\ 
+  & (0.012) & (0.004) & (0.002) & (0.001) & (0.013) & (0.015) & (0.013) & (0.008) \\ 
+ \hline \\[-1.8ex] 
+Industry fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
+Year fixed effects & Yes & Yes & Yes & Yes & Yes & Yes & Yes & Yes \\ 
+Treated firm obs. & 5,424 & 5,424 & 5,424 & 5,424 & 5,424 & 5,424 & 5,424 & 5,424 \\ 
+Control firm obs. & 16,176 & 16,176 & 16,176 & 16,176 & 16,176 & 16,176 & 16,176 & 16,176 \\ 
+Distinct treated firms & 1,651 & 1,651 & 1,651 & 1,651 & 1,651 & 1,651 & 1,651 & 1,651 \\ 
+Distinct control firms & 3,558 & 3,558 & 3,558 & 3,558 & 3,558 & 3,558 & 3,558 & 3,558 \\ 
+Observations & 21,600 & 21,600 & 21,600 & 21,600 & 21,600 & 21,600 & 21,600 & 21,600 \\ 
+Adjusted R$^{2}$ & 0.261 & 0.083 & 0.653 & 0.736 & 0.166 & 0.088 & 0.273 & 0.155 \\   
+\hline 
+\hline \\[-1.8ex] 
+\multicolumn{9}{r}{} \\ 
+\end{longtable}
+\end{landscape}
 
 \clearpage
 
