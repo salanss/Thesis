@@ -181,6 +181,10 @@ ggsave("figures/parallel_trend1a_facet.pdf",
 ``` {r parallel_trend1, message = FALSE, warning=FALSE, eval=FALSE}
 
 library(tidyverse)
+library(lfe)
+
+did_analyst <- read_rds("results/did_regression_matched1.rds")
+
 
 parallel_trend1 <- read_rds("results/did_regression_matched_raw.rds") %>% 
   mutate(TREATED = if_else(TREATED == 1, "Treated", "Control")) %>% 
