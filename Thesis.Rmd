@@ -54,11 +54,19 @@ header-includes:
 ```{r global_options, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, 
                       warning = FALSE, 
-                      message = FALSE)
+                      message = FALSE,
+                      dev = "cairo_pdf")
 
 # options(tinytex.clean = FALSE)
 
 ```
+
+```{r}
+library(extrafont)
+library(ggplot2)
+loadfonts()
+```
+
 \pagenumbering{roman}
 \setcounter{page}{3}
 \renewcommand*{\contentsname}{Table of Contents}
@@ -278,12 +286,14 @@ thirteenf_crsp_compustat %>%
   ggtitle("Panel A: Foreign ownership") +
   geom_line(aes(y = FOR_OWN)) +
   labs(x = "Report date", color = "") +
-  theme_classic() +
+  theme_classic(base_family = "Garamond") +
   theme(plot.title = element_text(size=9, face="italic")) +
   scale_color_grey(start = 0.55, end = 0)
 
-ggsave("figures/baseline_development_a.pdf", 
-       width = 8, height = 4, units = "in")
+ggsave("figures2/baseline_development_a.pdf", 
+       width = 8, height = 4, units = "in", device = cairo_pdf())
+
+embed_fonts("figures2/baseline_development_a.pdf", outfile="figures2/baseline_development_a.pdf")
 
 thirteenf_crsp_compustat %>% 
   mutate(INST_OWN = institutional_own) %>% 
@@ -294,12 +304,14 @@ thirteenf_crsp_compustat %>%
   ggtitle("Panel B: Institutional ownership") +
   geom_line(aes(y = INST_OWN)) +
   labs(x = "Report date", color = "") +
-  theme_classic() +
+  theme_classic(base_family = "Garamond") +
   theme(plot.title = element_text(size=9, face="italic")) +
   scale_color_grey(start = 0.55, end = 0)
 
-ggsave("figures/baseline_development_b.pdf", 
-       width = 8, height = 4, units = "in")
+ggsave("figures2/baseline_development_b.pdf", 
+       width = 8, height = 4, units = "in", device = cairo_pdf())
+
+embed_fonts("figures2/baseline_development_b.pdf", outfile="figures2/baseline_development_b.pdf")
 
 thirteenf_crsp_compustat %>% 
   mutate(FOR_BREADTH = foreign_breadth) %>% 
@@ -310,20 +322,22 @@ thirteenf_crsp_compustat %>%
   ggtitle("Panel C: Foreign breadth") +
   geom_line(aes(y = FOR_BREADTH)) +
   labs(x = "Report date", color = "") +
-  theme_classic() +
+  theme_classic(base_family = "Garamond") +
   theme(plot.title = element_text(size=9, face="italic")) +
   scale_color_grey(start = 0.55, end = 0)
 
-ggsave("figures/baseline_development_c.pdf", 
-       width = 8, height = 4, units = "in")
+ggsave("figures2/baseline_development_c.pdf", 
+       width = 8, height = 4, units = "in", device = cairo_pdf())
+
+embed_fonts("figures2/baseline_development_c.pdf", outfile="figures2/baseline_development_c.pdf")
 
 ```
 
 \captionsetup{width=1.0\linewidth}
 \begin{figure}[!htb]
 \centering
-\includegraphics[width = \linewidth]{figures/baseline_development_a.pdf}
-\includegraphics[width = \linewidth]{figures/baseline_development_b.pdf}
+\includegraphics[width = \linewidth]{figures2/baseline_development_a.pdf}
+\includegraphics[width = \linewidth]{figures2/baseline_development_b.pdf}
 \caption[Development of foreign and institutional ownership during baseline sample period]{\textbf{Time series development of foreign and institutional ownership during baseline sample period}\newline\small This figure presents the evolution of the mean of firm-quarter observations of foreign ownership (\textit{FOR\_OWN}) in Panel A and institutional ownership (\textit{INST\_OWN}) in Panel B during the baseline sample period of 1997-2017. Firm-quarter observations of these variables are winsorized at the top to a maximum of 1. Sources: CRSP and 13F.}
 \label{figure_baseline_development}
 \end{figure}
@@ -986,48 +1000,60 @@ ggplot(parallel_trend1, aes(quarter_index, FOR_OWN, color = TREATED)) +
   geom_line() +
   labs(x = "Event quarter", color = "") +
   geom_vline(xintercept=0) +
-  theme_classic() +
+  theme_classic(base_family = "Garamond") +
   theme(plot.title = element_text(size=9, face="italic")) +
   scale_color_grey(start = 0.55, end = 0)
 
-ggsave("figures/parallel_trend1a.pdf", 
-       width = 8, height = 6, units = "in")
+ggsave("figures2/parallel_trend1a.pdf", 
+       width = 8, height = 6, units = "in", device = cairo_pdf())
+
+embed_fonts("figures2/parallel_trend1a.pdf", 
+            outfile="figures2/parallel_trend1a.pdf")
 
 ggplot(parallel_trend1, aes(quarter_index, FOR_BREADTH, color = TREATED)) +
   ggtitle("Panel B: Foreign breadth") +
   geom_line() +
   labs(x = "Event quarter", color = "") +
   geom_vline(xintercept=0) +
-  theme_classic() +
+  theme_classic(base_family = "Garamond") +
   theme(plot.title = element_text(size=9, face="italic")) +
   scale_color_grey(start = 0.55, end = 0)
 
-ggsave("figures/parallel_trend1b.pdf", 
-       width = 8, height = 6, units = "in")
+ggsave("figures2/parallel_trend1b.pdf", 
+       width = 8, height = 6, units = "in", device = cairo_pdf())
+
+embed_fonts("figures2/parallel_trend1b.pdf", 
+            outfile="figures2/parallel_trend1b.pdf")
 
 ggplot(parallel_trend1, aes(quarter_index, FOR_TO_INST_OWN, color = TREATED)) +
   ggtitle("Panel C: Foreign-to-institution ownership") +
   geom_line() +
   labs(x = "Event quarter", color = "") +
   geom_vline(xintercept=0) +
-  theme_classic() +
+  theme_classic(base_family = "Garamond") +
   theme(plot.title = element_text(size=9, face="italic")) +
   scale_color_grey(start = 0.55, end = 0)
 
-ggsave("figures/parallel_trend2a.pdf", 
-       width = 8, height = 6, units = "in")
+ggsave("figures2/parallel_trend2a.pdf", 
+       width = 8, height = 6, units = "in", device = cairo_pdf())
+
+embed_fonts("figures2/parallel_trend2a.pdf", 
+            outfile="figures2/parallel_trend2a.pdf")
 
 ggplot(parallel_trend1, aes(quarter_index, FOR_TO_INST_BREADTH, color = TREATED)) +
   ggtitle("Panel D: Foreign-to-institution breadth") +
   geom_line() +
   labs(x = "Event quarter", color = "") +
   geom_vline(xintercept=0) +
-  theme_classic() +
+  theme_classic(base_family = "Garamond") +
   theme(plot.title = element_text(size=9, face="italic")) +
   scale_color_grey(start = 0.55, end = 0)
 
-ggsave("figures/parallel_trend2b.pdf", 
-       width = 8, height = 6, units = "in")
+ggsave("figures2/parallel_trend2b.pdf", 
+       width = 8, height = 6, units = "in", device = cairo_pdf())
+
+embed_fonts("figures2/parallel_trend2b.pdf", 
+            outfile="figures2/parallel_trend2b.pdf")
   
 ```
 
@@ -1035,22 +1061,22 @@ ggsave("figures/parallel_trend2b.pdf",
 \centering
 \begin{subfigure}{.475\textwidth}
   \centering
-  \includegraphics[width=\textwidth]{figures/parallel_trend1a.pdf}
+  \includegraphics[width=\textwidth]{figures2/parallel_trend1a.pdf}
 \end{subfigure}
 \hfill
 \begin{subfigure}{.475\textwidth}
   \centering
-  \includegraphics[width=\textwidth]{figures/parallel_trend1b.pdf}
+  \includegraphics[width=\textwidth]{figures2/parallel_trend1b.pdf}
 \end{subfigure}
 \hfill
 \begin{subfigure}{.475\textwidth}
   \centering
-  \includegraphics[width=\textwidth]{figures/parallel_trend2a.pdf}
+  \includegraphics[width=\textwidth]{figures2/parallel_trend2a.pdf}
 \end{subfigure}
 \hfill
 \begin{subfigure}{.475\textwidth}
   \centering
-  \includegraphics[width=\textwidth]{figures/parallel_trend2b.pdf}
+  \includegraphics[width=\textwidth]{figures2/parallel_trend2b.pdf}
 \end{subfigure}
 \hfill
 \caption[Foreign ownership-specific variables between the treatment and control groups around brokerage closures]{\textbf{Foreign ownership-specific variables between the treatment and control groups around brokerage closures}\newline\scriptsize This figure presents the evolution of the mean of firm-quarter observations of ownership-specific variables during the twelve quarters (i.e. three years) before and after an exogenous decrease in analyst coverage due to the 22 distinct brokerage closures listed by \citet{kelly2012testing}. I impose a three-month gap over the events so that foreign ownership estimates are from quarters [-12,-1] and [1,12], with the brokerage closure occurring in the quarter 0. Control firms are matched using propensity score matching (nearest neighbor) that matches each treatment firm to three control firms by multiple covariates (twelve quarters before the event): logarithm of market capitalization (\textit{LOG\_MKT\_CAP}), book-to-market ratio (\textit{BM\_RATIO}) and number of distinct analysts covering the firm (\textit{ANALYST\_COVERAGE}). Table \ref{table_variable_definitions} in Appendix A provides a detailed list of variable definitions. Sample period: 1997-2010. Sources: CRSP, COMPUSTAT, 13F and IBES.}
