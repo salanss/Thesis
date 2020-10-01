@@ -4,7 +4,6 @@
 .Ruserdata
 *.bib
 *.md
-*.pdf
 data
 figures
 *.csl
